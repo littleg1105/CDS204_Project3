@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure E-Shop{% endblock %}</title>
+    
+    <!-- CSP Meta Tag για προστασία από XSS -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; connect-src 'self'">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'catalog' %}">Secure E-Shop</a>
+                
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
+                        {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'catalog' %}">Κατάλογος</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'payment' %}">Καλάθι</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">Αποσύνδεση</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">Σύνδεση</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main class="container py-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="bg-light py-3 mt-5">
+        <div class="container text-center">
+            <p>© 2025 Secure E-Shop - Ασφάλεια Διαδικτυακών Εφαρμογών</p>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
