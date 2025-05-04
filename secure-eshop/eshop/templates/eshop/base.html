@@ -3,6 +3,22 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
+    <style>
+        /* Global image constraints */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Product images in tables */
+        .table img.product-img,
+        img.product-img {
+            width: 60px !important;
+            height: 60px !important;
+            object-fit: cover !important;
+            border-radius: 4px !important;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Secure E-Shop{% endblock %}</title>

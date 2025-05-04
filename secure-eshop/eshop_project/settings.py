@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'eshop',  # Custom app for the e-shop
-    'axes',  # Django Axes for brute-force protection
+    'eshop',
+    'axes',  
+    'django_extensions',  # Προσθήκη αυτής της γραμμής
 ]
 
 MIDDLEWARE = [
@@ -101,6 +102,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -133,12 +140,25 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Ρυθμίσεις ασφαλείας
-CSRF_COOKIE_SECURE = True  # Απαιτεί HTTPS
-SESSION_COOKIE_SECURE = True  # Απαιτεί HTTPS
-CSRF_COOKIE_HTTPONLY = True  # Μη προσβάσιμο από JavaScript
-SESSION_COOKIE_HTTPONLY = True  # Μη προσβάσιμο από JavaScript
-SESSION_COOKIE_SAMESITE = 'Lax'  # Προστασία από CSRF
+# Security Settings
+SECURE_SSL_REDIRECT = True  # Ανακατεύθυνση HTTP σε HTTPS
+SESSION_COOKIE_SECURE = True  # Αποστολή cookies μόνο μέσω HTTPS
+SECURE_BROWSER_XSS_FILTER = True  # Ενεργοποίηση του XSS φίλτρου των browsers
+SECURE_CONTENT_TYPE_NOSNIFF = True  # Αποτροπή MIME-type sniffing
+SECURE_HSTS_SECONDS = 31536000  # 1 χρόνος
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Εφαρμογή HSTS και σε subdomains
+SECURE_HSTS_PRELOAD = True  # Συμπερίληψη στη HSTS preload list
+
+
+# CSRF settings
+CSRF_COOKIE_HTTPONLY = False  # Άφησέ το False για να μπορεί να προσπελαστεί από JavaScript
+CSRF_COOKIE_SECURE = True  # Απαιτεί HTTPS για το CSRF cookie
+CSRF_COOKIE_SAMESITE = 'Lax'  # Περιορίζει την αποστολή του cookie σε cross-site requests
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']  # Domains που επιτρέπονται για CSRF
+
+# Για το περιβάλλον ανάπτυξης (θα απενεργοποιήσουμε προσωρινά το SSL redirect)
+if DEBUG:
+    SECURE_SSL_REDIRECT = False
 
 # Προσωρινά για την ανάπτυξη
 DEBUG = True
@@ -151,3 +171,13 @@ AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# Django-axes settings
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # in hours
+AXES_LOCK_OUT_AT_FAILURE = True
+AXES_RESET_ON_SUCCESS = True
+AXES_ENABLED = True
+
+# Use this instead of the deprecated settings:
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address", "user_agent"]]

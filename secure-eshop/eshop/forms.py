@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from .models import ShippingAddress
 import time
 import bleach
+import secrets
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -18,22 +19,44 @@ class LoginForm(forms.Form):
         super().__init__(*args, **kwargs)
 
     def clean(self):
-        # Επιπλέον επικύρωση
         cleaned_data = super().clean()
         username = cleaned_data.get('username')
         password = cleaned_data.get('password')
 
         if username and password:
-            # Σταθερός χρόνος καθυστέρησης για αποφυγή user enumeration
-            time.sleep(0.1)
+            # Σταθερός χρόνος delay για προστασία από timing attacks
+            # Αντί για απλό time.sleep, χρησιμοποιούμε μια πιο σύνθετη προσέγγιση
+            # που δεν είναι τόσο εύκολο να παρακαμφθεί
+            start_time = time.time()
             
-            # Τώρα περνάμε το request στο authenticate
+            # Constant-time string comparison operation - δεν αποκαλύπτει 
+            # πληροφορίες μέσω timing διαφορών
+            def constant_time_compare(val1, val2):
+                return hmac.compare_digest(
+                    str(val1).encode('utf-8'),
+                    str(val2).encode('utf-8')
+                )
+            
+            # Πραγματικός έλεγχος αυθεντικοποίησης
             user = authenticate(self.request, username=username, password=password)
-            if not user:
-                # Γενικό μήνυμα σφάλματος - αποφυγή user enumeration
-                raise ValidationError("Invalid username or password. Please try again.")
             
-            # Αποθηκεύουμε τον χρήστη για χρήση στο view
+            # Προσθήκη τυχαίας καθυστέρησης για να μην αποκαλύπτεται αν υπάρχει ο χρήστης
+            random_delay = secrets.randbelow(100) / 1000  # 0-100ms τυχαία καθυστέρηση
+            execution_time = time.time() - start_time
+            
+            # Διασφάλιση ότι η συνολική διάρκεια είναι τουλάχιστον 300ms
+            # ανεξάρτητα από το αν υπάρχει ο χρήστης ή όχι
+            if execution_time < 0.3:
+                time.sleep(0.3 - execution_time + random_delay)
+            
+            if not user:
+                # Γενικό μήνυμα σφάλματος που δεν δίνει πληροφορίες
+                # για το αν το username υπάρχει ή το password είναι λάθος
+                raise ValidationError(
+                    "Τα στοιχεία σύνδεσης που εισάγατε δεν είναι έγκυρα. Παρακαλώ προσπαθήστε ξανά."
+                )
+            
+            # Αποθήκευση του χρήστη για χρήση στο view
             self.user = user
         
         return cleaned_data
