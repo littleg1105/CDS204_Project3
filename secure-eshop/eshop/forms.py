@@ -5,6 +5,7 @@ from .models import ShippingAddress
 import time
 import bleach
 import secrets
+import hmac
 
 class LoginForm(forms.Form):
     username = forms.CharField(
