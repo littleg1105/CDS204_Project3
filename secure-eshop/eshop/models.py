@@ -25,7 +25,7 @@ class Cart(models.Model):
         return sum(item.quantity for item in self.cartitem_set.all())
     
     def get_total_price(self):
-        return sum(item.product.price * item.quantity for item in self.cartitem_set.all())
+        return sum(item.quantity * item.product.price for item in self.cartitem_set.all())
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
@@ -42,35 +42,61 @@ class CartItem(models.Model):
 
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=200)
-    address = models.CharField(max_length=200)
-    city = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=20)
-    country = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, verbose_name='Ονοματεπώνυμο')
+    address = models.CharField(max_length=200, verbose_name='Διεύθυνση')
+    city = models.CharField(max_length=100, verbose_name='Πόλη')
+    zip_code = models.CharField(max_length=20, verbose_name='ΤΚ')
+    country = models.CharField(max_length=100, verbose_name='Χώρα')
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    updated_at = models.DateTimeField(auto_now=True)  # Προσθήκη πεδίου
+    
     def __str__(self):
-        return f"{self.name}, {self.address}"
+        return f"{self.name}, {self.address}, {self.city}"
+    
+    class Meta:
+        verbose_name = 'Διεύθυνση Αποστολής'
+        verbose_name_plural = 'Διευθύνσεις Αποστολής'
 
 class Order(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
+        ('pending', 'Εκκρεμεί'),
+        ('processing', 'Σε επεξεργασία'),
+        ('shipped', 'Απεστάλη'),
+        ('delivered', 'Παραδόθηκε'),
+        ('cancelled', 'Ακυρώθηκε'),
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.SET_NULL, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Χρήστης')
+    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.PROTECT, verbose_name='Διεύθυνση Αποστολής', null=True, blank=True)    
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Συνολικό Ποσό')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Κατάσταση')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ημερομηνία Δημιουργίας')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Τελευταία Ενημέρωση')
+    
     def __str__(self):
-        return f"Order {self.id} - {self.user.username}"
+        return f"Παραγγελία #{self.id} - {self.user.username}"
+    
+    class Meta:
+        verbose_name = 'Παραγγελία'
+        verbose_name_plural = 'Παραγγελίες'
+        ordering = ['-created_at']
+
 
 class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Παραγγελία')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Προϊόν')
+    quantity = models.PositiveIntegerField(default=1, verbose_name='Ποσότητα')
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Τιμή')
+    
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
+    
+    def get_total_price(self):
+        return self.quantity * self.price
+    
+    class Meta:
+        verbose_name = 'Αντικείμενο Παραγγελίας'
+        verbose_name_plural = 'Αντικείμενα Παραγγελίας'
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])

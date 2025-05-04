@@ -1,7 +1,9 @@
 from django import forms
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
+from .models import ShippingAddress
 import time
+import bleach
 
 class LoginForm(forms.Form):
     username = forms.CharField(
@@ -33,5 +35,27 @@ class LoginForm(forms.Form):
             
             # Αποθηκεύουμε τον χρήστη για χρήση στο view
             self.user = user
+        
+        return cleaned_data
+    
+class ShippingAddressForm(forms.ModelForm):
+    class Meta:
+        model = ShippingAddress
+        fields = ['name', 'address', 'city', 'zip_code', 'country']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ονοματεπώνυμο'}),
+            'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Διεύθυνση'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Πόλη'}),
+            'zip_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ΤΚ'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Χώρα'}),
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # Καθαρισμός των δεδομένων εισόδου για προστασία από XSS
+        for field in self.fields:
+            if field in cleaned_data and isinstance(cleaned_data[field], str):
+                cleaned_data[field] = bleach.clean(cleaned_data[field])
         
         return cleaned_data

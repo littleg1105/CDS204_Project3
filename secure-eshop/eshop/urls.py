@@ -6,5 +6,5 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('', views.catalog_view, name='catalog'),
     path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
-    path('payment/', views.login_view, name='payment'),  # Προσωρινά για να δουλεύουν τα links
+    path('payment/', views.payment_view, name='payment'),  # Ενημερωμένο με το σωστό view
 ]

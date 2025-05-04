@@ -10,8 +10,12 @@ from django.db.models import Q
 import json
 import bleach
 from .forms import LoginForm
-from .models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem
 import logging
+from django.core.mail import send_mail
+from django.conf import settings
+from .forms import ShippingAddressForm
+
 
 # Ρύθμιση logging για καταγραφή αποτυχημένων προσπαθειών σύνδεσης
 logger = logging.getLogger('security')
@@ -125,5 +129,136 @@ def add_to_cart(request):
     except Exception as e:
         logger.error(f"Error adding to cart: {str(e)}")
         return JsonResponse({'error': 'Server error'}, status=500)
+
+@login_required
+def payment_view(request):
+    # Ανάκτηση του καλαθιού του χρήστη
+    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart_items = cart.cartitem_set.all().select_related('product')
+    
+    # Υπολογισμός συνολικού ποσού
+    total_price = cart.get_total_price()
+    
+    # Έλεγχος αν το καλάθι είναι άδειο
+    if not cart_items.exists():
+        messages.warning(request, "Το καλάθι σας είναι άδειο. Προσθέστε προϊόντα πριν προχωρήσετε στην πληρωμή.")
+        return redirect('catalog')
+    
+    # Έλεγχος αν έχει υποβληθεί η φόρμα
+    if request.method == 'POST':
+        # Έλεγχος αν είναι το βήμα επιβεβαίωσης παραγγελίας
+        if 'confirm_order' in request.POST:
+            # Λήψη της διεύθυνσης από το session
+            address_id = request.session.get('shipping_address_id')
+            if not address_id:
+                messages.error(request, "Η διεύθυνση αποστολής δεν βρέθηκε.")
+                return redirect('payment')
+            
+            shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+            
+            try:
+                # Δημιουργία νέας παραγγελίας
+                order = Order.objects.create(
+                    user=request.user,
+                    shipping_address=shipping_address,
+                    total_price=total_price,
+                    status='pending'
+                )
+                
+                # Προσθήκη των αντικειμένων του καλαθιού στην παραγγελία
+                for item in cart_items:
+                    OrderItem.objects.create(
+                        order=order,
+                        product=item.product,
+                        quantity=item.quantity,
+                        price=item.product.price
+                    )
+                
+                # Αποστολή email στον διαχειριστή
+                order_details = "\n".join([
+                    f"{item.quantity} x {item.product.name} ({item.product.price} €)"
+                    for item in cart_items
+                ])
+                
+                email_message = f"""
+                Νέα παραγγελία #{order.id}
+                
+                Πελάτης: {request.user.username}
+                
+                Προϊόντα:
+                {order_details}
+                
+                Συνολικό ποσό: {total_price} €
+                
+                Διεύθυνση αποστολής:
+                {shipping_address.name}
+                {shipping_address.address}
+                {shipping_address.zip_code} {shipping_address.city}
+                {shipping_address.country}
+                """
+                
+                try:
+                    send_mail(
+                        f'Νέα παραγγελία #{order.id}',
+                        email_message,
+                        'noreply@secureeshop.com',
+                        ['admin@secureeshop.com'],  # Αντικατάσταση με πραγματική διεύθυνση email διαχειριστή
+                        fail_silently=False,
+                    )
+                except Exception as e:
+                    # Σε περιβάλλον ανάπτυξης, απλά καταγράφουμε το σφάλμα
+                    logger.error(f"Σφάλμα αποστολής email: {str(e)}")
+                
+                # Άδειασμα του καλαθιού
+                cart_items.delete()
+                
+                # Διαγραφή της διεύθυνσης από το session
+                if 'shipping_address_id' in request.session:
+                    del request.session['shipping_address_id']
+                
+                messages.success(request, f"Η παραγγελία σας (#{order.id}) καταχωρήθηκε επιτυχώς!")
+                return redirect('catalog')
+                
+            except Exception as e:
+                logger.error(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
+                messages.error(request, "Προέκυψε σφάλμα κατά την καταχώρηση της παραγγελίας. Παρακαλώ προσπαθήστε ξανά.")
+                return redirect('payment')
+            
+        # Αλλιώς είναι το πρώτο βήμα (υποβολή διεύθυνσης)
+        form = ShippingAddressForm(request.POST)
+        if form.is_valid():
+            # Σύνδεση της διεύθυνσης με τον χρήστη
+            address = form.save(commit=False)
+            address.user = request.user
+            address.save()
+            
+            # Αποθήκευση του ID της διεύθυνσης στο session
+            request.session['shipping_address_id'] = address.id
+            
+            # Προετοιμασία δεδομένων για την οθόνη επιβεβαίωσης
+            context = {
+                'cart_items': cart_items,
+                'total_price': total_price,
+                'shipping_address': address,
+                'is_confirmation': True
+            }
+            return render(request, 'eshop/payment.html', context)
+    else:
+        # Εμφάνιση της φόρμας διεύθυνσης
+        # Προσπάθεια να βρεθεί μια προηγούμενη διεύθυνση του χρήστη
+        try:
+            last_address = ShippingAddress.objects.filter(user=request.user).order_by('-id').first()
+            form = ShippingAddressForm(instance=last_address)
+        except:
+            form = ShippingAddressForm()
+    
+    context = {
+        'form': form,
+        'cart_items': cart_items,
+        'total_price': total_price,
+        'is_confirmation': False
+    }
+    
+    return render(request, 'eshop/payment.html', context)
 
 # Θα προσθέσουμε και άλλα views αργότερα
