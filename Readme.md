@@ -1,3 +1,37 @@
+# Secure E-Shop
+
+Μια ασφαλής εφαρμογή ηλεκτρονικού καταστήματος που αναπτύχθηκε με Django 5.2 LTS.
+
+## Εγκατάσταση
+
+1. Κλωνοποίηση του repository
+2. Δημιουργία virtual environment: `python -m venv venv`
+3. Ενεργοποίηση του virtual environment: 
+   - Windows: `venv\Scripts\activate`
+   - macOS/Linux: `source venv/bin/activate`
+4. Εγκατάσταση εξαρτήσεων: `pip install -r requirements.txt`
+5. Εκτέλεση migrations: `python manage.py migrate`
+6. Δημιουργία superuser: `python manage.py createsuperuser`
+7. Δημιουργία πιστοποιητικού:
+mkdir -p certificates
+openssl req -x509 -newkey rsa:4096 -keyout certificates/key.pem -out certificates/cert.pem -days 365 -nodes
+8. Εκκίνηση του server: `python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem`
+
+## Λειτουργικότητα
+
+- Σελίδα Login: Ασφαλής αυθεντικοποίηση χρηστών
+- Σελίδα Καταλόγου Προϊόντων: Προβολή και αναζήτηση προϊόντων, προσθήκη στο καλάθι
+- Σελίδα Πληρωμών: Προβολή καλαθιού, συμπλήρωση διεύθυνσης αποστολής, ολοκλήρωση παραγγελίας
+
+## Μέτρα Ασφαλείας
+
+Περισσότερες λεπτομέρειες διαθέσιμες στο αρχείο [security_documentation.md](security_documentation.md).
+
+
+---
+
+
+
 # Εργασία 3η: Ανάπτυξη Ηλεκτρονικού Καταστήματος
 
 **Περιγραφή:**
