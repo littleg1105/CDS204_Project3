@@ -4,37 +4,7 @@
 {% block title %}Πληρωμή - Secure E-Shop{% endblock %}
 
 {% block extra_head %}
-<style>
-    .card {
-        margin-bottom: 20px;
-    }
-    .table th, .table td {
-        vertical-align: middle;
-    }
-    .product-img {
-        width: 60px !important;
-        height: 60px !important;
-        object-fit: cover !important;
-        border-radius: 4px !important;
-        max-width: 60px !important;
-        max-height: 60px !important;
-    }
-    .address-confirmation {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-    
-    /* Εφαρμογή των στυλ άμεσα στο <img> μέσα στο td */
-    .table td img {
-        width: 60px !important;
-        height: 60px !important;
-        object-fit: cover !important;
-        max-width: 60px !important;
-        max-height: 60px !important;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/payment.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -65,7 +35,7 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             {% if item.product.image %}
-                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-img me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-img me-3">
                                             {% endif %}
                                             <span>{{ item.product.name }}</span>
                                         </div>

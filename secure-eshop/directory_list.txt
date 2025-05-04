@@ -1,0 +1,63 @@
+.
+├── db.sqlite3
+├── directory_list.txt
+├── eshop
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── admin.cpython-313.pyc
+│   │   ├── apps.cpython-313.pyc
+│   │   ├── forms.cpython-313.pyc
+│   │   ├── models.cpython-313.pyc
+│   │   ├── urls.cpython-313.pyc
+│   │   └── views.cpython-313.pyc
+│   ├── admin.py
+│   ├── apps.py
+│   ├── forms.py
+│   ├── migrations
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── 0001_initial.cpython-313.pyc
+│   │   │   ├── 0002_alter_order_options_alter_orderitem_options_and_more.cpython-313.pyc
+│   │   │   └── 0002_shippingaddress_updated_at.cpython-313.pyc
+│   │   ├── 0001_initial.py
+│   │   └── 0002_shippingaddress_updated_at.py
+│   ├── models.py
+│   ├── static
+│   │   ├── css
+│   │   │   └── payment.css
+│   │   ├── img
+│   │   └── js
+│   │       └── cart.js
+│   ├── templates
+│   │   └── eshop
+│   │       ├── base.html
+│   │       ├── catalog.html
+│   │       ├── login.html
+│   │       └── payment.html
+│   ├── tests.py
+│   ├── urls.py
+│   └── views.py
+├── eshop_project
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   ├── settings.cpython-313.pyc
+│   │   ├── urls.cpython-313.pyc
+│   │   └── wsgi.cpython-313.pyc
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── manage.py
+├── media
+│   └── products
+│       ├── Screenshot_2025-05-02_at_3_TZD5RFR.39.26PM.png
+│       ├── Screenshot_2025-05-02_at_3.39.26PM.png
+│       ├── Screenshot_2025-05-02_at_3.45.01PM.png
+│       ├── Screenshot_2025-05-02_at_3.51.51PM.png
+│       └── Screenshot_2025-05-02_at_3.55.48PM.png
+└── static
+
+16 directories, 45 files
