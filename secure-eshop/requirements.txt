@@ -6,8 +6,10 @@ cffi==1.17.1
 cryptography==44.0.3
 Django==5.2
 django-axes==7.1.0
+django-csp==4.0
 django-extensions==4.1
 MarkupSafe==3.0.2
+packaging==25.0
 pillow==11.2.1
 psycopg2-binary==2.9.10
 pycparser==2.22

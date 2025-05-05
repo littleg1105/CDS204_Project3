@@ -39,6 +39,9 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
+        
+    def get_total(self):
+        return self.quantity * self.product.price
 
 class ShippingAddress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -47,6 +50,8 @@ class ShippingAddress(models.Model):
     city = models.CharField(max_length=100, verbose_name='Πόλη')
     zip_code = models.CharField(max_length=20, verbose_name='ΤΚ')
     country = models.CharField(max_length=100, verbose_name='Χώρα')
+    phone = models.CharField(max_length=20, verbose_name='Τηλέφωνο', blank=True, null=True)
+    email = models.EmailField(verbose_name='Email', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)  # Προσθήκη πεδίου
     

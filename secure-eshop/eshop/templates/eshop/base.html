@@ -8,8 +8,8 @@
     <title>{% block title %}Secure E-Shop{% endblock %}</title>
     <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon">
     
-    <!-- CSP Meta Tag για προστασία από XSS -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; connect-src 'self'">    <!-- Bootstrap CSS -->
+    <!-- CSP now managed by Django middleware -->
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css">
     
     <!-- Custom CSS -->
@@ -65,10 +65,7 @@
         </div>
     </footer>
     
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Bootstrap JS Bundle -->
+    <!-- Bootstrap JS Bundle with Subresource Integrity (SRI) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
     crossorigin="anonymous"></script>

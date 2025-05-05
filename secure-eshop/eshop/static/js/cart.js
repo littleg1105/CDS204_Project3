@@ -65,4 +65,59 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Προσθήκη event listeners για τα κουμπιά διαγραφής
+    const removeFromCartButtons = document.querySelectorAll('.remove-from-cart-btn');
+    
+    removeFromCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const cartItemId = this.getAttribute('data-cart-item-id');
+            const csrfToken = this.getAttribute('data-csrf-token');
+            
+            // Αλλαγή εμφάνισης κουμπιού κατά τη διάρκεια του αιτήματος
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            this.disabled = true;
+            
+            // Δημιουργία αιτήματος AJAX
+            fetch('/remove-from-cart/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ cart_item_id: cartItemId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Ενημέρωση του αριθμού αντικειμένων στο καλάθι
+                const cartCount = document.getElementById('cart-items-count');
+                if (cartCount) {
+                    cartCount.innerHTML = 
+                        `<strong>${data.cart_items_count}</strong> προϊόν${data.cart_items_count !== 1 ? 'α' : ''} στο καλάθι`;
+                }
+                
+                // Ανανέωση της σελίδας για να ενημερωθεί το preview του καλαθιού
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                this.innerHTML = 'Σφάλμα!';
+                setTimeout(() => {
+                    this.innerHTML = 'X';
+                    this.disabled = false;
+                }, 2000);
+            });
+        });
+    });
+
+
+
+
+
 });

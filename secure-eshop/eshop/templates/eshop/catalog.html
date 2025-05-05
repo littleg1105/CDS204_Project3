@@ -93,7 +93,16 @@
                 <div class="col-12">
                     <div class="small text-muted">
                         {% for item in cart_items %}
-                            {{ item.quantity }} x {{ item.product.name }}{% if not forloop.last %}, {% endif %}
+                            <span class="me-2">
+                                {{ item.quantity }} x {{ item.product.name }}
+                                <button class="btn btn-sm btn-danger remove-from-cart-btn ms-1" 
+                                        data-cart-item-id="{{ item.id }}" 
+                                        data-csrf-token="{{ csrf_token }}"
+                                        title="Αφαίρεση από το καλάθι">
+                                    X
+                                </button>
+                            </span>
+                            {% if not forloop.last %} | {% endif %}
                         {% endfor %}
                     </div>
                 </div>

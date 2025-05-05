@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',  # Content Security Policy middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -148,6 +149,16 @@ SECURE_CONTENT_TYPE_NOSNIFF = True  # Αποτροπή MIME-type sniffing
 SECURE_HSTS_SECONDS = 31536000  # 1 χρόνος
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Εφαρμογή HSTS και σε subdomains
 SECURE_HSTS_PRELOAD = True  # Συμπερίληψη στη HSTS preload list
+
+# Content Security Policy
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_IMG_SRC = ("'self'", "data:")
+CSP_CONNECT_SRC = ("'self'",)
+CSP_INCLUDE_NONCE_IN_SCRIPT_SRC = True
+CSP_BLOCK_ALL_MIXED_CONTENT = True
 
 
 # CSRF settings

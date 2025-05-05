@@ -65,13 +65,15 @@ class LoginForm(forms.Form):
 class ShippingAddressForm(forms.ModelForm):
     class Meta:
         model = ShippingAddress
-        fields = ['name', 'address', 'city', 'zip_code', 'country']
+        fields = ['name', 'address', 'city', 'zip_code', 'country', 'phone', 'email']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ονοματεπώνυμο'}),
             'address': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Διεύθυνση'}),
             'city': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Πόλη'}),
             'zip_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ΤΚ'}),
             'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Χώρα'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Τηλέφωνο'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
         }
     
     def clean(self):

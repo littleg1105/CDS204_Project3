@@ -31,5 +31,9 @@ img.product-img {
     width: 50px !important;
     height: 50px !important;
     object-fit: cover !important;
-} 
+}
+
+.quantity-width {
+    width: 60px;
+}
 

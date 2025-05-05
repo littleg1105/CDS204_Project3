@@ -138,6 +138,7 @@ def payment_view(request):
     
     # Υπολογισμός συνολικού ποσού
     total_price = cart.get_total_price()
+    cart_items_count = cart.get_total_items()
     
     # Έλεγχος αν το καλάθι είναι άδειο
     if not cart_items.exists():
@@ -146,10 +147,16 @@ def payment_view(request):
     
     # Έλεγχος αν έχει υποβληθεί η φόρμα
     if request.method == 'POST':
+        # Εκτύπωση δεδομένων POST για debugging
+        print("POST data:", request.POST)
+        
         # Έλεγχος αν είναι το βήμα επιβεβαίωσης παραγγελίας
         if 'confirm_order' in request.POST:
+            print("Επιβεβαίωση παραγγελίας εντοπίστηκε")
             # Λήψη της διεύθυνσης από το session
             address_id = request.session.get('shipping_address_id')
+            print("Address ID από session:", address_id)
+            
             if not address_id:
                 messages.error(request, "Η διεύθυνση αποστολής δεν βρέθηκε.")
                 return redirect('payment')
@@ -165,6 +172,8 @@ def payment_view(request):
                     status='pending'
                 )
                 
+                print("Παραγγελία δημιουργήθηκε με ID:", order.id)
+                
                 # Προσθήκη των αντικειμένων του καλαθιού στην παραγγελία
                 for item in cart_items:
                     OrderItem.objects.create(
@@ -173,6 +182,7 @@ def payment_view(request):
                         quantity=item.quantity,
                         price=item.product.price
                     )
+                    print(f"Προστέθηκε στην παραγγελία: {item.quantity} x {item.product.name}")
                 
                 # Αποστολή email στον διαχειριστή
                 order_details = "\n".join([
@@ -205,42 +215,63 @@ def payment_view(request):
                         ['admin@secureeshop.com'],  # Αντικατάσταση με πραγματική διεύθυνση email διαχειριστή
                         fail_silently=False,
                     )
+                    print("Email στάλθηκε επιτυχώς")
                 except Exception as e:
                     # Σε περιβάλλον ανάπτυξης, απλά καταγράφουμε το σφάλμα
                     logger.error(f"Σφάλμα αποστολής email: {str(e)}")
+                    print(f"Σφάλμα αποστολής email: {str(e)}")
                 
                 # Άδειασμα του καλαθιού
                 cart_items.delete()
+                print("Το καλάθι άδειασε")
                 
                 # Διαγραφή της διεύθυνσης από το session
                 if 'shipping_address_id' in request.session:
                     del request.session['shipping_address_id']
+                    print("Η διεύθυνση αφαιρέθηκε από το session")
                 
-                messages.success(request, f"Η παραγγελία σας (#{order.id}) καταχωρήθηκε επιτυχώς!")
+                messages.success(request, "Η παραγγελία σας καταχωρήθηκε επιτυχώς!")
                 return redirect('catalog')
                 
             except Exception as e:
                 logger.error(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
+                print(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
                 messages.error(request, "Προέκυψε σφάλμα κατά την καταχώρηση της παραγγελίας. Παρακαλώ προσπαθήστε ξανά.")
                 return redirect('payment')
             
         # Αλλιώς είναι το πρώτο βήμα (υποβολή διεύθυνσης)
         form = ShippingAddressForm(request.POST)
+        print("Επικύρωση φόρμας διεύθυνσης, έγκυρη:", form.is_valid())
+        if not form.is_valid():
+            print("Σφάλματα φόρμας:", form.errors.as_json())
+            
         if form.is_valid():
             # Σύνδεση της διεύθυνσης με τον χρήστη
             address = form.save(commit=False)
             address.user = request.user
             address.save()
+            print(f"Διεύθυνση αποθηκεύτηκε με ID: {address.id}")
             
             # Αποθήκευση του ID της διεύθυνσης στο session
             request.session['shipping_address_id'] = address.id
+            print(f"ID διεύθυνσης {address.id} αποθηκεύτηκε στο session")
             
             # Προετοιμασία δεδομένων για την οθόνη επιβεβαίωσης
             context = {
                 'cart_items': cart_items,
+                'cart_items_count': cart_items_count,
                 'total_price': total_price,
                 'shipping_address': address,
                 'is_confirmation': True
+            }
+            return render(request, 'eshop/payment.html', context)
+        else:
+            context = {
+                'form': form, 
+                'cart_items': cart_items,
+                'cart_items_count': cart_items_count,
+                'total_price': total_price,
+                'is_confirmation': False
             }
             return render(request, 'eshop/payment.html', context)
     else:
@@ -255,10 +286,97 @@ def payment_view(request):
     context = {
         'form': form,
         'cart_items': cart_items,
+        'cart_items_count': cart_items_count,
         'total_price': total_price,
         'is_confirmation': False
     }
     
     return render(request, 'eshop/payment.html', context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def remove_from_cart(request):
+    try:
+        # Ανάλυση του JSON request
+        data = json.loads(request.body)
+        cart_item_id = data.get('cart_item_id')
+        
+        # Έλεγχος εγκυρότητας του cart_item_id
+        if not cart_item_id:
+            return JsonResponse({'error': 'Missing cart_item_id'}, status=400)
+        
+        # Ανάκτηση του cart_item και έλεγχος ότι ανήκει στον τρέχοντα χρήστη
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart_item = CartItem.objects.get(id=cart_item_id, cart=cart)
+        except (Cart.DoesNotExist, CartItem.DoesNotExist):
+            return JsonResponse({'error': 'Item not found'}, status=404)
+        
+        # Διαγραφή του αντικειμένου
+        cart_item.delete()
+        
+        # Επιστροφή απάντησης
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Item removed from cart',
+            'cart_items_count': cart.get_total_items()
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Error removing from cart: {str(e)}")
+        return JsonResponse({'error': 'Server error'}, status=500)
+    
+@login_required
+@require_http_methods(["POST"])
+def update_cart_item(request):
+    try:
+        # Ανάλυση του JSON request
+        data = json.loads(request.body)
+        cart_item_id = data.get('cart_item_id')
+        new_quantity = data.get('quantity')
+        
+        # Έλεγχοι εγκυρότητας
+        if not cart_item_id or new_quantity is None:
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        try:
+            new_quantity = int(new_quantity)
+            if new_quantity <= 0:
+                return JsonResponse({'error': 'Quantity must be positive'}, status=400)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid quantity'}, status=400)
+        
+        # Ανάκτηση του cart_item και έλεγχος ότι ανήκει στον τρέχοντα χρήστη
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart_item = CartItem.objects.get(id=cart_item_id, cart=cart)
+        except (Cart.DoesNotExist, CartItem.DoesNotExist):
+            return JsonResponse({'error': 'Item not found'}, status=404)
+        
+        # Ενημέρωση της ποσότητας
+        cart_item.quantity = new_quantity
+        cart_item.save()
+        
+        # Υπολογισμός του νέου συνόλου
+        item_total = cart_item.product.price * new_quantity
+        cart_total = cart.get_total_price()
+        
+        # Επιστροφή απάντησης
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Quantity updated',
+            'item_total': float(item_total),
+            'cart_total': float(cart_total),
+            'cart_items_count': cart.get_total_items()
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        logger.error(f"Error updating cart item: {str(e)}")
+        return JsonResponse({'error': 'Server error'}, status=500)
 
 # Θα προσθέσουμε και άλλα views αργότερα
