@@ -1,6 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
+import uuid
+import random
+import string
+
+# This function has been replaced by generate_order_id below.
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
@@ -62,6 +67,13 @@ class ShippingAddress(models.Model):
         verbose_name = 'Διεύθυνση Αποστολής'
         verbose_name_plural = 'Διευθύνσεις Αποστολής'
 
+def generate_order_id():
+    """Generate a random order ID format: ORD-XXXXX-XXXXX"""
+    prefix = 'ORD'
+    part1 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    part2 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    return f"{prefix}-{part1}-{part2}"
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Εκκρεμεί'),
@@ -71,6 +83,7 @@ class Order(models.Model):
         ('cancelled', 'Ακυρώθηκε'),
     )
     
+    id = models.CharField(primary_key=True, max_length=20, default=generate_order_id, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Χρήστης')
     shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.PROTECT, verbose_name='Διεύθυνση Αποστολής', null=True, blank=True)    
     total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Συνολικό Ποσό')
@@ -79,7 +92,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Τελευταία Ενημέρωση')
     
     def __str__(self):
-        return f"Παραγγελία #{self.id} - {self.user.username}"
+        return f"Παραγγελία {self.id} - {self.user.username}"
     
     class Meta:
         verbose_name = 'Παραγγελία'
@@ -90,7 +103,7 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Παραγγελία')
     product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Προϊόν')
-    quantity = models.PositiveIntegerField(default=1, verbose_name='Ποσότητα')
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)], verbose_name='Ποσότητα')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Τιμή')
     
     def __str__(self):
@@ -102,10 +115,3 @@ class OrderItem(models.Model):
     class Meta:
         verbose_name = 'Αντικείμενο Παραγγελίας'
         verbose_name_plural = 'Αντικείμενα Παραγγελίας'
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # Αποθηκεύουμε την τιμή τη στιγμή της αγοράς
-    
-    def __str__(self):
-        return f"{self.quantity} x {self.product.name}"

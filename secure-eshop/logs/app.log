@@ -1,0 +1,12 @@
+ERROR 2025-05-05 13:43:01,249 emails Failed to send order confirmation email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials a640c23a62f3a-ad1891a19e6sm492969266b.46 - gsmtp')
+ERROR 2025-05-05 13:43:02,228 emails Failed to send order notification email to admin: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials a640c23a62f3a-ad1891a749fsm495734966b.74 - gsmtp')
+ERROR 2025-05-05 13:45:39,182 emails Failed to send order confirmation email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 4fb4d7f45d1cf-5faa42f65dfsm4285167a12.38 - gsmtp')
+ERROR 2025-05-05 13:45:39,865 emails Failed to send order notification email to admin: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials a640c23a62f3a-ad1891f6aefsm494645966b.84 - gsmtp')
+INFO 2025-05-05 13:47:53,943 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #8
+INFO 2025-05-05 13:47:55,312 emails Order notification email sent to admin for order #8
+INFO 2025-05-05 13:52:29,175 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #9
+INFO 2025-05-05 13:52:30,628 emails Order notification email sent to admin for order #9
+INFO 2025-05-05 13:59:31,096 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-93FUG-N3N6R
+INFO 2025-05-05 13:59:32,654 emails Order notification email sent to admin for order #ORD-93FUG-N3N6R
+INFO 2025-05-05 14:00:06,728 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-ILQW1-832EH
+INFO 2025-05-05 14:00:08,263 emails Order notification email sent to admin for order #ORD-ILQW1-832EH

@@ -1,0 +1,33 @@
+SECURE E-SHOP - ΕΠΙΒΕΒΑΙΩΣΗ ΠΑΡΑΓΓΕΛΙΑΣ #{order.id}
+
+Αγαπητέ/ή {{ order.user.username }},
+
+Σας ευχαριστούμε για την παραγγελία σας. Η παραγγελία σας έχει καταχωρηθεί και θα αποσταλεί το συντομότερο δυνατόν.
+
+ΣΤΟΙΧΕΙΑ ΠΑΡΑΓΓΕΛΙΑΣ #{{ order.id }}
+Ημερομηνία: {{ order.created_at|date:"d/m/Y H:i" }}
+Κατάσταση: {{ order.get_status_display }}
+
+ΠΡΟΪΟΝΤΑ:
+{% for item in order_items %}
+- {{ item.product.name }} ({{ item.quantity }} x {{ item.price }}€) = {{ item.get_total_price }}€
+{% endfor %}
+
+ΣΥΝΟΛΙΚΟ ΠΟΣΟ: {{ order.total_price }}€
+
+ΔΙΕΥΘΥΝΣΗ ΑΠΟΣΤΟΛΗΣ:
+{{ shipping_address.name }}
+{{ shipping_address.address }}
+{{ shipping_address.zip_code }} {{ shipping_address.city }}
+{{ shipping_address.country }}
+{% if shipping_address.phone %}Τηλέφωνο: {{ shipping_address.phone }}{% endif %}
+{% if shipping_address.email %}Email: {{ shipping_address.email }}{% endif %}
+
+Αν έχετε οποιαδήποτε απορία σχετικά με την παραγγελία σας, μη διστάσετε να επικοινωνήσετε μαζί μας.
+
+Με εκτίμηση,
+Η ομάδα του Secure E-Shop
+
+------------------------------------------
+© 2025 Secure E-Shop - Ασφάλεια Διαδικτυακών Εφαρμογών
+Αυτό είναι ένα αυτοματοποιημένο email. Παρακαλούμε μην απαντήσετε απευθείας σε αυτό.

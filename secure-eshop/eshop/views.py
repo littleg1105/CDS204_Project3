@@ -12,8 +12,8 @@ import bleach
 from .forms import LoginForm
 from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem
 import logging
-from django.core.mail import send_mail
 from django.conf import settings
+from .emails import send_order_confirmation, send_order_notification_to_admin
 from .forms import ShippingAddressForm
 
 
@@ -184,42 +184,23 @@ def payment_view(request):
                     )
                     print(f"Προστέθηκε στην παραγγελία: {item.quantity} x {item.product.name}")
                 
-                # Αποστολή email στον διαχειριστή
-                order_details = "\n".join([
-                    f"{item.quantity} x {item.product.name} ({item.product.price} €)"
-                    for item in cart_items
-                ])
+                # Αποστολή email στον πελάτη
+                user_email = shipping_address.email or request.user.email
+                if user_email:
+                    success = send_order_confirmation(order, user_email)
+                    if success:
+                        print(f"Email επιβεβαίωσης στάλθηκε επιτυχώς στον πελάτη ({user_email})")
+                    else:
+                        print(f"Σφάλμα αποστολής email επιβεβαίωσης στον πελάτη")
+                else:
+                    print("Δεν βρέθηκε email χρήστη για αποστολή επιβεβαίωσης")
                 
-                email_message = f"""
-                Νέα παραγγελία #{order.id}
-                
-                Πελάτης: {request.user.username}
-                
-                Προϊόντα:
-                {order_details}
-                
-                Συνολικό ποσό: {total_price} €
-                
-                Διεύθυνση αποστολής:
-                {shipping_address.name}
-                {shipping_address.address}
-                {shipping_address.zip_code} {shipping_address.city}
-                {shipping_address.country}
-                """
-                
-                try:
-                    send_mail(
-                        f'Νέα παραγγελία #{order.id}',
-                        email_message,
-                        'noreply@secureeshop.com',
-                        ['admin@secureeshop.com'],  # Αντικατάσταση με πραγματική διεύθυνση email διαχειριστή
-                        fail_silently=False,
-                    )
-                    print("Email στάλθηκε επιτυχώς")
-                except Exception as e:
-                    # Σε περιβάλλον ανάπτυξης, απλά καταγράφουμε το σφάλμα
-                    logger.error(f"Σφάλμα αποστολής email: {str(e)}")
-                    print(f"Σφάλμα αποστολής email: {str(e)}")
+                # Αποστολή ειδοποίησης στον διαχειριστή
+                admin_notification_success = send_order_notification_to_admin(order)
+                if admin_notification_success:
+                    print("Email ειδοποίησης στάλθηκε επιτυχώς στον διαχειριστή")
+                else:
+                    print("Σφάλμα αποστολής email ειδοποίησης στον διαχειριστή")
                 
                 # Άδειασμα του καλαθιού
                 cart_items.delete()
@@ -230,7 +211,7 @@ def payment_view(request):
                     del request.session['shipping_address_id']
                     print("Η διεύθυνση αφαιρέθηκε από το session")
                 
-                messages.success(request, "Η παραγγελία σας καταχωρήθηκε επιτυχώς!")
+                messages.success(request, f"Η παραγγελία σας καταχωρήθηκε επιτυχώς με κωδικό #{order.id}! Θα λάβετε σύντομα email με όλες τις λεπτομέρειες.")
                 return redirect('catalog')
                 
             except Exception as e:
