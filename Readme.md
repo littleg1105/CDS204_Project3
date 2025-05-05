@@ -2,20 +2,126 @@
 
 Μια ασφαλής εφαρμογή ηλεκτρονικού καταστήματος που αναπτύχθηκε με Django 5.2 LTS.
 
-## Εγκατάσταση
+## Detailed Development Setup Guide
 
-1. Κλωνοποίηση του repository
-2. Δημιουργία virtual environment: `python -m venv venv`
-3. Ενεργοποίηση του virtual environment: 
-   - Windows: `venv\Scripts\activate`
-   - macOS/Linux: `source venv/bin/activate`
-4. Εγκατάσταση εξαρτήσεων: `pip install -r requirements.txt`
-5. Εκτέλεση migrations: `python manage.py migrate`
-6. Δημιουργία superuser: `python manage.py createsuperuser`
-7. Δημιουργία πιστοποιητικού:
+### Prerequisites
+- Python 3.8 or higher
+- Git
+- OpenSSL for certificate generation
+- (Optional) A Gmail account for email functionality
+
+### Step 1: Clone the Repository
+```bash
+git clone <repository-url>
+cd secure-eshop
+```
+
+### Step 2: Set Up Python Environment
+Create and activate a virtual environment:
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+```
+
+### Step 3: Install Dependencies
+Install all required packages:
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Create Log Directory
+Ensure the logs directory exists:
+```bash
+mkdir -p logs
+touch logs/app.log
+```
+
+### Step 5: Configure Environment Variables (Optional)
+Create a `.env` file in the project root for email functionality:
+```bash
+# Create .env file
+touch .env
+
+# Add email configuration (edit with your details)
+echo "EMAIL_HOST_USER=youremail@gmail.com" >> .env
+echo "EMAIL_HOST_PASSWORD=your-app-password" >> .env
+```
+Note: For Gmail, you'll need to use an "App Password" rather than your account password. You can generate one in your Google Account security settings.
+
+### Step 6: Set Up the Database
+Run database migrations:
+```bash
+python manage.py migrate
+```
+
+### Step 7: Create Admin User
+Create a superuser for admin access:
+```bash
+python manage.py createsuperuser
+```
+Follow the prompts to create your admin username, email, and password.
+
+### Step 8: Generate SSL Certificate
+Generate a self-signed SSL certificate for HTTPS:
+```bash
 mkdir -p certificates
 openssl req -x509 -newkey rsa:4096 -keyout certificates/key.pem -out certificates/cert.pem -days 365 -nodes
-8. Εκκίνηση του server: `python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem`
+```
+When prompted, provide the required information or press Enter to use defaults.
+
+### Step 9: Start the Development Server
+Start the development server with SSL:
+```bash
+python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem
+```
+
+### Step 10: Access the Application
+Open your browser and navigate to:
+- **Website**: https://localhost:8000/
+- **Admin Interface**: https://localhost:8000/admin/
+
+### Common Development Tasks
+
+#### Running Tests
+To run all tests:
+```bash
+python manage.py test
+```
+
+To run a specific test:
+```bash
+python manage.py test eshop.tests.TestClassName.test_method_name
+```
+
+#### Creating New Migrations
+After modifying models:
+```bash
+python manage.py makemigrations eshop
+python manage.py migrate
+```
+
+#### Collecting Static Files
+```bash
+python manage.py collectstatic
+```
+
+### Browser Security Warning
+When you first access the site, your browser will warn about the self-signed certificate. This is expected in development. You can proceed by:
+- In Chrome: Click "Advanced" and then "Proceed to localhost (unsafe)"
+- In Firefox: Click "Advanced" > "Accept the Risk and Continue"
+- In Safari: Click "Show Details" > "visit this website"
+
+### Troubleshooting
+- **Certificate Issues**: Ensure certificates are correctly generated and the paths match in the runserver command
+- **Database Errors**: Try deleting `db.sqlite3` and running migrations again
+- **Static Files Not Loading**: Run `python manage.py collectstatic`
+- **Email Errors**: Check your `.env` configuration and Gmail security settings
 
 ## Λειτουργικότητα
 
