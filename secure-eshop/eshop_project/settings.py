@@ -10,215 +10,434 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+# Εισαγωγή απαραίτητων modules
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file if it exists
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Ορισμός βασικής διαδρομής του project
+# Χρησιμότητα: Παρέχει απόλυτο path για όλες τις υπόλοιπες διαδρομές
+# αποφεύγοντας προβλήματα με relative paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Φόρτωση μεταβλητών περιβάλλοντος από αρχείο .env
+# Χρησιμότητα: Επιτρέπει την αποθήκευση ευαίσθητων πληροφοριών (passwords, keys)
+# εκτός του κώδικα για μεγαλύτερη ασφάλεια
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j*m(@j8q)n_p4z^x!^k1ek11r(1*wbg3kc)!_0t4)r-#wp6=9a'
+# ============================================================================
+# ΒΑΣΙΚΕΣ ΡΥΘΜΙΣΕΙΣ ΑΣΦΑΛΕΙΑΣ
+# ============================================================================
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Μυστικό κλειδί για κρυπτογραφικές λειτουργίες
+# ΠΡΟΣΟΧΗ: Αυτό το κλειδί είναι για development - ΠΟΤΕ μην το χρησιμοποιείτε σε production!
+# Χρησιμότητα: Χρησιμοποιείται για:
+# - Υπογραφή session data
+# - CSRF tokens
+# - Password reset tokens
+# - Κρυπτογράφηση δεδομένων
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j*m(@j8q)n_p4z^x!^k1ek11r(1*wbg3kc)!_0t4)r-#wp6=9a')
+
+# Debug mode - ΠΡΕΠΕΙ να είναι False σε production
+# Χρησιμότητα: 
+# - True: Εμφανίζει detailed error pages με stack traces
+# - False: Εμφανίζει generic error pages για ασφάλεια
+# DEBUG = os.getenv('DEBUG', 'False') == True
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# Λίστα επιτρεπόμενων hostnames
+# Χρησιμότητα: Προστασία από Host header poisoning attacks
+# Σε production πρέπει να περιέχει τα actual domains
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
-# Application definition
+# ============================================================================
+# INSTALLED APPS - Εγκατεστημένες εφαρμογές
+# ============================================================================
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'eshop',
-    'axes',  
-    'django_extensions',  # Προσθήκη αυτής της γραμμής
+    # Django built-in apps
+    'django.contrib.admin',        # Admin interface
+    'django.contrib.auth',         # Authentication system
+    'django.contrib.contenttypes', # Content type framework
+    'django.contrib.sessions',     # Session framework
+    'django.contrib.messages',     # Messaging framework
+    'django.contrib.staticfiles',  # Static files management
+    
+    # Custom app
+    'eshop',                      # Η κύρια εφαρμογή e-shop
+    
+    # Third-party apps
+    'axes',                       # Προστασία από brute force attacks
+    'django_extensions',          # Επιπλέον management commands (π.χ. shell_plus)
 ]
+
+
+# ============================================================================
+# MIDDLEWARE - Ενδιάμεσο λογισμικό
+# ============================================================================
 
 MIDDLEWARE = [
+    # Security middleware - ΠΡΩΤΟ για μέγιστη ασφάλεια
     'django.middleware.security.SecurityMiddleware',
-    'csp.middleware.CSPMiddleware',  # Content Security Policy middleware
+    
+    # Content Security Policy - Προστασία από XSS
+    'csp.middleware.CSPMiddleware',
+    
+    # Session management - Διαχείριση sessions
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
+    # Common middleware - Διάφορες λειτουργίες (URL normalization κτλ)
     'django.middleware.common.CommonMiddleware',
+    
+    # CSRF protection - Προστασία από Cross-Site Request Forgery
     'django.middleware.csrf.CsrfViewMiddleware',
+    
+    # Authentication - Συνδέει users με requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    
+    # Messages - Σύστημα μηνυμάτων για feedback στον χρήστη
     'django.contrib.messages.middleware.MessageMiddleware',
+    
+    # Clickjacking protection - X-Frame-Options header
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'axes.middleware.AxesMiddleware',  # Middleware for Django Axes
+    
+    # Django-axes - Προστασία από login brute force
+    'axes.middleware.AxesMiddleware',
 ]
 
+# URL configuration module
+# Χρησιμότητα: Ορίζει που βρίσκονται οι κεντρικές URL ρυθμίσεις
 ROOT_URLCONF = 'eshop_project.urls'
+
+# ============================================================================
+# TEMPLATES - Ρυθμίσεις για templates
+# ============================================================================
 
 TEMPLATES = [
     {
+        # Template engine που χρησιμοποιούμε
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        
+        # Επιπλέον directories για templates (εκτός από app directories)
         'DIRS': [],
+        
+        # Αναζήτηση templates μέσα στα 'templates' directories των apps
         'APP_DIRS': True,
+        
         'OPTIONS': {
+            # Context processors - Προσθέτουν μεταβλητές σε όλα τα templates
             'context_processors': [
+                # Προσθέτει το request object
                 'django.template.context_processors.request',
+                
+                # Προσθέτει user και perms
                 'django.contrib.auth.context_processors.auth',
+                
+                # Προσθέτει messages
                 'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
+# WSGI application
+# Χρησιμότητα: Entry point για WSGI-compatible web servers
 WSGI_APPLICATION = 'eshop_project.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ============================================================================
+# DATABASE for Deveopment - Ρυθμίσεις βάσης δεδομένων
+# ============================================================================
 
 DATABASES = {
     'default': {
+        # SQLite για development - ΌΧΙ για production!
         'ENGINE': 'django.db.backends.sqlite3',
+        
+        # Τοποθεσία αρχείου βάσης
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
+# ============================================================================
+# DATABASE for Production(MySQL - pythonanywhere.com)  - Ρυθμίσεις βάσης δεδομένων
+# ============================================================================
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('DB_USER'),
+#         'PASSWORD': os.getenv('DB_PASSWORD'),
+#         'HOST': os.getenv('DB_HOST'),
+#         'PORT': os.getenv('DB_PORT', '3306'),
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#             'charset': 'utf8mb4',
+#         }
+#     }
+# }
+
+
+
+
+# ============================================================================
+# DATABASE for Production(Postgres - VM selfhost  - Ρυθμίσεις βάσης δεδομένων
+# ============================================================================
+
+# DATABASES = {
+#       'default': {
+#           'ENGINE': 'django.db.backends.postgresql',
+#           'NAME': 'secure_eshop',
+#           'USER': 'eshop_user',
+#           'PASSWORD': '*********',  # Replace with your actual password
+#           'HOST': 'localhost',
+#           'PORT': '',
+#     }
+# }
+
+
+
+
+
+# ============================================================================
+# PASSWORD VALIDATION - Επικύρωση κωδικών
+# ============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
+        # Έλεγχος ομοιότητας με user attributes (username, email)
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
+        # Ελάχιστο μήκος κωδικού
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
+        # Έλεγχος για κοινούς κωδικούς (από λίστα 20.000 κωδικών)
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
+        # Απαγόρευση αποκλειστικά αριθμητικών κωδικών
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
+# Password hashing algorithms σε σειρά προτίμησης
+# Χρησιμότητα: Argon2 είναι ο πιο ασφαλής, PBKDF2 για backwards compatibility
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',       # Καλύτερος & πιο ασφαλής
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',       # Django default
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',   # Legacy
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# ============================================================================
+# INTERNATIONALIZATION - Διεθνοποίηση
+# ============================================================================
 
+# Γλώσσα του κώδικα
 LANGUAGE_CODE = 'en-us'
 
+# Ζώνη ώρας
 TIME_ZONE = 'UTC'
 
+# Ενεργοποίηση internationalization
 USE_I18N = True
 
+# Χρήση timezone-aware datetimes
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# ============================================================================
+# STATIC FILES - Στατικά αρχεία (CSS, JavaScript, Images)
+# ============================================================================
 
+# URL prefix για static files
 STATIC_URL = 'static/'
+
+# Επιπλέον directories για static files
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+# Directory για collected static files (για production)
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# Default primary key field type για models
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Ρυθμίσεις για αρχεία media (εικόνες προϊόντων κλπ)
+
+# ============================================================================
+# MEDIA FILES - Αρχεία που ανεβάζουν οι χρήστες
+# ============================================================================
+
+# URL prefix για media files
 MEDIA_URL = '/media/'
+
+# Directory για αποθήκευση uploaded files
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Security Settings
-SECURE_SSL_REDIRECT = True  # Ανακατεύθυνση HTTP σε HTTPS
-SESSION_COOKIE_SECURE = True  # Αποστολή cookies μόνο μέσω HTTPS
-SECURE_BROWSER_XSS_FILTER = True  # Ενεργοποίηση του XSS φίλτρου των browsers
-SECURE_CONTENT_TYPE_NOSNIFF = True  # Αποτροπή MIME-type sniffing
-SECURE_HSTS_SECONDS = 31536000  # 1 χρόνος
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Εφαρμογή HSTS και σε subdomains
-SECURE_HSTS_PRELOAD = True  # Συμπερίληψη στη HSTS preload list
+# ============================================================================
+# SECURITY SETTINGS - Ρυθμίσεις ασφαλείας
+# ============================================================================
 
-# Content Security Policy
+# HTTPS enforcement - Ανακατεύθυνση όλου του HTTP traffic σε HTTPS
+# Χρησιμότητα: Εξασφαλίζει κρυπτογραφημένη επικοινωνία
+SECURE_SSL_REDIRECT = True
+
+# Session cookies μόνο μέσω HTTPS
+# Χρησιμότητα: Αποτρέπει κλοπή session cookies μέσω unencrypted connections
+SESSION_COOKIE_SECURE = True
+
+# XSS filter των browsers
+# Χρησιμότητα: Ενεργοποιεί built-in XSS protection των browsers
+SECURE_BROWSER_XSS_FILTER = True
+
+# Αποτροπή MIME-type sniffing
+# Χρησιμότητα: Αναγκάζει browsers να σεβαστούν το Content-Type header
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# HTTP Strict Transport Security (HSTS)
+# Χρησιμότητα: Αναγκάζει browsers να χρησιμοποιούν HTTPS για 1 χρόνο
+SECURE_HSTS_SECONDS = 31536000  # 1 χρόνος
+
+# HSTS για subdomains
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# HSTS preload - Συμπερίληψη στη browser preload list
+SECURE_HSTS_PRELOAD = True
+
+
+# ============================================================================
+# CONTENT SECURITY POLICY (CSP)
+# Χρησιμότητα: Προστασία από XSS και injection attacks περιορίζοντας
+# από που μπορούν να φορτωθούν resources
+# ============================================================================
+
+# Default policy - μόνο από τον ίδιο server
 CSP_DEFAULT_SRC = ("'self'",)
+
+# Scripts - από τον server και CDN
 CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+
+# Styles - από τον server και CDN  
 CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
+
+# Fonts - από τον server και CDN
 CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+
+# Images - από τον server και data: URIs
 CSP_IMG_SRC = ("'self'", "data:")
+
+# AJAX/Fetch - μόνο στον ίδιο server
 CSP_CONNECT_SRC = ("'self'",)
+
+# Χρήση nonce για inline scripts
 CSP_INCLUDE_NONCE_IN_SCRIPT_SRC = True
+
+# Απαγόρευση mixed content (HTTP σε HTTPS pages)
 CSP_BLOCK_ALL_MIXED_CONTENT = True
 
 
-# CSRF settings
-CSRF_COOKIE_HTTPONLY = False  # Άφησέ το False για να μπορεί να προσπελαστεί από JavaScript
-CSRF_COOKIE_SECURE = True  # Απαιτεί HTTPS για το CSRF cookie
-CSRF_COOKIE_SAMESITE = 'Lax'  # Περιορίζει την αποστολή του cookie σε cross-site requests
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']  # Domains που επιτρέπονται για CSRF
+# ============================================================================
+# CSRF SETTINGS - Cross-Site Request Forgery protection
+# ============================================================================
 
-# Για το περιβάλλον ανάπτυξης (θα απενεργοποιήσουμε προσωρινά το SSL redirect)
+# Επιτρέπει JavaScript access στο CSRF cookie (για AJAX)
+CSRF_COOKIE_HTTPONLY = False
+
+# CSRF cookie μόνο μέσω HTTPS
+CSRF_COOKIE_SECURE = True
+
+# SameSite policy για CSRF cookie
+# Χρησιμότητα: Περιορίζει πότε στέλνεται το cookie σε cross-site requests
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Trusted origins για CSRF
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']
+
+
+# ============================================================================
+# DEVELOPMENT OVERRIDES
+# ============================================================================
+
+# Απενεργοποίηση SSL redirect για development
 if DEBUG:
     SECURE_SSL_REDIRECT = False
 
-# Προσωρινά για την ανάπτυξη
-DEBUG = True
+# Προσωρινή ρύθμιση για development
+# DEBUG = True
 
-# URL για ανακατεύθυνση όταν απαιτείται σύνδεση
-LOGIN_URL = 'login'  # Χρησιμοποιεί το name='login' από το urls.py
 
-# Email settings
-# Get email settings from environment variables for security
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'littleg1105@gmail.com')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-ADMIN_EMAIL = EMAIL_HOST_USER
+# ============================================================================
+# AUTHENTICATION SETTINGS
+# ============================================================================
 
-# In development: Use console backend if no password or if DEBUG is True
+# URL για login redirect
+# Χρησιμότητα: Όταν χρειάζεται authentication, redirect εδώ
+LOGIN_URL = 'login'
+
+
+# ============================================================================
+# EMAIL SETTINGS
+# ============================================================================
+
+# Email configuration από environment variables για ασφάλεια
+# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'liweqweqweqw@gmail.com')
+# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# ADMIN_EMAIL = EMAIL_HOST_USER
+
+# Development: Console backend αν δεν υπάρχει password
+# Production: SMTP με Gmail
 if DEBUG and not os.environ.get('EMAIL_HOST_PASSWORD'):
+    # Εκτύπωση emails στην κονσόλα για development
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
-    # Use SMTP with secure settings (development or production)
+    # SMTP configuration για πραγματική αποστολή
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-# Django-axes configuration
+
+# ============================================================================
+# DJANGO-AXES SETTINGS - Brute force protection
+# ============================================================================
+
+# Authentication backends - axes πρώτο για να μετράει attempts
 AUTHENTICATION_BACKENDS = [
-    'axes.backends.AxesBackend',
-    'django.contrib.auth.backends.ModelBackend',
+    'axes.backends.AxesBackend',          # Για tracking login attempts
+    'django.contrib.auth.backends.ModelBackend',  # Default Django backend
 ]
 
-# Django-axes settings
-AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = 1  # in hours
-AXES_LOCK_OUT_AT_FAILURE = True
-AXES_RESET_ON_SUCCESS = True
-AXES_ENABLED = True
+# Axes configuration
+AXES_FAILURE_LIMIT = 5                    # Αποτυχίες πριν το lockout
+AXES_COOLOFF_TIME = 1                     # Ώρες lockout
+AXES_LOCK_OUT_AT_FAILURE = True           # Ενεργοποίηση lockout
+AXES_RESET_ON_SUCCESS = True              # Reset counter μετά από επιτυχία
+AXES_ENABLED = True                       # Ενεργοποίηση του axes
 
-# Use this instead of the deprecated settings:
+# Παράμετροι για lockout - συνδυασμός username/IP/user-agent
+# Χρησιμότητα: Πιο έξυπνο lockout που δυσκολεύει bypassing
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address", "user_agent"]]
 
-# Logging configuration
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# Χρησιμότητα: Καταγραφή γεγονότων για debugging και security monitoring
+# ============================================================================
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    
+    # Formatters - Πως φαίνονται τα log messages
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
@@ -229,12 +448,16 @@ LOGGING = {
             'style': '{',
         },
     },
+    
+    # Handlers - Που πάνε τα logs
     'handlers': {
+        # Console output
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
+        # File output
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
@@ -242,17 +465,22 @@ LOGGING = {
             'formatter': 'verbose',
         },
     },
+    
+    # Loggers - Ποια subsystems κάνουν logging
     'loggers': {
+        # Django framework logs
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,
         },
+        # Security-related logs (custom)
         'security': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': False,
         },
+        # Order-related logs (custom)
         'orders': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
@@ -260,3 +488,97 @@ LOGGING = {
         },
     },
 }
+
+# ============================================================================
+
+# Ανάλυση Χρησιμότητας ανά Block
+# 1. Imports και Environment Variables
+
+# Ασφάλεια: Αποφυγή hardcoded passwords/keys στον κώδικα
+# Ευελιξία: Διαφορετικές ρυθμίσεις για development/production
+# Συντήρηση: Εύκολη αλλαγή configuration χωρίς code changes
+
+# 2. Path Configuration
+
+# Portability: Λειτουργεί σε διαφορετικά λειτουργικά συστήματα
+# Maintainability: Κεντρικός ορισμός paths για όλο το project
+# Reliability: Absolute paths αποφεύγουν προβλήματα με working directory
+
+# 3. Security Settings (SECRET_KEY, DEBUG, ALLOWED_HOSTS)
+
+# SECRET_KEY: Κρίσιμο για την ασφάλεια - χρησιμοποιείται σε κρυπτογραφικές λειτουργίες
+# DEBUG: False σε production για να μην εκτίθενται sensitive πληροφορίες
+# ALLOWED_HOSTS: Προστασία από HTTP Host header attacks
+
+# 4. Installed Apps
+
+# Modular Design: Κάθε app έχει συγκεκριμένη λειτουργικότητα
+# Third-party Integration: Εύκολη προσθήκη έτοιμων λύσεων (axes, extensions)
+# Maintainability: Clear separation of concerns
+
+# 5. Middleware
+
+# Layered Security: Κάθε middleware προσθέτει ένα επίπεδο προστασίας
+# Performance: Σωστή σειρά για βέλτιστη απόδοση
+# Functionality: Κάθε middleware παρέχει specific λειτουργικότητα
+
+# 6. Database Configuration
+
+# SQLite: Ιδανικό για development (zero configuration)
+# Production Ready: Εύκολη αλλαγή σε PostgreSQL/MySQL για production
+# Performance: Separate database για testing
+
+# 7. Password Validation
+
+# Security: Enforces strong passwords
+# User Protection: Prevents common/weak passwords
+# Compliance: Helps meet security standards
+
+# 8. Static/Media Files
+
+# Organization: Clear separation of code/user content
+# Performance: Allows CDN/web server to serve static files
+# Security: Media files isolated from code
+
+# 9. Security Headers
+
+# HTTPS Enforcement: Ensures encrypted communication
+# XSS Protection: Multiple layers against cross-site scripting
+# HSTS: Forces browsers to use HTTPS for extended periods
+# CSP: Fine-grained control over resource loading
+
+# 10. CSRF Protection
+
+# Form Security: Prevents unauthorized form submissions
+# AJAX Support: Configuration allows JavaScript access when needed
+# Flexible: SameSite policy balances security/functionality
+
+# 11. Email Configuration
+
+# Development: Console backend for testing
+# Production: Secure SMTP configuration
+# Security: Credentials from environment variables
+
+# 12. Django-axes
+
+# Brute Force Protection: Limits login attempts
+# Smart Lockout: Combines multiple parameters for effective blocking
+# Monitoring: Tracks suspicious activity
+
+# 13. Logging
+
+# Debugging: Detailed logs for development
+# Security Monitoring: Tracks security events
+# Compliance: Audit trail for regulatory requirements
+# Performance: Can identify bottlenecks
+
+# Συμπέρασμα
+# Αυτό το αρχείο settings.py δείχνει μια ολοκληρωμένη προσέγγιση στην ασφάλεια, με:
+
+# Πολλαπλά επίπεδα προστασίας
+# Σαφή διαχωρισμό development/production ρυθμίσεων
+# Χρήση best practices για Django security
+# Ευέλικτη αρχιτεκτονική για μελλοντικές επεκτάσεις
+
+# Κάθε ρύθμιση έχει συγκεκριμένο σκοπό και συμβάλλει στη συνολική ασφάλεια και λειτουργικότητα της εφαρμογής.
+# ============================================================================

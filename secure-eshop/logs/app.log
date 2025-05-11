@@ -10,3 +10,13 @@ INFO 2025-05-05 13:59:31,096 emails Order confirmation email sent to georgegeorg
 INFO 2025-05-05 13:59:32,654 emails Order notification email sent to admin for order #ORD-93FUG-N3N6R
 INFO 2025-05-05 14:00:06,728 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-ILQW1-832EH
 INFO 2025-05-05 14:00:08,263 emails Order notification email sent to admin for order #ORD-ILQW1-832EH
+INFO 2025-05-05 21:55:59,366 emails Order confirmation email sent to catherine.parmagou@gmail.com for order #ORD-4V8QE-5G84D
+INFO 2025-05-05 21:56:00,655 emails Order notification email sent to admin for order #ORD-4V8QE-5G84D
+WARNING 2025-05-10 20:51:39,765 views Failed login attempt with username: new_user
+WARNING 2025-05-10 20:51:41,948 views Failed login attempt with username: new_user
+WARNING 2025-05-10 20:51:44,526 views Failed login attempt with username: new_user
+WARNING 2025-05-10 20:51:47,259 views Failed login attempt with username: new_user
+WARNING 2025-05-10 20:51:49,803 views Failed login attempt with username: new_user
+WARNING 2025-05-10 20:53:49,034 views Failed login attempt with username: new_user
+ERROR 2025-05-11 19:29:05,999 emails Failed to send order notification email to admin: 'Settings' object has no attribute 'ADMIN_EMAIL'
+INFO 2025-05-11 19:29:06,024 emails Order confirmation email sent to test@example.com for order #ORD-NKQ9A-W5VVD
