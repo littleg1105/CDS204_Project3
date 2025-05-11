@@ -1,80 +1,299 @@
+# ============================================================================
+# IMPORTS - Εισαγωγή απαραίτητων modules
+# ============================================================================
+
+# Django models module - βασικές κλάσεις για δημιουργία models
 from django.db import models
+# Χρησιμότητα: Παρέχει Model class και όλα τα field types
+
+# Django User model για authentication
 from django.contrib.auth.models import User
+# Χρησιμότητα: Built-in User model για σύνδεση με τους χρήστες του συστήματος
+
+# Validators για field validation
 from django.core.validators import MinValueValidator
+# Χρησιμότητα: Εξασφαλίζει ότι οι τιμές δεν είναι αρνητικές
+
+# UUID module για unique identifiers
 import uuid
+# Χρησιμότητα: Δημιουργία μοναδικών identifiers (αν και δεν χρησιμοποιείται εδώ)
+
+# Random module για τυχαίους αριθμούς
 import random
+# Χρησιμότητα: Χρησιμοποιείται στη δημιουργία order IDs
+
+# String module για χαρακτήρες
 import string
+# Χρησιμότητα: Παρέχει ASCII characters και digits για order ID generation
+
 
 # This function has been replaced by generate_order_id below.
+# Σχόλιο που υποδεικνύει ότι υπήρχε παλαιότερη υλοποίηση
+
+
+# ============================================================================
+# PRODUCT MODEL - Μοντέλο για τα προϊόντα του καταστήματος
+# ============================================================================
 
 class Product(models.Model):
+    """
+    Μοντέλο που αναπαριστά ένα προϊόν στο e-shop.
+    
+    Χρησιμότητα:
+    - Αποθηκεύει όλες τις πληροφορίες προϊόντων
+    - Διαχειρίζεται εικόνες προϊόντων
+    - Παρέχει validation για τιμές
+    """
+    
+    # Όνομα προϊόντος
     name = models.CharField(max_length=200)
+    # Χρησιμότητα: Κύριος τίτλος προϊόντος, περιορισμός στους 200 χαρακτήρες
+    
+    # Περιγραφή προϊόντος
     description = models.TextField()
-    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-    image = models.ImageField(upload_to='products/', null=True, blank=True)
+    # Χρησιμότητα: Αναλυτική περιγραφή χωρίς όριο χαρακτήρων
+    
+    # Τιμή προϊόντος με validation
+    price = models.DecimalField(
+        max_digits=10,           # Μέγιστο 10 ψηφία συνολικά
+        decimal_places=2,        # 2 δεκαδικά ψηφία (για cents/λεπτά)
+        validators=[MinValueValidator(0)]  # Όχι αρνητικές τιμές
+    )
+    # Χρησιμότητα: Ακριβής αποθήκευση τιμών χρήματος με protection από αρνητικές τιμές
+    
+    # Εικόνα προϊόντος (προαιρετική)
+    image = models.ImageField(
+        upload_to='products/',   # Directory για αποθήκευση
+        null=True,              # Επιτρέπεται NULL στη database
+        blank=True              # Επιτρέπεται κενό στις forms
+    )
+    # Χρησιμότητα: Αποθήκευση εικόνων με οργάνωση σε φάκελο products/
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
+    # Χρησιμότητα: Αυτόματη καταγραφή χρόνου δημιουργίας
+    
     updated_at = models.DateTimeField(auto_now=True)
-
+    # Χρησιμότητα: Αυτόματη ενημέρωση χρόνου τελευταίας αλλαγής
+    
     def __str__(self):
+        """String representation του προϊόντος."""
         return self.name
+    # Χρησιμότητα: Εμφάνιση ονόματος στο admin και debugging
+
+
+# ============================================================================
+# CART MODEL - Μοντέλο για το καλάθι αγορών
+# ============================================================================
 
 class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    """
+    Μοντέλο που αναπαριστά το καλάθι αγορών ενός χρήστη.
+    
+    Χρησιμότητα:
+    - One-to-one relationship με User (ένας χρήστης = ένα καλάθι)
+    - Container για CartItems
+    - Υπολογισμοί συνόλων
+    """
+    
+    # Σύνδεση με χρήστη (1-1 relationship)
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE  # Διαγραφή καλαθιού αν διαγραφεί ο χρήστης
+    )
+    # Χρησιμότητα: Κάθε χρήστης έχει ακριβώς ένα καλάθι
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     def __str__(self):
+        """String representation του καλαθιού."""
         return f"Cart for {self.user.username}"
     
     def get_total_items(self):
+        """
+        Υπολογίζει το συνολικό αριθμό αντικειμένων στο καλάθι.
+        
+        Χρησιμότητα:
+        - Εμφάνιση counter στο UI
+        - Έλεγχος αν το καλάθι είναι άδειο
+        """
         return sum(item.quantity for item in self.cartitem_set.all())
     
     def get_total_price(self):
+        """
+        Υπολογίζει τη συνολική αξία του καλαθιού.
+        
+        Χρησιμότητα:
+        - Εμφάνιση συνολικού κόστους
+        - Χρήση στη διαδικασία checkout
+        """
         return sum(item.quantity * item.product.price for item in self.cartitem_set.all())
 
+
+# ============================================================================
+# CART ITEM MODEL - Μοντέλο για τα αντικείμενα στο καλάθι
+# ============================================================================
+
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
+    """
+    Μοντέλο που αναπαριστά ένα προϊόν μέσα στο καλάθι.
+    
+    Χρησιμότητα:
+    - Συνδέει προϊόντα με καλάθια
+    - Διαχειρίζεται ποσότητες
+    - Εμποδίζει διπλότυπα (unique_together)
+    """
+    
+    # Foreign key στο καλάθι
+    cart = models.ForeignKey(
+        Cart,
+        on_delete=models.CASCADE  # Διαγραφή items αν διαγραφεί το καλάθι
+    )
+    # Χρησιμότητα: Σύνδεση με το parent καλάθι
+    
+    # Foreign key στο προϊόν
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE  # Διαγραφή από καλάθι αν διαγραφεί το προϊόν
+    )
+    # Χρησιμότητα: Σύνδεση με το actual προϊόν
+    
+    # Ποσότητα με validation
+    quantity = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)]  # Τουλάχιστον 1
+    )
+    # Χρησιμότητα: Αποθήκευση ποσότητας με validation για θετικούς αριθμούς
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
-        unique_together = ('cart', 'product')
-
-    def __str__(self):
-        return f"{self.quantity} x {self.product.name}"
+        """
+        Metadata για το μοντέλο.
         
+        Χρησιμότητα:
+        - Εμποδίζει το ίδιο προϊόν να υπάρχει δύο φορές στο ίδιο καλάθι
+        """
+        unique_together = ('cart', 'product')  # Μοναδικός συνδυασμός cart-product
+    
+    def __str__(self):
+        """String representation του cart item."""
+        return f"{self.quantity} x {self.product.name}"
+    
     def get_total(self):
+        """
+        Υπολογίζει το συνολικό κόστος για αυτό το item.
+        
+        Χρησιμότητα:
+        - Εμφάνιση subtotal ανά προϊόν
+        - Χρήση σε υπολογισμούς καλαθιού
+        """
         return self.quantity * self.product.price
 
+
+# ============================================================================
+# SHIPPING ADDRESS MODEL - Μοντέλο για διευθύνσεις αποστολής
+# ============================================================================
+
 class ShippingAddress(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    """
+    Μοντέλο που αποθηκεύει διευθύνσεις αποστολής.
+    
+    Χρησιμότητα:
+    - Αποθήκευση multiple διευθύνσεων ανά χρήστη
+    - Επαναχρησιμοποίηση διευθύνσεων
+    - Localization με ελληνικά labels
+    """
+    
+    # Foreign key στον χρήστη
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE  # Διαγραφή διευθύνσεων αν διαγραφεί ο χρήστης
+    )
+    # Χρησιμότητα: Σύνδεση διευθύνσεων με χρήστες
+    
+    # Πεδία διεύθυνσης με ελληνικά verbose names
     name = models.CharField(max_length=100, verbose_name='Ονοματεπώνυμο')
     address = models.CharField(max_length=200, verbose_name='Διεύθυνση')
     city = models.CharField(max_length=100, verbose_name='Πόλη')
     zip_code = models.CharField(max_length=20, verbose_name='ΤΚ')
     country = models.CharField(max_length=100, verbose_name='Χώρα')
-    phone = models.CharField(max_length=20, verbose_name='Τηλέφωνο', blank=True, null=True)
-    email = models.EmailField(verbose_name='Email', blank=True, null=True)
+    
+    # Προαιρετικά πεδία επικοινωνίας
+    phone = models.CharField(
+        max_length=20,
+        verbose_name='Τηλέφωνο',
+        blank=True,  # Επιτρέπεται κενό στις forms
+        null=True    # Επιτρέπεται NULL στη database
+    )
+    email = models.EmailField(
+        verbose_name='Email',
+        blank=True,
+        null=True
+    )
+    # Χρησιμότητα: Εναλλακτικά στοιχεία επικοινωνίας για την παράδοση
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)  # Προσθήκη πεδίου
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
+        """String representation της διεύθυνσης."""
         return f"{self.name}, {self.address}, {self.city}"
     
     class Meta:
+        """
+        Metadata για το μοντέλο.
+        
+        Χρησιμότητα:
+        - Ελληνικά ονόματα στο admin interface
+        """
         verbose_name = 'Διεύθυνση Αποστολής'
         verbose_name_plural = 'Διευθύνσεις Αποστολής'
 
+
+# ============================================================================
+# ORDER ID GENERATOR - Συνάρτηση δημιουργίας μοναδικού ID παραγγελίας
+# ============================================================================
+
 def generate_order_id():
-    """Generate a random order ID format: ORD-XXXXX-XXXXX"""
+    """
+    Δημιουργεί μοναδικό ID παραγγελίας με format: ORD-XXXXX-XXXXX
+    
+    Χρησιμότητα:
+    - Human-readable format
+    - Μοναδικότητα μέσω random generation
+    - Εύκολη αναγνώριση παραγγελιών
+    
+    Returns:
+        str: Order ID σε format ORD-XXXXX-XXXXX
+    """
     prefix = 'ORD'
+    # Δημιουργία δύο τμημάτων από 5 random χαρακτήρες (γράμματα + αριθμοί)
     part1 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
     part2 = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
     return f"{prefix}-{part1}-{part2}"
 
+
+# ============================================================================
+# ORDER MODEL - Μοντέλο για παραγγελίες
+# ============================================================================
+
 class Order(models.Model):
+    """
+    Μοντέλο που αναπαριστά μια ολοκληρωμένη παραγγελία.
+    
+    Χρησιμότητα:
+    - Καταγραφή παραγγελιών με unique IDs
+    - Tracking status παραγγελιών
+    - Σύνδεση με χρήστη και διεύθυνση
+    """
+    
+    # Status choices για παραγγελίες
     STATUS_CHOICES = (
         ('pending', 'Εκκρεμεί'),
         ('processing', 'Σε επεξεργασία'),
@@ -82,36 +301,208 @@ class Order(models.Model):
         ('delivered', 'Παραδόθηκε'),
         ('cancelled', 'Ακυρώθηκε'),
     )
+    # Χρησιμότητα: Predefined επιλογές για order status με ελληνικές ετικέτες
     
-    id = models.CharField(primary_key=True, max_length=20, default=generate_order_id, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Χρήστης')
-    shipping_address = models.ForeignKey(ShippingAddress, on_delete=models.PROTECT, verbose_name='Διεύθυνση Αποστολής', null=True, blank=True)    
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Συνολικό Ποσό')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Κατάσταση')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Ημερομηνία Δημιουργίας')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='Τελευταία Ενημέρωση')
+    # Custom primary key με auto-generated ID
+    id = models.CharField(
+        primary_key=True,
+        max_length=20,
+        default=generate_order_id,  # Automatic generation
+        editable=False             # Δεν επιτρέπεται αλλαγή
+    )
+    # Χρησιμότητα: Human-readable unique identifiers αντί για auto-increment integers
+    
+    # Foreign keys
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Χρήστης'
+    )
+    # Χρησιμότητα: Σύνδεση παραγγελίας με χρήστη
+    
+    shipping_address = models.ForeignKey(
+        ShippingAddress,
+        on_delete=models.PROTECT,  # Προστασία από διαγραφή διεύθυνσης
+        verbose_name='Διεύθυνση Αποστολής',
+        null=True,
+        blank=True
+    )
+    # Χρησιμότητα: Σύνδεση με διεύθυνση, PROTECT αποτρέπει διαγραφή χρησιμοποιούμενων διευθύνσεων
+    
+    # Οικονομικά στοιχεία
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Συνολικό Ποσό'
+    )
+    # Χρησιμότητα: Αποθήκευση συνολικού κόστους παραγγελίας
+    
+    # Status tracking
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Κατάσταση'
+    )
+    # Χρησιμότητα: Παρακολούθηση κατάστασης παραγγελίας
+    
+    # Timestamps
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Ημερομηνία Δημιουργίας'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Τελευταία Ενημέρωση'
+    )
     
     def __str__(self):
+        """String representation της παραγγελίας."""
         return f"Παραγγελία {self.id} - {self.user.username}"
     
     class Meta:
+        """
+        Metadata για το μοντέλο.
+        
+        Χρησιμότητα:
+        - Ελληνικά ονόματα στο admin
+        - Default ταξινόμηση από νεότερη σε παλαιότερη
+        """
         verbose_name = 'Παραγγελία'
         verbose_name_plural = 'Παραγγελίες'
-        ordering = ['-created_at']
+        ordering = ['-created_at']  # Νεότερες πρώτα
 
+
+# ============================================================================
+# ORDER ITEM MODEL - Μοντέλο για προϊόντα σε παραγγελίες
+# ============================================================================
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Παραγγελία')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, verbose_name='Προϊόν')
-    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)], verbose_name='Ποσότητα')
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Τιμή')
+    """
+    Μοντέλο που αναπαριστά ένα προϊόν μέσα σε παραγγελία.
+    
+    Χρησιμότητα:
+    - Καταγραφή προϊόντων σε παραγγελίες
+    - Διατήρηση ιστορικών τιμών
+    - Υπολογισμός subtotals
+    """
+    
+    # Foreign key στην παραγγελία
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='items',  # Allows order.items.all()
+        verbose_name='Παραγγελία'
+    )
+    # Χρησιμότητα: Σύνδεση με parent παραγγελία, related_name για εύκολη πρόσβαση
+    
+    # Foreign key στο προϊόν
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,  # Προστασία από διαγραφή προϊόντων
+        verbose_name='Προϊόν'
+    )
+    # Χρησιμότητα: Σύνδεση με προϊόν, PROTECT για data integrity
+    
+    # Ποσότητα και τιμή
+    quantity = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name='Ποσότητα'
+    )
+    # Χρησιμότητα: Αποθήκευση ποσότητας με validation
+    
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Τιμή'
+    )
+    # Χρησιμότητα: Αποθήκευση τιμής κατά τη στιγμή της παραγγελίας (ιστορικό)
     
     def __str__(self):
+        """String representation του order item."""
         return f"{self.quantity} x {self.product.name}"
     
     def get_total_price(self):
+        """
+        Υπολογίζει το συνολικό κόστος για αυτό το item.
+        
+        Χρησιμότητα:
+        - Υπολογισμός subtotal
+        - Εμφάνιση σε invoices/receipts
+        """
         return self.quantity * self.price
     
     class Meta:
+        """
+        Metadata για το μοντέλο.
+        
+        Χρησιμότητα:
+        - Ελληνικά ονόματα στο admin interface
+        """
         verbose_name = 'Αντικείμενο Παραγγελίας'
         verbose_name_plural = 'Αντικείμενα Παραγγελίας'
+
+# ============================================================================
+# Ανάλυση Χρησιμότητας ανά Model
+# 1. Product Model
+
+# Βασικό model του e-shop: Αποθηκεύει όλες τις πληροφορίες προϊόντων
+# Image handling: Upload και οργάνωση εικόνων
+# Price validation: Προστασία από αρνητικές τιμές
+# Timestamps: Tracking δημιουργίας/ενημέρωσης
+
+# 2. Cart Model
+
+# One-to-one με User: Κάθε χρήστης έχει ένα μοναδικό καλάθι
+# Container pattern: Περιέχει CartItems
+# Aggregate calculations: Υπολογισμοί συνόλων
+# Session persistence: Το καλάθι παραμένει μεταξύ sessions
+
+# 3. CartItem Model
+
+# Junction table: Συνδέει Products με Carts
+# Quantity management: Διαχείριση ποσοτήτων
+# Unique constraint: Αποτρέπει διπλότυπα
+# Subtotal calculations: Υπολογισμοί ανά προϊόν
+
+# 4. ShippingAddress Model
+
+# Multiple addresses: Πολλές διευθύνσεις ανά χρήστη
+# Greek localization: Ελληνικά labels και verbose names
+# Optional fields: Phone/email προαιρετικά
+# Reusability: Επαναχρησιμοποίηση διευθύνσεων
+
+# 5. Order Model
+
+# Custom primary key: Human-readable order IDs
+# Status tracking: Lifecycle management
+# Foreign key protection: PROTECT για shipping addresses
+# Historical record: Αμετάβλητο αρχείο παραγγελιών
+
+# 6. OrderItem Model
+
+# Order details: Προϊόντα σε κάθε παραγγελία
+# Price history: Αποθήκευση τιμών κατά την παραγγελία
+# Data integrity: PROTECT για προϊόντα
+# Related name: Εύκολη πρόσβαση από Order
+
+# Database Relationships
+
+# User ↔ Cart: One-to-One
+# Cart ↔ CartItem: One-to-Many
+# Product ↔ CartItem: One-to-Many
+# User ↔ ShippingAddress: One-to-Many
+# User ↔ Order: One-to-Many
+# Order ↔ OrderItem: One-to-Many
+# ShippingAddress ↔ Order: One-to-Many
+# Product ↔ OrderItem: One-to-Many
+
+# Security & Best Practices
+
+# Cascade deletions: Όπου είναι λογικό
+# Protect deletions: Για data integrity
+# Validation: MinValueValidator για ποσότητες/τιμές
+# Unique constraints: Αποφυγή διπλότυπων
+# Decimal fields: Για ακριβείς χρηματικές τιμές
+# Timestamps: Audit trail σε όλα τα models

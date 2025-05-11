@@ -1,20 +1,199 @@
+# ============================================================================
+# DJANGO PROJECT REQUIREMENTS FILE
+# Αρχείο dependencies για το e-shop Django project
+# ============================================================================
+
+# ============================================================================
+# SECURITY & AUTHENTICATION
+# ============================================================================
+
 argon2-cffi==23.1.0
-argon2-cffi-bindings==21.2.0
-asgiref==3.8.1
-bleach==6.2.0
+# Χρησιμότητα:
+# - Password hashing library για Django
+# - Recommended hasher by Django (more secure than PBKDF2)
+# - Uses Argon2 algorithm (winner of Password Hashing Competition)
+# - Protects against GPU/ASIC attacks
+# - Memory-hard function (resistant to hardware attacks)
+
+argon2-cffi-bindings==21.2.0  
+# Χρησιμότητα:
+# - Low-level CFFI bindings για Argon2
+# - Required by argon2-cffi
+# - Provides C bindings για performance
+# - Enables fast password hashing operations
+
 cffi==1.17.1
+# Χρησιμότητα:
+# - C Foreign Function Interface για Python
+# - Required by cryptography και argon2
+# - Allows Python to call C libraries
+# - Essential για performance-critical operations
+
 cryptography==44.0.3
-Django==5.2
-django-axes==7.1.0
-django-csp==4.0
-django-extensions==4.1
-MarkupSafe==3.0.2
-packaging==25.0
-pillow==11.2.1
-psycopg2-binary==2.9.10
-pycparser==2.22
+# Χρησιμότητα:
+# - Cryptographic library για Python
+# - Required by Django για security features
+# - Handles SSL/TLS operations
+# - Provides encryption/decryption utilities
+# - Used for secure token generation
+
 pyOpenSSL==25.0.0
-python-dotenv==1.1.0
+# Χρησιμότητα:
+# - Python wrapper για OpenSSL library
+# - Enables SSL/TLS functionality
+# - Required για HTTPS development server
+# - Certificate handling και validation
+# - Secure socket operations
+
+# ============================================================================
+# DJANGO FRAMEWORK & EXTENSIONS
+# ============================================================================
+
+Django==5.2
+# Χρησιμότητα:
+# - The main Django web framework
+# - Latest version με LTS support
+# - Core functionality για web application
+# - MVC architecture, ORM, admin panel
+# - Security features built-in
+
+asgiref==3.8.1
+# Χρησιμότητα:
+# - ASGI specifications και utilities
+# - Required by Django για async support
+# - Enables async views και middleware
+# - WebSocket support capabilities
+# - Compatibility layer για WSGI/ASGI
+
+django-axes==7.1.0
+# Χρησιμότητα:
+# - Brute-force login protection
+# - Tracks failed login attempts
+# - Locks out users/IPs after failures
+# - Prevents credential stuffing attacks
+# - Configurable lockout policies
+# - Security logging και monitoring
+
+django-csp==4.0
+# Χρησιμότητα:
+# - Content Security Policy για Django
+# - Prevents XSS attacks
+# - Controls resource loading
+# - Protects against code injection
+# - Configurable security headers
+# - Modern web security standard
+
+django-extensions==4.1
+# Χρησιμότητα:
+# - Collection of Django extensions
+# - Enhanced shell με shell_plus
+# - Graph models command
+# - Show URLs command
+# - Development productivity tools
+# - Management command helpers
+
+# ============================================================================
+# DATABASE & ORM
+# ============================================================================
+
+psycopg2-binary==2.9.10
+# Χρησιμότητα:
+# - PostgreSQL adapter για Python
+# - Database driver για Django ORM
+# - Binary version (no compilation needed)
+# - Production-ready database connectivity
+# - Connection pooling support
+# - Async operations support
+
 sqlparse==0.5.3
+# Χρησιμότητα:
+# - SQL parsing και formatting
+# - Required by Django για SQL handling
+# - Pretty-printing SQL queries
+# - SQL syntax highlighting
+# - Database migration formatting
+
+# ============================================================================
+# MEDIA & FILE HANDLING
+# ============================================================================
+
+pillow==11.2.1
+# Χρησιμότητα:
+# - Python Imaging Library fork
+# - Image processing για Django
+# - Required για ImageField
+# - Image upload και manipulation
+# - Thumbnail generation
+# - Format conversion support
+# - Product image handling
+
+# ============================================================================
+# HTML & CONTENT PROCESSING
+# ============================================================================
+
+bleach==6.2.0
+# Χρησιμότητα:
+# - HTML sanitization library
+# - Cleans user-generated content
+# - Prevents XSS attacks
+# - Whitelist-based HTML filtering
+# - Safe HTML output
+# - Used in forms για content cleaning
+
+MarkupSafe==3.0.2
+# Χρησιμότητα:
+# - Safe string markup για Python
+# - HTML/XML markup escaping
+# - Required by various libraries
+# - Prevents injection attacks
+# - Template safety utilities
+
 webencodings==0.5.1
+# Χρησιμότητα:
+# - Character encoding detection
+# - Required by bleach
+# - Handles various text encodings
+# - UTF-8, ASCII, etc. support
+# - Web content encoding utilities
+
+# ============================================================================
+# UTILITIES & CONFIGURATION
+# ============================================================================
+
+python-dotenv==1.1.0
+# Χρησιμότητα:
+# - Environment variables management
+# - Loads .env files
+# - Keeps secrets out of code
+# - Different configs για environments
+# - 12-factor app methodology
+# - Secure configuration handling
+
+packaging==25.0
+# Χρησιμότητα:
+# - Python packaging utilities
+# - Version parsing και comparison
+# - Required by various packages
+# - Dependency resolution
+# - Package metadata handling
+
+pycparser==2.22
+# Χρησιμότητα:
+# - C parser για Python
+# - Required by cffi
+# - Parses C declarations
+# - Enables C library bindings
+# - Low-level infrastructure
+
+# ============================================================================
+# DEVELOPMENT & DEBUGGING
+# ============================================================================
+
 Werkzeug==3.1.3
+# Χρησιμότητα:
+# - WSGI utility library
+# - Enhanced debugging
+# - Interactive debugger
+# - Request/response objects
+# - Development server features
+# - Performance profiling tools
