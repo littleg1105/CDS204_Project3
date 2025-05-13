@@ -27,3 +27,222 @@ INFO 2025-05-13 12:51:43,968 emails Order confirmation email sent to georgegeorg
 ERROR 2025-05-13 12:51:43,969 emails Failed to send order notification email to admin: 'Settings' object has no attribute 'ADMIN_EMAIL'
 INFO 2025-05-13 12:52:14,790 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-ECQVH-VP9WK
 INFO 2025-05-13 12:52:14,795 emails Order notification email sent to admin for order #ORD-ECQVH-VP9WK
+WARNING 2025-05-13 12:56:52,605 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:56:53,024 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:56:53,409 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:56:53,726 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:56:54,051 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:27,273 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:27,674 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:28,035 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:28,377 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:28,780 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:29,156 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:29,521 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:29,896 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:30,276 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:30,606 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:57:30,971 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 12:57:30,972 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 12:58:41,936 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:42,318 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:42,638 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:42,974 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:43,316 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:43,711 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:44,103 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:44,456 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:44,849 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:45,261 views Failed login attempt with username: testuser
+WARNING 2025-05-13 12:58:45,637 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 12:58:45,638 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 12:59:32,152 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 12:59:32,153 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+INFO 2025-05-13 13:02:45,824 emails Order notification email sent to admin for order #ORD-25MGH-50N3B
+INFO 2025-05-13 13:02:45,843 emails Order confirmation email sent to test@example.com for order #ORD-MS5VH-1VW3M
+WARNING 2025-05-13 13:02:53,699 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:02:53,699 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:02:54,130 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:54,537 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:54,858 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:55,257 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:55,655 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:55,995 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:56,355 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:56,732 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:57,058 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:57,442 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:02:57,482 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:57,872 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:58,197 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:58,538 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:58,917 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:59,295 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:02:59,649 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:03:00,020 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:03:00,387 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:03:00,702 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:03:01,059 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:03:01,060 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:09:31,651 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:32,089 views Failed login attempt with username: nonexistent
+ERROR 2025-05-13 13:09:37,915 views Error adding to cart: No Product matches the given query.
+WARNING 2025-05-13 13:09:38,183 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:54,301 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:09:54,302 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:09:54,361 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:54,761 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:55,110 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:55,503 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:55,861 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:56,230 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:56,569 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:56,892 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:57,226 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:57,565 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:09:57,914 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:09:57,915 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:10:43,129 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:43,541 views Failed login attempt with username: nonexistent
+WARNING 2025-05-13 13:10:44,731 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:10:44,731 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:10:45,142 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:45,506 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:45,894 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:46,272 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:46,650 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:46,991 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:47,363 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:47,679 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:48,071 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:48,371 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:10:48,411 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:48,770 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:49,085 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:49,460 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:49,808 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:50,170 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:50,573 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:50,918 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:51,280 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:51,655 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:51,992 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:10:51,992 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:10:52,074 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:10:52,074 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:10:52,129 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:52,469 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:52,822 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:53,215 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:53,535 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:53,948 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:54,269 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:54,592 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:54,977 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:55,375 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:10:55,694 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:10:55,695 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+ERROR 2025-05-13 13:10:55,831 views Error adding to cart: No Product matches the given query.
+WARNING 2025-05-13 13:10:56,092 views Failed login attempt with username: testuser
+INFO 2025-05-13 13:10:56,702 emails Order notification email sent to admin for order #ORD-AZMBP-ZQGDO
+INFO 2025-05-13 13:10:56,720 emails Order confirmation email sent to test@example.com for order #ORD-HFG3N-LILHX
+ERROR 2025-05-13 13:14:36,540 views Error adding to cart: No Product matches the given query.
+WARNING 2025-05-13 13:14:36,813 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:17:33,983 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:07,628 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:20,508 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:18:20,508 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:18:20,551 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:20,922 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:21,273 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:21,679 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:21,994 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:22,375 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:22,746 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:23,120 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:23,498 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:23,816 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:24,256 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:24,604 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:25,002 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:25,324 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:25,645 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:26,029 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:26,436 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:26,832 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:27,179 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:27,496 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:18:27,821 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:18:27,822 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:35,708 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:35,709 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:36,133 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:36,462 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:36,850 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:37,192 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:37,533 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:37,938 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:38,278 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:38,686 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:39,050 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:39,338 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:39,372 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:39,730 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:40,123 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:40,432 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:40,826 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:41,193 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:41,589 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:41,984 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:42,336 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:42,697 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:43,043 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:43,044 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:43,128 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:43,129 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:43,167 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:43,553 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:43,886 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:44,298 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:44,615 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:44,991 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:45,392 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:45,783 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:46,141 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:46,537 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:46,939 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:47,347 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:47,692 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:48,055 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:48,471 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:48,812 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:49,190 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:49,590 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:49,912 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:50,254 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:50,604 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:50,606 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:50,713 views Failed login attempt with username: nonexistent
+WARNING 2025-05-13 13:19:51,080 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:51,563 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,564 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,564 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,564 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,565 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,610 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,611 views Rate limit exceeded - IP: 127.0.0.1, User: testuser, Path: /add-to-cart/
+WARNING 2025-05-13 13:19:51,637 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:51,998 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:52,362 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:52,678 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:53,052 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:53,447 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:53,837 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:54,165 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:54,556 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:54,919 views Failed login attempt with username: testuser
+WARNING 2025-05-13 13:19:55,281 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:55,284 views Rate limit exceeded - IP: 127.0.0.1, User: AnonymousUser, Path: /login/
+WARNING 2025-05-13 13:19:55,710 views Failed login attempt with username: testuser
+INFO 2025-05-13 13:19:56,288 emails Order notification email sent to admin for order #ORD-W8OQ7-7L3L2
+INFO 2025-05-13 13:19:56,307 emails Order confirmation email sent to test@example.com for order #ORD-U6LGQ-3X37N
