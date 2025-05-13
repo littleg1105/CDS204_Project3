@@ -20,3 +20,4 @@ WARNING 2025-05-10 20:51:49,803 views Failed login attempt with username: new_us
 WARNING 2025-05-10 20:53:49,034 views Failed login attempt with username: new_user
 ERROR 2025-05-11 19:29:05,999 emails Failed to send order notification email to admin: 'Settings' object has no attribute 'ADMIN_EMAIL'
 INFO 2025-05-11 19:29:06,024 emails Order confirmation email sent to test@example.com for order #ORD-NKQ9A-W5VVD
+WARNING 2025-05-13 12:06:58,699 views Failed login attempt with username: test_user

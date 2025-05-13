@@ -14,6 +14,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/notifications.css' %}">
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -56,6 +57,15 @@
             {% endfor %}
         {% endif %}
         
+        <!-- Data container for form errors and messages (for JS) -->
+        {% if form_errors_json %}
+            <div data-form-errors="{{ form_errors_json }}" aria-hidden="true" style="display: none;"></div>
+        {% endif %}
+        
+        {% if messages_json %}
+            <div data-messages="{{ messages_json }}" aria-hidden="true" style="display: none;"></div>
+        {% endif %}
+        
         {% block content %}{% endblock %}
     </main>
     
@@ -69,6 +79,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
     crossorigin="anonymous"></script>
+    
+    <!-- Notification System -->
+    <script src="{% static 'js/notifications.js' %}"></script>
+    <script src="{% static 'js/form-error-handler.js' %}"></script>
+    
     {% block extra_scripts %}{% endblock %}
 
 </body>

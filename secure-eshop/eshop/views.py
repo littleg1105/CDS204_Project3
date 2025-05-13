@@ -8,6 +8,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 # redirect: Ανακατευθύνει σε άλλο URL
 # get_object_or_404: Βρίσκει object ή επιστρέφει 404 error
 
+from django.template.loader import render_to_string
+# render_to_string: Renders a template to a string
+
 # Authentication functions
 from django.contrib.auth import login, authenticate, logout
 # login: Δημιουργεί session για authenticated user
@@ -94,8 +97,11 @@ user_login_failed.connect(login_failed_callback)
 # Χρησιμότητα: Διαχείριση user authentication
 # ============================================================================
 
+from ratelimit.decorators import ratelimit  # Import the ratelimit decorator
+
 @require_http_methods(["GET", "POST"])  # Μόνο GET/POST επιτρέπονται
 @sensitive_post_parameters('password')   # Απόκρυψη password από error logs
+@ratelimit(key='ip', rate='10/m', method=['POST'], block=True)  # Rate limit: 10 attempts per minute per IP
 def login_view(request):
     """
     Διαχειρίζεται την είσοδο χρηστών στο σύστημα.
@@ -134,9 +140,15 @@ def login_view(request):
             # Χρησιμότητα: Αλλάζει session ID μετά το login για ασφάλεια
             request.session.cycle_key()
             
+            # Success message
+            messages.success(request, f"Καλώς ήρθατε, {user.username}!")
+            
             # Redirect στο 'next' URL ή στον κατάλογο
             # Χρησιμότητα: Επιστροφή στη σελίδα που ζήτησε authentication
             return redirect(request.GET.get('next', 'catalog'))
+        else:
+            # Store form with errors for context processor
+            request.form_errors = form
     else:
         # GET request - Εμφάνιση empty form
         form = LoginForm()
@@ -302,6 +314,7 @@ def add_to_cart(request):
 # ============================================================================
 
 @login_required
+@ratelimit(key='user', rate='5/m', method=['POST'], block=True)  # Rate limit: 5 attempts per minute per user
 def payment_view(request):
     """
     Διαχειρίζεται τη διαδικασία checkout και πληρωμής.
@@ -438,6 +451,9 @@ def payment_view(request):
             request.session['shipping_address_id'] = address.id
             print(f"ID διεύθυνσης {address.id} αποθηκεύτηκε στο session")
             
+            # Success message
+            messages.success(request, "Η διεύθυνση αποστολής καταχωρήθηκε επιτυχώς. Παρακαλώ επιβεβαιώστε την παραγγελία σας.")
+            
             # Προετοιμασία για confirmation page
             context = {
                 'cart_items': cart_items,
@@ -448,6 +464,12 @@ def payment_view(request):
             }
             return render(request, 'eshop/payment.html', context)
         else:
+            # Store form with errors for context processor
+            request.form_errors = form
+            
+            # Warning message about validation errors
+            messages.warning(request, "Παρακαλώ διορθώστε τα σφάλματα στη φόρμα και δοκιμάστε ξανά.")
+            
             # Form errors - επανεμφάνιση με errors
             context = {
                 'form': form, 

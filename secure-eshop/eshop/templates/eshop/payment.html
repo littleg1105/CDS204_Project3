@@ -189,7 +189,7 @@
                         <h5 class="mb-0">Διεύθυνση Αποστολής</h5>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{% url 'payment' %}" id="shipping-form">
+                        <form method="post" action="{% url 'payment' %}" id="shipping-form" class="shipping-address-form">
                             {% csrf_token %}
                             <div class="row g-3">
                                 <div class="col-12">
@@ -268,4 +268,5 @@
 
 {% block extra_scripts %}
 <script src="{% static 'js/payment.js' %}"></script>
+<script src="{% static 'js/address-validation.js' %}"></script>
 {% endblock %}

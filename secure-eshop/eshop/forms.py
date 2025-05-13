@@ -283,9 +283,9 @@ class ShippingAddressForm(forms.ModelForm):
             phone = re.sub(r'[\s-]', '', phone)
             
             # Έλεγχος αν το τηλέφωνο είναι έγκυρο ελληνικό
-            greek_phone_pattern = r'^(?:\+30|0030)?[2-9]\d{9}$'
+            greek_phone_pattern = r'^(?:\+30|0030)?((69\d{8})|(2\d{9}))$'
             if not re.match(greek_phone_pattern, phone):
-                raise ValidationError('Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (π.χ. 2101234567 ή +30 2101234567).')
+                raise ValidationError('Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (σταθερό ή κινητό).')
             
             # Ομοιόμορφη μορφοποίηση με πρόθεμα +30
             if not phone.startswith('+30') and not phone.startswith('0030'):

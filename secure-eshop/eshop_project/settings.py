@@ -106,6 +106,9 @@ MIDDLEWARE = [
     
     # Django-axes - Προστασία από login brute force
     'axes.middleware.AxesMiddleware',
+    
+    # Rate limiting middleware - Προστασία από brute force στις φόρμες
+    'ratelimit.middleware.RatelimitMiddleware',
 ]
 
 # URL configuration module
@@ -138,6 +141,10 @@ TEMPLATES = [
                 
                 # Προσθέτει messages
                 'django.contrib.messages.context_processors.messages',
+                
+                # Custom context processors για notifications
+                'eshop.context_processors.form_errors',
+                'eshop.context_processors.django_messages',
             ],
         },
     },
