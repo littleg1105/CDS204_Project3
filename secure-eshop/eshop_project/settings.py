@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     # Third-party apps
     'axes',                       # Προστασία από brute force attacks
     'django_extensions',          # Επιπλέον management commands (π.χ. shell_plus)
+    'captcha',                    # CAPTCHA για προστασία από αυτοματοποιημένες επιθέσεις
 ]
 
 
@@ -426,6 +427,20 @@ AXES_ENABLED = True                       # Ενεργοποίηση του axes
 # Παράμετροι για lockout - συνδυασμός username/IP/user-agent
 # Χρησιμότητα: Πιο έξυπνο lockout που δυσκολεύει bypassing
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address", "user_agent"]]
+
+
+# ============================================================================
+# CAPTCHA SETTINGS - Protection against automated attacks
+# ============================================================================
+
+CAPTCHA_LENGTH = 6                        # Αριθμός χαρακτήρων στο CAPTCHA
+CAPTCHA_FONT_SIZE = 30                    # Μέγεθος γραμματοσειράς
+CAPTCHA_LETTER_ROTATION = (-35, 35)       # Τυχαία περιστροφή χαρακτήρων
+CAPTCHA_BACKGROUND_COLOR = '#ffffff'      # Λευκό φόντο
+CAPTCHA_FOREGROUND_COLOR = '#001100'      # Σκούρο πράσινο χρώμα χαρακτήρων
+CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.random_char_challenge'  # Τυχαίοι χαρακτήρες
+CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_dots',)         # Προσθήκη θορύβου με τελείες
+CAPTCHA_TIMEOUT = 5                       # 5 λεπτά χρόνος λήξης
 
 
 # ============================================================================

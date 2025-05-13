@@ -51,6 +51,14 @@ urlpatterns = [
     # - Authentication required (staff users only)
     # - Customizable μέσω admin.py
     
+    # CAPTCHA URLs
+    path('captcha/', include('captcha.urls')),
+    # Χρησιμότητα:
+    # - URL: /captcha/
+    # - Παρέχει τα URLs για να λειτουργήσει το CAPTCHA
+    # - Περιλαμβάνει το endpoint για τις εικόνες CAPTCHA
+    # - Απαραίτητο για την ασφαλή λειτουργία του CAPTCHA
+    
     # E-shop Application URLs
     path('', include('eshop.urls')),  # Προσθέτουμε τα URLs της εφαρμογής
     # Χρησιμότητα:
@@ -69,6 +77,16 @@ urlpatterns = [
 
 # Αν είμαστε σε debug mode, προσθέτουμε URLs για τα στατικά αρχεία
 if settings.DEBUG:
+    # Serve static files
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    # Χρησιμότητα:
+    # - Conditional: Μόνο όταν DEBUG=True (development)
+    # - Serves static files (CSS, JS, images)
+    # - STATIC_URL: URL prefix για static files (π.χ. /static/)
+    # - STATIC_ROOT: Filesystem path για collected static files
+    # - Απαραίτητο για την εμφάνιση του CAPTCHA και άλλων στοιχείων
+    
+    # Serve media files
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     # Χρησιμότητα:
     # - Conditional: Μόνο όταν DEBUG=True (development)

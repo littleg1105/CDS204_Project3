@@ -34,6 +34,10 @@ import secrets
 import hmac
 # Χρησιμότητα: Παρέχει constant-time comparison για αποφυγή timing attacks
 
+# Captcha για προστασία από αυτοματοποιημένες επιθέσεις
+from captcha.fields import CaptchaField
+# Χρησιμότητα: Παρέχει CAPTCHA field για forms
+
 
 # ============================================================================
 # LOGIN FORM - Φόρμα σύνδεσης με προηγμένα μέτρα ασφαλείας
@@ -45,11 +49,13 @@ class LoginForm(forms.Form):
     - Timing attacks
     - User enumeration  
     - Brute force attacks (μέσω django-axes)
+    - Αυτοματοποιημένες επιθέσεις (μέσω CAPTCHA)
     
     Χρησιμότητα:
     - Ασφαλής αυθεντικοποίηση χρηστών
     - Προστασία από common attack vectors
     - User-friendly interface με Bootstrap classes
+    - Επιπλέον επίπεδο ασφάλειας με CAPTCHA
     """
     
     # Πεδίο username με custom styling
@@ -69,6 +75,12 @@ class LoginForm(forms.Form):
         })
     )
     # Χρησιμότητα: Password field με αυτόματο masking για ασφάλεια
+    
+    # Πεδίο CAPTCHA για προστασία από bots
+    captcha = CaptchaField(
+        # Χρησιμότητα: Προσθέτει CAPTCHA verification στη φόρμα
+        error_messages={'invalid': 'Λάθος CAPTCHA. Προσπαθήστε ξανά.'}
+    )
     
     def __init__(self, *args, **kwargs):
         """
@@ -330,7 +342,13 @@ class ShippingAddressForm(forms.ModelForm):
 # Same response για όλα τα failures
 # No username disclosure
 
-# 4. Bootstrap Integration
+# 4. CAPTCHA Implementation
+
+# Προστασία από bots και αυτοματοποιημένες επιθέσεις
+# Επιπλέον επίπεδο ασφάλειας πέρα από django-axes
+# Anti-automation mechanism
+
+# 5. Bootstrap Integration
 
 # Consistent styling
 # Responsive design

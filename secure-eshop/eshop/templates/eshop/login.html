@@ -45,6 +45,20 @@
                         {% endif %}
                     </div>
                     
+                    <div class="mb-3">
+                        <label class="form-label">CAPTCHA</label>
+                        {{ form.captcha }}
+                        {% if form.captcha.errors %}
+                            <div class="text-danger">
+                                {% for error in form.captcha.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <br>
+                        <small class="form-text text-muted">Εισάγετε τους χαρακτήρες που βλέπετε στην εικόνα.</small>
+                    </div>
+                    
                     <button type="submit" class="btn btn-primary">Σύνδεση</button>
                 </form>
             </div>
