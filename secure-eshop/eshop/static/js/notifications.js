@@ -22,6 +22,23 @@ const Notifications = {
      * @param {string} type - Notification type (success, error, warning, info)
      * @param {number} duration - Duration in milliseconds (default: 5000)
      */
+    /**
+     * Safely escape HTML special characters to prevent XSS
+     * 
+     * @param {string} str - The string to escape
+     * @returns {string} - The escaped string
+     */
+    escapeHTML: function(str) {
+        if (!str) return '';
+        
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    },
+    
     showToast: function(message, type = NOTIFICATION_TYPES.INFO, duration = 5000) {
         // Create container if it doesn't exist
         let container = document.getElementById('toast-container');
@@ -31,15 +48,28 @@ const Notifications = {
             document.body.appendChild(container);
         }
         
-        // Create toast element
+        // Create toast element with escaped content
         const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <div class="toast-content">
-                <span class="toast-message">${message}</span>
-                <button class="toast-close">&times;</button>
-            </div>
-        `;
+        toast.className = `toast toast-${this.escapeHTML(type)}`;
+        
+        // Create content div
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'toast-content';
+        
+        // Create message span with safely escaped content
+        const messageSpan = document.createElement('span');
+        messageSpan.className = 'toast-message';
+        messageSpan.textContent = message; // Uses textContent for automatic escaping
+        
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'toast-close';
+        closeButton.textContent = '×';
+        
+        // Append elements using DOM methods instead of innerHTML
+        contentDiv.appendChild(messageSpan);
+        contentDiv.appendChild(closeButton);
+        toast.appendChild(contentDiv);
         
         // Add toast to container
         container.appendChild(toast);

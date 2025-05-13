@@ -244,7 +244,7 @@ class ShippingAddress(models.Model):
         verbose_name='Τηλέφωνο',
         validators=[
             RegexValidator(
-                regex=r'^(\+30|0030)?\s?((69\d{8})|(2\d{9}))$',
+                regex=r'^(?:\+30|0030)?(?:\s*)(?:(?:69\d{8})|(?:2\d{9}))$',
                 message='Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (σταθερό ή κινητό)',
                 code='invalid_phone'
             )

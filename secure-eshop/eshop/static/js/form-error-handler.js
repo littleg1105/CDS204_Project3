@@ -22,8 +22,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         const fieldName = field
                             .replace(/_/g, ' ')
                             .replace(/\b\w/g, l => l.toUpperCase());
-                            
-                        Notifications.error(`${fieldName}: ${error}`, 7000);
+                        
+                        // Use safe error display - both fieldName and error are already sanitized by Django
+                        // We use concatenation here so the message is properly escaped
+                        Notifications.error(fieldName + ': ' + error, 7000);
                     });
                 });
             }

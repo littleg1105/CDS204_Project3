@@ -21,3 +21,9 @@ WARNING 2025-05-10 20:53:49,034 views Failed login attempt with username: new_us
 ERROR 2025-05-11 19:29:05,999 emails Failed to send order notification email to admin: 'Settings' object has no attribute 'ADMIN_EMAIL'
 INFO 2025-05-11 19:29:06,024 emails Order confirmation email sent to test@example.com for order #ORD-NKQ9A-W5VVD
 WARNING 2025-05-13 12:06:58,699 views Failed login attempt with username: test_user
+INFO 2025-05-13 12:47:08,507 emails Order confirmation email sent to littleg1105@gmS.GR for order #ORD-LB5C5-YOTI7
+ERROR 2025-05-13 12:47:08,511 emails Failed to send order notification email to admin: 'Settings' object has no attribute 'ADMIN_EMAIL'
+INFO 2025-05-13 12:51:43,968 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-ORT6N-PIEZU
+ERROR 2025-05-13 12:51:43,969 emails Failed to send order notification email to admin: 'Settings' object has no attribute 'ADMIN_EMAIL'
+INFO 2025-05-13 12:52:14,790 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-ECQVH-VP9WK
+INFO 2025-05-13 12:52:14,795 emails Order notification email sent to admin for order #ORD-ECQVH-VP9WK

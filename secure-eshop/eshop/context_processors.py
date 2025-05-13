@@ -5,12 +5,15 @@ These processors add additional context variables to all templates.
 """
 
 import json
+import bleach
+import html
 
 def form_errors(request):
     """
     Context processor that adds form error data to template context.
     
     This allows us to pass form errors to JavaScript without inline scripts.
+    It also sanitizes all error messages to prevent XSS attacks.
     
     Returns:
         dict: A dictionary with form errors data in JSON format
@@ -26,14 +29,26 @@ def form_errors(request):
         
         form = request.form_errors
         
-        # Field errors
+        # Field errors - sanitize all values
         for field_name, errors in form.errors.items():
             if field_name != '__all__':  # Skip non-field errors
-                form_errors_dict['field_errors'][field_name] = [str(error) for error in errors]
+                # Sanitize the field name (though Django field names should already be safe)
+                safe_field_name = bleach.clean(field_name)
+                
+                # Create a list of sanitized error messages
+                form_errors_dict['field_errors'][safe_field_name] = []
+                
+                for error in errors:
+                    # Double sanitization for extra security: bleach + html escape
+                    safe_error = html.escape(bleach.clean(str(error)))
+                    form_errors_dict['field_errors'][safe_field_name].append(safe_error)
         
-        # Non-field errors
+        # Non-field errors - sanitize all values
         if form.non_field_errors():
-            form_errors_dict['non_field_errors'] = [str(error) for error in form.non_field_errors()]
+            for error in form.non_field_errors():
+                # Double sanitization for extra security
+                safe_error = html.escape(bleach.clean(str(error)))
+                form_errors_dict['non_field_errors'].append(safe_error)
             
         # Convert to JSON string for data attribute
         context['form_errors_json'] = json.dumps(form_errors_dict)

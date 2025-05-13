@@ -22,6 +22,14 @@ argon2-cffi-bindings==21.2.0
 # - Provides C bindings για performance
 # - Enables fast password hashing operations
 
+django-ratelimit==4.1.0
+# Χρησιμότητα:
+# - Rate limiting για Django views
+# - Προστασία από brute force attacks
+# - Configurable rate limits ανά view
+# - IP-based και user-based limiting
+# - Customizable response για blocked requests
+
 cffi==1.17.1
 # Χρησιμότητα:
 # - C Foreign Function Interface για Python
@@ -140,6 +148,21 @@ bleach==6.2.0
 # - Safe HTML output
 # - Used in forms για content cleaning
 
+django-simple-captcha==0.6.2
+# Χρησιμότητα:
+# - CAPTCHA implementation για Django
+# - Προστασία από bots και αυτοματοποιημένες επιθέσεις
+# - Customizable στυλ και δυσκολία
+# - Ajax support και accessibility options
+# - Easy-to-use form field
+
+django-ranged-response==0.2.0
+# Χρησιμότητα:
+# - Support για range requests in Django
+# - Required by django-simple-captcha
+# - Enables partial content responses
+# - Better media file handling
+
 MarkupSafe==3.0.2
 # Χρησιμότητα:
 # - Safe string markup για Python
@@ -168,6 +191,14 @@ python-dotenv==1.1.0
 # - Different configs για environments
 # - 12-factor app methodology
 # - Secure configuration handling
+
+dnspython==2.7.0
+# Χρησιμότητα:
+# - DNS toolkit για Python
+# - Email domain verification
+# - MX record lookups
+# - Caching DNS responses
+# - Handling DNS timeouts και errors
 
 packaging==25.0
 # Χρησιμότητα:

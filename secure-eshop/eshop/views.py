@@ -1,3 +1,7 @@
+"""
+View functions for the eshop application.
+"""
+
 # ============================================================================
 # IMPORTS - Εισαγωγή απαραίτητων modules
 # ============================================================================
@@ -34,7 +38,7 @@ from django.contrib.auth.decorators import login_required
 # Χρησιμότητα: Απαιτεί authentication για πρόσβαση σε view
 
 # HTTP responses
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 # Χρησιμότητα: Επιστρέφει JSON response (για AJAX requests)
 
 # Django messages framework
@@ -66,6 +70,14 @@ import logging
 from django.conf import settings
 # Χρησιμότητα: Πρόσβαση σε project settings
 
+# Rate limiting with django-ratelimit
+# Χρησιμότητα: Περιορίζει τις αιτήσεις ανά χρήστη/IP
+import time
+from functools import wraps
+from django.core.cache import cache
+from django.http import HttpResponse
+from django_ratelimit.decorators import ratelimit
+
 
 # ============================================================================
 # LOGGING CONFIGURATION
@@ -93,11 +105,39 @@ user_login_failed.connect(login_failed_callback)
 
 
 # ============================================================================
+# RATE LIMIT ERROR VIEW
+# Χρησιμότητα: Χειρισμός σφαλμάτων rate limit
+# ============================================================================
+
+def ratelimit_error(request, exception=None):
+    """
+    View για σφάλματα rate limit.
+    
+    Εμφανίζει ευγενικό μήνυμα όταν ένας χρήστης έχει υπερβεί το rate limit.
+    
+    Args:
+        request: Django request object
+        exception: Rate limit exception
+        
+    Returns:
+        HttpResponse με μήνυμα σφάλματος και κωδικό 429
+    """
+    logger.warning(
+        f"Rate limit exceeded - IP: {request.META.get('REMOTE_ADDR')}, " 
+        f"User: {request.user}, Path: {request.path}"
+    )
+    
+    return HttpResponse(
+        "Έχετε υποβάλει πάρα πολλές αιτήσεις σε σύντομο χρονικό διάστημα. "
+        "Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.",
+        status=429
+    )
+
+
+# ============================================================================
 # LOGIN VIEW
 # Χρησιμότητα: Διαχείριση user authentication
 # ============================================================================
-
-from ratelimit.decorators import ratelimit  # Import the ratelimit decorator
 
 @require_http_methods(["GET", "POST"])  # Μόνο GET/POST επιτρέπονται
 @sensitive_post_parameters('password')   # Απόκρυψη password από error logs
@@ -243,6 +283,7 @@ def catalog_view(request):
 
 @login_required
 @require_http_methods(["POST"])  # Μόνο POST για data modification
+@ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
 def add_to_cart(request):
     """
     AJAX endpoint για προσθήκη προϊόντων στο καλάθι.
@@ -509,6 +550,7 @@ def payment_view(request):
 
 @login_required
 @require_http_methods(["POST"])  # Data modification = POST only
+@ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
 def remove_from_cart(request):
     """
     AJAX endpoint για αφαίρεση προϊόντων από το καλάθι.
@@ -568,6 +610,7 @@ def remove_from_cart(request):
 
 @login_required
 @require_http_methods(["POST"])
+@ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
 def update_cart_item(request):
     """
     AJAX endpoint για ενημέρωση ποσότητας στο καλάθι.

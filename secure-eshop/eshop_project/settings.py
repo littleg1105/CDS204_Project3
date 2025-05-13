@@ -108,7 +108,7 @@ MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     
     # Rate limiting middleware - Προστασία από brute force στις φόρμες
-    'ratelimit.middleware.RatelimitMiddleware',
+    'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
 # URL configuration module
@@ -398,6 +398,7 @@ LOGIN_URL = 'login'
 # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'liweqweqweqw@gmail.com')
 # DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # ADMIN_EMAIL = EMAIL_HOST_USER
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', '')
 
 # Development: Console backend αν δεν υπάρχει password
 # Production: SMTP με Gmail
@@ -449,6 +450,37 @@ CAPTCHA_CHALLENGE_FUNCT = 'captcha.helpers.random_char_challenge'  # Τυχαί�
 CAPTCHA_NOISE_FUNCTIONS = ('captcha.helpers.noise_dots',)         # Προσθήκη θορύβου με τελείες
 CAPTCHA_TIMEOUT = 5                       # 5 λεπτά χρόνος λήξης
 
+
+# ============================================================================
+# RATE LIMITING CONFIGURATION
+# Χρησιμότητα: Ρυθμίσεις για rate limiting
+# ============================================================================
+
+# Rate limiting error message
+RATELIMIT_VIEW = 'eshop.views.ratelimit_error'
+
+# Rate limit cache
+RATELIMIT_USE_CACHE = 'default'
+
+# ============================================================================
+# CACHE CONFIGURATION
+# ============================================================================
+
+# Cache configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    },
+    'dns_cache': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'dns-lookup-cache',
+        'TIMEOUT': 3600,  # Cache DNS results for 1 hour
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,  # Maximum number of entries in the cache
+        }
+    }
+}
 
 # ============================================================================
 # LOGGING CONFIGURATION

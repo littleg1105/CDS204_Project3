@@ -18,6 +18,10 @@ from django.core.exceptions import ValidationError
 from .models import ShippingAddress
 # Χρησιμότητα: Το model που θα συνδεθεί με το ShippingAddressForm
 
+# Import utility functions
+from .utils import verify_email_domain
+# Χρησιμότητα: Παρέχει λειτουργίες όπως cached DNS verification
+
 # Time module για timing attack protection
 import time
 # Χρησιμότητα: Χρησιμοποιείται για σταθερό χρόνο απόκρισης
@@ -283,7 +287,7 @@ class ShippingAddressForm(forms.ModelForm):
             phone = re.sub(r'[\s-]', '', phone)
             
             # Έλεγχος αν το τηλέφωνο είναι έγκυρο ελληνικό
-            greek_phone_pattern = r'^(?:\+30|0030)?((69\d{8})|(2\d{9}))$'
+            greek_phone_pattern = r'^(?:\+30|0030)?(?:\s*)(?:(?:69\d{8})|(?:2\d{9}))$'
             if not re.match(greek_phone_pattern, phone):
                 raise ValidationError('Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (σταθερό ή κινητό).')
             
@@ -309,23 +313,16 @@ class ShippingAddressForm(forms.ModelForm):
         
         if email:
             # Έλεγχος βασικής μορφής με regex
-            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            email_pattern = r'^[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]{0,63}[a-zA-Z0-9])?@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$'
             if not re.match(email_pattern, email):
                 raise ValidationError('Η διεύθυνση email δεν είναι έγκυρη. Ελέγξτε τη μορφή της.')
             
             # Εξαγωγή domain
             domain = email.split('@')[-1]
             
-            # Έλεγχος εγκυρότητας domain με DNS lookup
-            try:
-                # Έλεγχος για MX records (mail exchange)
-                dns.resolver.resolve(domain, 'MX')
-            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.exception.Timeout):
-                # Δοκιμή για Α records σε περίπτωση που δεν υπάρχουν MX records
-                try:
-                    dns.resolver.resolve(domain, 'A')
-                except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.exception.Timeout):
-                    raise ValidationError(f'Το domain "{domain}" δεν είναι έγκυρο ή δεν υπάρχει.')
+            # Έλεγχος εγκυρότητας domain με cached DNS lookup
+            if not verify_email_domain(email):
+                raise ValidationError(f'Το domain "{domain}" δεν είναι έγκυρο ή δεν υπάρχει.')
         
         return email
     
