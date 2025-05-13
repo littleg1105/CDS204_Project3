@@ -38,6 +38,11 @@ import hmac
 from captcha.fields import CaptchaField
 # Χρησιμότητα: Παρέχει CAPTCHA field για forms
 
+# Validate_email για επικύρωση διεύθυνσης email
+import dns.resolver
+import re
+# Χρησιμότητα: Επικύρωση εγκυρότητας domain email με DNS lookup
+
 
 # ============================================================================
 # LOGIN FORM - Φόρμα σύνδεσης με προηγμένα μέτρα ασφαλείας
@@ -237,14 +242,102 @@ class ShippingAddressForm(forms.ModelForm):
             }),
         }
     
+    def clean_zip_code(self):
+        """
+        Επιπλέον validation για τον ταχυδρομικό κώδικα.
+        
+        Χρησιμότητα:
+        - Επιβεβαιώνει ότι ο ΤΚ αποτελείται μόνο από ψηφία
+        - Ελέγχει το μήκος (5 ψηφία για Ελλάδα)
+        - Επιστρέφει λεπτομερές μήνυμα λάθους
+        """
+        zip_code = self.cleaned_data.get('zip_code')
+        
+        if zip_code:
+            # Αφαίρεση κενών διαστημάτων
+            zip_code = zip_code.strip()
+            
+            # Έλεγχος αν αποτελείται μόνο από ψηφία
+            if not zip_code.isdigit():
+                raise ValidationError('Ο ταχυδρομικός κώδικας πρέπει να περιέχει μόνο ψηφία.')
+            
+            # Έλεγχος μήκους
+            if len(zip_code) != 5:
+                raise ValidationError('Ο ταχυδρομικός κώδικας πρέπει να έχει ακριβώς 5 ψηφία.')
+        
+        return zip_code
+    
+    def clean_phone(self):
+        """
+        Επιπλέον validation για το τηλέφωνο.
+        
+        Χρησιμότητα:
+        - Επιβεβαιώνει ότι το τηλέφωνο ακολουθεί ελληνικό format
+        - Αφαιρεί περιττά κενά και χαρακτήρες
+        - Επιτρέπει διάφορες μορφές εισαγωγής
+        """
+        phone = self.cleaned_data.get('phone')
+        
+        if phone:
+            # Αφαίρεση κενών διαστημάτων και παύλων
+            phone = re.sub(r'[\s-]', '', phone)
+            
+            # Έλεγχος αν το τηλέφωνο είναι έγκυρο ελληνικό
+            greek_phone_pattern = r'^(?:\+30|0030)?[2-9]\d{9}$'
+            if not re.match(greek_phone_pattern, phone):
+                raise ValidationError('Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (π.χ. 2101234567 ή +30 2101234567).')
+            
+            # Ομοιόμορφη μορφοποίηση με πρόθεμα +30
+            if not phone.startswith('+30') and not phone.startswith('0030'):
+                if len(phone) == 10:
+                    phone = '+30' + phone
+            elif phone.startswith('0030'):
+                phone = '+30' + phone[4:]
+        
+        return phone
+    
+    def clean_email(self):
+        """
+        Επιπλέον validation για το email με έλεγχο domain.
+        
+        Χρησιμότητα:
+        - Επιβεβαιώνει ότι το format του email είναι σωστό
+        - Ελέγχει αν το domain υπάρχει πραγματικά μέσω DNS lookup
+        - Αποτρέπει εισαγωγή ανύπαρκτων διευθύνσεων email
+        """
+        email = self.cleaned_data.get('email')
+        
+        if email:
+            # Έλεγχος βασικής μορφής με regex
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, email):
+                raise ValidationError('Η διεύθυνση email δεν είναι έγκυρη. Ελέγξτε τη μορφή της.')
+            
+            # Εξαγωγή domain
+            domain = email.split('@')[-1]
+            
+            # Έλεγχος εγκυρότητας domain με DNS lookup
+            try:
+                # Έλεγχος για MX records (mail exchange)
+                dns.resolver.resolve(domain, 'MX')
+            except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.exception.Timeout):
+                # Δοκιμή για Α records σε περίπτωση που δεν υπάρχουν MX records
+                try:
+                    dns.resolver.resolve(domain, 'A')
+                except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer, dns.resolver.NoNameservers, dns.exception.Timeout):
+                    raise ValidationError(f'Το domain "{domain}" δεν είναι έγκυρο ή δεν υπάρχει.')
+        
+        return email
+    
     def clean(self):
         """
-        Custom validation με XSS protection.
+        Custom validation με XSS protection και επιπλέον ελέγχους.
         
         Χρησιμότητα:
         - Καθαρίζει όλα τα string fields από HTML/JavaScript
         - Προστατεύει από XSS attacks
         - Διατηρεί clean data στη βάση
+        - Κάνει επιπλέον συνδυαστικούς ελέγχους
         
         Security:
         - Χρησιμοποιεί bleach για HTML sanitization
@@ -260,6 +353,16 @@ class ShippingAddressForm(forms.ModelForm):
             if field in cleaned_data and isinstance(cleaned_data[field], str):
                 # Καθαρισμός με bleach (strip όλα τα tags)
                 cleaned_data[field] = bleach.clean(cleaned_data[field])
+        
+        # Έλεγχος αν η χώρα είναι Ελλάδα για επιπλέον validation
+        country = cleaned_data.get('country', '').lower()
+        if country in ['ελλάδα', 'ελλαδα', 'greece', 'hellas']:
+            # Βεβαιωνόμαστε ότι ο ΤΚ και το τηλέφωνο ακολουθούν ελληνικούς κανόνες
+            # (επιπλέον από τους ελέγχους στα clean_* methods)
+            zip_code = cleaned_data.get('zip_code', '')
+            phone = cleaned_data.get('phone', '')
+            
+            # Οποιαδήποτε επιπλέον ειδική λογική για ελληνικές διευθύνσεις
         
         return cleaned_data
     

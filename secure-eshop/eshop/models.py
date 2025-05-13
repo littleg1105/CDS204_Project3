@@ -11,8 +11,8 @@ from django.contrib.auth.models import User
 # Χρησιμότητα: Built-in User model για σύνδεση με τους χρήστες του συστήματος
 
 # Validators για field validation
-from django.core.validators import MinValueValidator
-# Χρησιμότητα: Εξασφαλίζει ότι οι τιμές δεν είναι αρνητικές
+from django.core.validators import MinValueValidator, RegexValidator
+# Χρησιμότητα: Εξασφαλίζει ότι οι τιμές δεν είναι αρνητικές και επιβάλλει μορφή σε πεδία
 
 # UUID module για unique identifiers
 import uuid
@@ -207,6 +207,7 @@ class ShippingAddress(models.Model):
     - Αποθήκευση multiple διευθύνσεων ανά χρήστη
     - Επαναχρησιμοποίηση διευθύνσεων
     - Localization με ελληνικά labels
+    - Επικύρωση εγκυρότητας για ΤΚ, τηλέφωνο, και email
     """
     
     # Foreign key στον χρήστη
@@ -220,22 +221,48 @@ class ShippingAddress(models.Model):
     name = models.CharField(max_length=100, verbose_name='Ονοματεπώνυμο')
     address = models.CharField(max_length=200, verbose_name='Διεύθυνση')
     city = models.CharField(max_length=100, verbose_name='Πόλη')
-    zip_code = models.CharField(max_length=20, verbose_name='ΤΚ')
+    
+    # Ταχυδρομικός κώδικας με validation για ελληνικό format (5 ψηφία)
+    zip_code = models.CharField(
+        max_length=5, 
+        verbose_name='ΤΚ',
+        validators=[
+            RegexValidator(
+                regex=r'^\d{5}$',
+                message='Ο ταχυδρομικός κώδικας πρέπει να αποτελείται από 5 ψηφία',
+                code='invalid_zip_code'
+            )
+        ]
+    )
+    # Χρησιμότητα: Επιβεβαιώνει ότι ο ΤΚ έχει την σωστή μορφή (5 ψηφία)
+    
     country = models.CharField(max_length=100, verbose_name='Χώρα')
     
-    # Προαιρετικά πεδία επικοινωνίας
+    # Τηλέφωνο με validation για ελληνικό format
     phone = models.CharField(
         max_length=20,
         verbose_name='Τηλέφωνο',
-        blank=True,  # Επιτρέπεται κενό στις forms
-        null=True    # Επιτρέπεται NULL στη database
+        validators=[
+            RegexValidator(
+                regex=r'^(\+30|0030)?\s?[2-9]\d{9}$',
+                message='Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου',
+                code='invalid_phone'
+            )
+        ],
+        blank=False,  # Δεν επιτρέπεται κενό στις forms
+        null=True,    # Επιτρέπεται NULL στη database για backwards compatibility
+        help_text='Εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (π.χ. 2101234567 ή +30 2101234567)'
     )
+    # Χρησιμότητα: Επιβεβαιώνει ότι το τηλέφωνο έχει σωστή μορφή ελληνικού αριθμού
+    
+    # Email με υποχρεωτική συμπλήρωση και built-in validation
     email = models.EmailField(
         verbose_name='Email',
-        blank=True,
-        null=True
+        help_text='Απαιτείται για επικοινωνία σχετικά με την παραγγελία',
+        blank=False,   # Δεν επιτρέπεται κενό στις forms
+        null=True      # Επιτρέπεται NULL στη database για backwards compatibility
     )
-    # Χρησιμότητα: Εναλλακτικά στοιχεία επικοινωνίας για την παράδοση
+    # Χρησιμότητα: Απαραίτητο πεδίο για επικοινωνία με αυτόματη επικύρωση μορφής
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
