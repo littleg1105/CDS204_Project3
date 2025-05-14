@@ -246,3 +246,5 @@ WARNING 2025-05-13 13:19:55,284 views Rate limit exceeded - IP: 127.0.0.1, User:
 WARNING 2025-05-13 13:19:55,710 views Failed login attempt with username: testuser
 INFO 2025-05-13 13:19:56,288 emails Order notification email sent to admin for order #ORD-W8OQ7-7L3L2
 INFO 2025-05-13 13:19:56,307 emails Order confirmation email sent to test@example.com for order #ORD-U6LGQ-3X37N
+INFO 2025-05-14 10:40:21,876 emails Order confirmation email sent to georgegeorgopoulosgg@gmail.com for order #ORD-CWD3D-VIZ7M
+INFO 2025-05-14 10:40:21,884 emails Order notification email sent to admin for order #ORD-CWD3D-VIZ7M

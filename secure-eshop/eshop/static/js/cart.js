@@ -49,9 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     button.disabled = false;
                 }, 2000);
                 
-                // Εμφάνιση μηνύματος
-                alert(`Το προϊόν "${productName}" προστέθηκε στο καλάθι`);
-                
                 // Ανανέωση της σελίδας για να ενημερωθεί το preview του καλαθιού
                 window.location.reload();
             })
