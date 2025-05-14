@@ -43,7 +43,16 @@ class Product(models.Model):
     - Αποθηκεύει όλες τις πληροφορίες προϊόντων
     - Διαχειρίζεται εικόνες προϊόντων
     - Παρέχει validation για τιμές
+    - Χρησιμοποιεί UUID για ασφάλεια από enumeration attacks
     """
+    
+    # Primary key με UUID αντί για auto-increment integer
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    # Χρησιμότητα: Μη προβλέψιμα IDs για αποφυγή enumeration attacks
     
     # Όνομα προϊόντος
     name = models.CharField(max_length=200)
@@ -94,7 +103,16 @@ class Cart(models.Model):
     - One-to-one relationship με User (ένας χρήστης = ένα καλάθι)
     - Container για CartItems
     - Υπολογισμοί συνόλων
+    - Χρησιμοποιεί UUID για ασφάλεια από enumeration attacks
     """
+    
+    # Primary key με UUID αντί για auto-increment integer
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    # Χρησιμότητα: Μη προβλέψιμα IDs για αποφυγή enumeration attacks
     
     # Σύνδεση με χρήστη (1-1 relationship)
     user = models.OneToOneField(
@@ -144,7 +162,16 @@ class CartItem(models.Model):
     - Συνδέει προϊόντα με καλάθια
     - Διαχειρίζεται ποσότητες
     - Εμποδίζει διπλότυπα (unique_together)
+    - Χρησιμοποιεί UUID για ασφάλεια από enumeration attacks
     """
+    
+    # Primary key με UUID αντί για auto-increment integer
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    # Χρησιμότητα: Μη προβλέψιμα IDs για αποφυγή enumeration attacks
     
     # Foreign key στο καλάθι
     cart = models.ForeignKey(
@@ -208,7 +235,16 @@ class ShippingAddress(models.Model):
     - Επαναχρησιμοποίηση διευθύνσεων
     - Localization με ελληνικά labels
     - Επικύρωση εγκυρότητας για ΤΚ, τηλέφωνο, και email
+    - Χρησιμοποιεί UUID για ασφάλεια από enumeration attacks
     """
+    
+    # Primary key με UUID αντί για auto-increment integer
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    # Χρησιμότητα: Μη προβλέψιμα IDs για αποφυγή enumeration attacks
     
     # Foreign key στον χρήστη
     user = models.ForeignKey(
@@ -412,7 +448,16 @@ class OrderItem(models.Model):
     - Καταγραφή προϊόντων σε παραγγελίες
     - Διατήρηση ιστορικών τιμών
     - Υπολογισμός subtotals
+    - Χρησιμοποιεί UUID για ασφάλεια από enumeration attacks
     """
+    
+    # Primary key με UUID αντί για auto-increment integer
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
+    # Χρησιμότητα: Μη προβλέψιμα IDs για αποφυγή enumeration attacks
     
     # Foreign key στην παραγγελία
     order = models.ForeignKey(

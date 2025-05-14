@@ -53,6 +53,10 @@ from django.db.models import Q
 import json
 # Χρησιμότητα: Parse/serialize JSON data για AJAX
 
+# Custom JSON utils with UUID support
+from .utils.json_utils import dumps as json_dumps, UUIDEncoder
+# Χρησιμότητα: Σωστή σειριοποίηση αντικειμένων UUID σε JSON
+
 # Security - input sanitization
 import bleach
 # Χρησιμότητα: Καθαρίζει user input από malicious HTML/scripts (XSS protection)
@@ -310,7 +314,7 @@ def add_to_cart(request):
         # Input validation
         # Χρησιμότητα: Προστασία από invalid/malicious input
         if not product_id:
-            return JsonResponse({'error': 'Missing product_id'}, status=400)
+            return JsonResponse({'error': 'Missing product_id'}, status=400, encoder=UUIDEncoder)
         
         # Ασφαλής ανάκτηση προϊόντος
         # Χρησιμότητα: 404 αν δεν υπάρχει το προϊόν
@@ -336,17 +340,18 @@ def add_to_cart(request):
         return JsonResponse({
             'status': 'success',
             'message': f'{product.name} added to cart',
-            'cart_items_count': cart.get_total_items()  # Για update του UI
-        })
+            'cart_items_count': cart.get_total_items(),  # Για update του UI
+            'product_id': str(product.id)  # Convert UUID to string explicitly
+        }, encoder=UUIDEncoder)
     
     except json.JSONDecodeError:
         # Invalid JSON handling
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({'error': 'Invalid JSON'}, status=400, encoder=UUIDEncoder)
     except Exception as e:
         # Generic error handling με logging
         # Χρησιμότητα: Security monitoring, debugging
         logger.error(f"Error adding to cart: {str(e)}")
-        return JsonResponse({'error': 'Server error'}, status=500)
+        return JsonResponse({'error': 'Server error'}, status=500, encoder=UUIDEncoder)
 
 
 # ============================================================================
@@ -394,23 +399,18 @@ def payment_view(request):
     
     # POST request handling
     if request.method == 'POST':
-        # Debug output - θα αφαιρεθεί σε production
-        print("POST data:", request.POST)
-        
         # Step 2: Επιβεβαίωση παραγγελίας
         if 'confirm_order' in request.POST:
-            print("Επιβεβαίωση παραγγελίας εντοπίστηκε")
-            
             # Ανάκτηση address ID από session
             # Χρησιμότητα: Ασφαλής μεταφορά data μεταξύ requests
             address_id = request.session.get('shipping_address_id')
-            print("Address ID από session:", address_id)
             
             if not address_id:
                 messages.error(request, "Η διεύθυνση αποστολής δεν βρέθηκε.")
                 return redirect('payment')
             
             # Ασφαλής ανάκτηση address - έλεγχος ownership
+            # The address_id is stored as a string in the session
             shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
             
             try:
@@ -422,8 +422,6 @@ def payment_view(request):
                     status='pending'
                 )
                 
-                print("Παραγγελία δημιουργήθηκε με ID:", order.id)
-                
                 # Μεταφορά items από cart σε order
                 # Χρησιμότητα: Διατήρηση ιστορικού τιμών
                 for item in cart_items:
@@ -433,36 +431,29 @@ def payment_view(request):
                         quantity=item.quantity,
                         price=item.product.price  # Αποθήκευση τρέχουσας τιμής
                     )
-                    print(f"Προστέθηκε στην παραγγελία: {item.quantity} x {item.product.name}")
                 
                 # Email στον πελάτη
                 # Priority: Address email > User email
                 user_email = shipping_address.email or request.user.email
                 if user_email:
                     success = send_order_confirmation(order, user_email)
-                    if success:
-                        print(f"Email επιβεβαίωσης στάλθηκε επιτυχώς στον πελάτη ({user_email})")
-                    else:
-                        print(f"Σφάλμα αποστολής email επιβεβαίωσης στον πελάτη")
+                    if not success:
+                        logger.error(f"Failed to send order confirmation email to customer ({user_email})")
                 else:
-                    print("Δεν βρέθηκε email χρήστη για αποστολή επιβεβαίωσης")
+                    logger.warning("No user email found for order confirmation")
                 
                 # Email στον admin
                 admin_notification_success = send_order_notification_to_admin(order)
-                if admin_notification_success:
-                    print("Email ειδοποίησης στάλθηκε επιτυχώς στον διαχειριστή")
-                else:
-                    print("Σφάλμα αποστολής email ειδοποίησης στον διαχειριστή")
+                if not admin_notification_success:
+                    logger.error("Failed to send order notification email to admin")
                 
                 # Καθαρισμός μετά την παραγγελία
                 # 1. Άδειασμα καλαθιού
                 cart_items.delete()
-                print("Το καλάθι άδειασε")
                 
                 # 2. Καθαρισμός session data
                 if 'shipping_address_id' in request.session:
                     del request.session['shipping_address_id']
-                    print("Η διεύθυνση αφαιρέθηκε από το session")
                 
                 # Success message και redirect
                 messages.success(request, f"Η παραγγελία σας καταχωρήθηκε επιτυχώς με κωδικό #{order.id}! Θα λάβετε σύντομα email με όλες τις λεπτομέρειες.")
@@ -471,26 +462,21 @@ def payment_view(request):
             except Exception as e:
                 # Error handling με logging
                 logger.error(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
-                print(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
                 messages.error(request, "Προέκυψε σφάλμα κατά την καταχώρηση της παραγγελίας. Παρακαλώ προσπαθήστε ξανά.")
                 return redirect('payment')
         
         # Step 1: Υποβολή shipping address
         form = ShippingAddressForm(request.POST)
-        print("Επικύρωση φόρμας διεύθυνσης, έγκυρη:", form.is_valid())
-        if not form.is_valid():
-            print("Σφάλματα φόρμας:", form.errors.as_json())
-            
+        
         if form.is_valid():
             # Αποθήκευση address με user association
             address = form.save(commit=False)  # Δεν αποθηκεύει ακόμα
             address.user = request.user        # Σύνδεση με χρήστη
             address.save()                     # Τώρα αποθήκευση
-            print(f"Διεύθυνση αποθηκεύτηκε με ID: {address.id}")
             
             # Αποθήκευση στο session για το επόμενο βήμα
-            request.session['shipping_address_id'] = address.id
-            print(f"ID διεύθυνσης {address.id} αποθηκεύτηκε στο session")
+            # Convert UUID to string to make it JSON serializable
+            request.session['shipping_address_id'] = str(address.id)
             
             # Success message
             messages.success(request, "Η διεύθυνση αποστολής καταχωρήθηκε επιτυχώς. Παρακαλώ επιβεβαιώστε την παραγγελία σας.")
@@ -576,7 +562,7 @@ def remove_from_cart(request):
         
         # Input validation
         if not cart_item_id:
-            return JsonResponse({'error': 'Missing cart_item_id'}, status=400)
+            return JsonResponse({'error': 'Missing cart_item_id'}, status=400, encoder=UUIDEncoder)
         
         # Ownership verification
         # Χρησιμότητα: Αποτρέπει users από διαγραφή items άλλων users
@@ -584,7 +570,7 @@ def remove_from_cart(request):
             cart = Cart.objects.get(user=request.user)
             cart_item = CartItem.objects.get(id=cart_item_id, cart=cart)
         except (Cart.DoesNotExist, CartItem.DoesNotExist):
-            return JsonResponse({'error': 'Item not found'}, status=404)
+            return JsonResponse({'error': 'Item not found'}, status=404, encoder=UUIDEncoder)
         
         # Διαγραφή item
         cart_item.delete()
@@ -594,13 +580,13 @@ def remove_from_cart(request):
             'status': 'success',
             'message': 'Item removed from cart',
             'cart_items_count': cart.get_total_items()
-        })
+        }, encoder=UUIDEncoder)
     
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({'error': 'Invalid JSON'}, status=400, encoder=UUIDEncoder)
     except Exception as e:
         logger.error(f"Error removing from cart: {str(e)}")
-        return JsonResponse({'error': 'Server error'}, status=500)
+        return JsonResponse({'error': 'Server error'}, status=500, encoder=UUIDEncoder)
     
 
 # ============================================================================
@@ -635,23 +621,23 @@ def update_cart_item(request):
         
         # Input validation - both fields required
         if not cart_item_id or new_quantity is None:
-            return JsonResponse({'error': 'Missing required fields'}, status=400)
+            return JsonResponse({'error': 'Missing required fields'}, status=400, encoder=UUIDEncoder)
         
         # Quantity validation
         # Χρησιμότητα: Αποτρέπει negative quantities, injection attacks
         try:
             new_quantity = int(new_quantity)
             if new_quantity <= 0:
-                return JsonResponse({'error': 'Quantity must be positive'}, status=400)
+                return JsonResponse({'error': 'Quantity must be positive'}, status=400, encoder=UUIDEncoder)
         except ValueError:
-            return JsonResponse({'error': 'Invalid quantity'}, status=400)
+            return JsonResponse({'error': 'Invalid quantity'}, status=400, encoder=UUIDEncoder)
         
         # Ownership verification
         try:
             cart = Cart.objects.get(user=request.user)
             cart_item = CartItem.objects.get(id=cart_item_id, cart=cart)
         except (Cart.DoesNotExist, CartItem.DoesNotExist):
-            return JsonResponse({'error': 'Item not found'}, status=404)
+            return JsonResponse({'error': 'Item not found'}, status=404, encoder=UUIDEncoder)
         
         # Update quantity
         cart_item.quantity = new_quantity
@@ -668,13 +654,14 @@ def update_cart_item(request):
             'message': 'Quantity updated',
             'item_total': float(item_total),      # Για update του item row
             'cart_total': float(cart_total),      # Για update του total
-            'cart_items_count': cart.get_total_items()  # Για update του counter
-        })
+            'cart_items_count': cart.get_total_items(),  # Για update του counter
+            'cart_item_id': str(cart_item.id)  # Convert UUID to string explicitly
+        }, encoder=UUIDEncoder)
     
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({'error': 'Invalid JSON'}, status=400, encoder=UUIDEncoder)
     except Exception as e:
         logger.error(f"Error updating cart item: {str(e)}")
-        return JsonResponse({'error': 'Server error'}, status=500)
+        return JsonResponse({'error': 'Server error'}, status=500, encoder=UUIDEncoder)
 
 # Θα προσθέσουμε και άλλα views αργότερα

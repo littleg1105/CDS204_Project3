@@ -7,6 +7,7 @@ These processors add additional context variables to all templates.
 import json
 import bleach
 import html
+from .utils.json_utils import dumps as json_dumps
 
 def form_errors(request):
     """
@@ -50,8 +51,8 @@ def form_errors(request):
                 safe_error = html.escape(bleach.clean(str(error)))
                 form_errors_dict['non_field_errors'].append(safe_error)
             
-        # Convert to JSON string for data attribute
-        context['form_errors_json'] = json.dumps(form_errors_dict)
+        # Convert to JSON string for data attribute using custom encoder that handles UUIDs
+        context['form_errors_json'] = json_dumps(form_errors_dict)
     
     return context
 
@@ -76,7 +77,7 @@ def django_messages(request):
                 'text': str(message)
             })
             
-        # Convert to JSON string for data attribute
-        context['messages_json'] = json.dumps(messages_list)
+        # Convert to JSON string for data attribute using custom encoder that handles UUIDs
+        context['messages_json'] = json_dumps(messages_list)
     
     return context

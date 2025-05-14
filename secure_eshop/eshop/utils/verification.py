@@ -1,17 +1,21 @@
 """
-Utility functions for the eshop application.
+Verification utility functions for the eshop application.
 
-This module provides common utility functions used across the application.
+This module provides utilities for validating user inputs, including email domains,
+phone numbers, and other data.
 """
 
 import dns.resolver
 import dns.exception
-import time
 import logging
+import time
 from django.core.cache import caches
 
-# Get the DNS cache
-dns_cache = caches['dns_cache']
+# Get the DNS cache, fallback to default if not available
+try:
+    dns_cache = caches['dns_cache']
+except KeyError:
+    dns_cache = caches['default']
 
 # Configure logger
 logger = logging.getLogger('security')

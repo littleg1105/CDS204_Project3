@@ -40,7 +40,13 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ item.product.image.url }}" class="product-img me-3" alt="{{ item.product.name }}">
+                                            {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}" class="product-img me-3" alt="{{ item.product.name }}">
+                                            {% else %}
+                                                <div class="product-img me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                    <span class="text-muted small">No img</span>
+                                                </div>
+                                            {% endif %}
                                             <span>{{ item.product.name }}</span>
                                         </div>
                                     </td>
@@ -139,7 +145,13 @@
                                 <tr id="cart-item-{{ item.id }}">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ item.product.image.url }}" class="product-img me-3" alt="{{ item.product.name }}">
+                                            {% if item.product.image %}
+                                                <img src="{{ item.product.image.url }}" class="product-img me-3" alt="{{ item.product.name }}">
+                                            {% else %}
+                                                <div class="product-img me-3 bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                    <span class="text-muted small">No img</span>
+                                                </div>
+                                            {% endif %}
                                             <span>{{ item.product.name }}</span>
                                         </div>
                                     </td>
