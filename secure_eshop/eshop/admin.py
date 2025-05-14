@@ -1,6 +1,6 @@
 # ============================================================================
 # DJANGO ADMIN CONFIGURATION
-# Αρχείο διαμόρφωσης για το Django Admin Interface
+# Αρχείο διαμόρφωσης για το Django Admin Interface with OTP support
 # ============================================================================
 
 # Εισαγωγή του Django admin module
@@ -8,9 +8,22 @@ from django.contrib import admin
 # Χρησιμότητα: Παρέχει πρόσβαση στο Django admin framework
 # που επιτρέπει διαχείριση μοντέλων μέσω web interface
 
+# Import OTP Admin
+from django_otp.admin import OTPAdminSite
+# Χρησιμότητα: Παρέχει two-factor authentication για το admin interface
+
 # Εισαγωγή όλων των μοντέλων που θέλουμε να διαχειριστούμε μέσω admin
 from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem
 # Χρησιμότητα: Επιτρέπει την καταχώρηση αυτών των μοντέλων στο admin interface
+
+# Set up the OTP admin site
+class OTPAdmin(OTPAdminSite):
+    site_title = 'Secure eShop Admin with OTP'
+    site_header = 'Secure eShop Administration with OTP'
+    index_title = 'eShop Admin Panel'
+
+# Replace the default admin site
+admin.site.__class__ = OTPAdmin
 
 
 # ============================================================================

@@ -48,3 +48,4 @@ env/
 
 # Local development settings
 local_settings.py
+secure_eshop/certificates/admin_qrcode.png

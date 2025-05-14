@@ -67,7 +67,16 @@ python manage.py createsuperuser
 ```
 Follow the prompts to create your admin username, email, and password.
 
-### Step 8: Generate SSL Certificate
+### Step 8: Set Up Two-Factor Authentication for Admin (Added May 14, 2025)
+Set up OTP for the admin user:
+```bash
+python manage.py add_otp_device admin
+```
+This will generate a QR code at admin_qrcode.png that you can scan with an authenticator app like Google Authenticator, Microsoft Authenticator, or Authy.
+
+For more details, see the [OTP Guide](ADMIN_OTP_SETUP.md).
+
+### Step 9: Generate SSL Certificate
 Generate a self-signed SSL certificate for HTTPS:
 ```bash
 mkdir -p certificates
@@ -75,16 +84,16 @@ openssl req -x509 -newkey rsa:4096 -keyout certificates/key.pem -out certificate
 ```
 When prompted, provide the required information or press Enter to use defaults.
 
-### Step 9: Start the Development Server
+### Step 10: Start the Development Server
 Start the development server with SSL:
 ```bash
 python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem
 ```
 
-### Step 10: Access the Application
+### Step 11: Access the Application
 Open your browser and navigate to:
 - **Website**: https://localhost:8000/
-- **Admin Interface**: https://localhost:8000/admin/
+- **Admin Interface**: https://localhost:8000/admin/ (now protected with two-factor authentication)
 
 ### Common Development Tasks
 
@@ -122,16 +131,29 @@ When you first access the site, your browser will warn about the self-signed cer
 - **Database Errors**: Try deleting `db.sqlite3` and running migrations again
 - **Static Files Not Loading**: Run `python manage.py collectstatic`
 - **Email Errors**: Check your `.env` configuration and Gmail security settings
+- **OTP Issues**: If you're having issues with OTP authentication, you can regenerate the OTP device using the management command
 
 ## Λειτουργικότητα
 
 - Σελίδα Login: Ασφαλής αυθεντικοποίηση χρηστών
 - Σελίδα Καταλόγου Προϊόντων: Προβολή και αναζήτηση προϊόντων, προσθήκη στο καλάθι
 - Σελίδα Πληρωμών: Προβολή καλαθιού, συμπλήρωση διεύθυνσης αποστολής, ολοκλήρωση παραγγελίας
+- Admin Panel: Διαχείριση προϊόντων, παραγγελιών και χρηστών με two-factor authentication (προστέθηκε στις 14/5/2025)
 
 ## Μέτρα Ασφαλείας
 
-Περισσότερες λεπτομέρειες διαθέσιμες στο αρχείο [security_documentation.md](security_documentation.md).
+Περισσότερες λεπτομέρειες διαθέσιμες στα αρχεία:
+- [Security Documentation](Documentation/security_documentation.md) (5 Μαΐου 2025)
+- [Security Analysis](Documentation/security_analysis.md) (14 Μαΐου 2025)
+- [Code Explanation](Documentation/code_explanation.md) (11 Μαΐου 2025)
+- [PythonAnywhere Setup Guide](Documentation/python_anywhere_setup.md) (11 Μαΐου 2025)
+- [OTP Implementation Guide](Documentation/otp_guide.md) (14 Μαΐου 2025)
+
+## Πρόσφατες Ενημερώσεις
+
+- **14 Μαΐου 2025**: Προσθήκη Two-Factor Authentication (2FA) στο διαχειριστικό panel
+- **11 Μαΐου 2025**: Ενημέρωση της τεκμηρίωσης και οδηγιών για το PythonAnywhere deployment
+- **5 Μαΐου 2025**: Ολοκλήρωση της ασφαλούς ανάλυσης της εφαρμογής
 
 
 ---

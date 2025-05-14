@@ -72,6 +72,9 @@ INSTALLED_APPS = [
     'axes',                       # Προστασία από brute force attacks
     'django_extensions',          # Επιπλέον management commands (π.χ. shell_plus)
     'captcha',                    # CAPTCHA για προστασία από αυτοματοποιημένες επιθέσεις
+    'django_otp',                 # OTP support
+    'django_otp.plugins.otp_totp', # Time-based OTP
+    'django_otp.plugins.otp_static', # Backup codes
 ]
 
 
@@ -97,6 +100,9 @@ MIDDLEWARE = [
     
     # Authentication - Συνδέει users με requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    
+    # OTP Middleware - Enables two-factor authentication
+    'django_otp.middleware.OTPMiddleware',
     
     # Messages - Σύστημα μηνυμάτων για feedback στον χρήστη
     'django.contrib.messages.middleware.MessageMiddleware',
