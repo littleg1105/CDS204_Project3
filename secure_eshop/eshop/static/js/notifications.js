@@ -80,8 +80,8 @@ const Notifications = {
         }, 10);
         
         // Set up close button
-        const closeButton = toast.querySelector('.toast-close');
-        closeButton.addEventListener('click', () => {
+        const closeButtonElement = toast.querySelector('.toast-close');
+        closeButtonElement.addEventListener('click', () => {
             this.closeToast(toast);
         });
         
