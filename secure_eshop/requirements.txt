@@ -57,7 +57,7 @@ pyOpenSSL==25.0.0
 # DJANGO FRAMEWORK & EXTENSIONS
 # ============================================================================
 
-Django==5.2
+Django==5.2.1
 # Χρησιμότητα:
 # - The main Django web framework
 # - Latest version με LTS support
