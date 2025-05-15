@@ -364,6 +364,80 @@ class ShippingAddressForm(forms.ModelForm):
         return cleaned_data
     
 # ============================================================================
+# ADMIN OTP SECURITY FORMS - Enhanced OTP security for admin
+# ============================================================================
+
+from django_otp.forms import OTPAuthenticationForm
+
+class SecureOTPAuthenticationForm(OTPAuthenticationForm):
+    """
+    Custom OTP authentication form that enforces proper lockout
+    for failed OTP verification attempts.
+    
+    Features:
+    - Tracks failed OTP verification attempts
+    - Locks out users after 3 failed attempts for 1 hour
+    - Protects admin interface from brute force attacks
+    - Provides clear error messages
+    
+    Χρησιμότητα:
+    - Enhances security for the admin interface
+    - Prevents OTP brute force attempts
+    - Ensures proper lockout enforcement
+    """
+    
+    def clean(self):
+        """
+        Override the clean method to add proper lockout for failed OTP attempts
+        """
+        # Check if form has errors from previous validation
+        if self._errors:
+            return
+            
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        
+        # Check if user is locked out
+        from .admin import OTPLockoutTracker
+        if username and OTPLockoutTracker.check_lockout(username):
+            from django.core.exceptions import ValidationError
+            raise ValidationError(
+                "This account is temporarily locked due to too many failed verification attempts. "
+                "Please try again later or contact an administrator."
+            )
+        
+        # Get the token from the form
+        token = self.cleaned_data.get('otp_token')
+            
+        # If we have the required fields, attempt login
+        try:
+            # Call parent clean method - will raise ValidationError on OTP failure
+            return super().clean()
+        except ValidationError as e:
+            # If we get here with a valid username/password but invalid OTP,
+            # track the failed attempt
+            if username and password:
+                from django.contrib.auth import authenticate
+                user = authenticate(self.request, username=username, password=password)
+                if user is not None:
+                    # Password was correct, but OTP failed - track as OTP failure
+                    remaining = OTPLockoutTracker.log_failed_attempt(username)
+                    if remaining == 0:
+                        # Account is now locked
+                        raise ValidationError(
+                            "This account has been locked due to too many failed verification attempts. "
+                            "Please try again later or contact an administrator."
+                        )
+                    else:
+                        # Still has attempts remaining
+                        raise ValidationError(
+                            f"Invalid verification code. You have {remaining} attempt(s) remaining "
+                            f"before your account is locked."
+                        )
+            # Re-raise the original error
+            raise e
+
+# ============================================================================
 # Ανάλυση Χρησιμότητας ανά Block
 # 1. Imports Section
 

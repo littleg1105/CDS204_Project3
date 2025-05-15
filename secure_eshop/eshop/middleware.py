@@ -6,15 +6,64 @@ This module provides middleware classes for additional security protections.
 
 import logging
 from django.utils.deprecation import MiddlewareMixin
-from django.http import HttpResponseTooManyRequests
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.cache import cache
+from django.contrib import messages
+from django.urls import reverse
 import time
 import hashlib
 import functools
-from django.http import HttpResponse
 
 # Configure logger
 logger = logging.getLogger('security')
+
+class OTPLockoutMiddleware(MiddlewareMixin):
+    """
+    Middleware to enforce OTP lockout on all admin requests.
+    
+    This middleware checks if a user is locked out from OTP verification
+    and blocks access to admin pages if they are.
+    """
+    
+    def process_request(self, request):
+        """
+        Check if user is locked out from OTP and enforce lockout.
+        """
+        # For login page, check if the username in POST is locked out
+        if request.path == '/admin/login/' and request.method == 'POST':
+            username = request.POST.get('username')
+            if username:
+                # Check if this username is locked out
+                from .admin import OTPLockoutTracker
+                if OTPLockoutTracker.check_lockout(username):
+                    # Redirect to admin login with lockout message in context
+                    from django.shortcuts import redirect
+                    from django.contrib import messages
+                    
+                    # Instead of trying to use messages, we'll handle this
+                    # through the admin login view which adds messages to context
+                    return redirect('/admin/login/')
+        
+        # For all admin pages, enforce lockout if authenticated
+        elif request.path.startswith('/admin/'):
+            # Skip if not authenticated
+            if not request.user.is_authenticated:
+                return None
+                
+            # Check if user is locked out
+            username = request.user.username
+            from .admin import OTPLockoutTracker
+            if OTPLockoutTracker.check_lockout(username):
+                # User is locked out - force logout and redirect to login
+                from django.contrib.auth import logout
+                logout(request)
+                
+                # Redirect to login page
+                from django.shortcuts import redirect
+                return redirect('/admin/login/')
+            
+        return None
+
 
 def custom_ratelimit(key='ip', rate='10/m', method=None, block=True):
     """
@@ -139,7 +188,7 @@ class FormRateLimitMiddleware(MiddlewareMixin):
             request: The Django request object
             
         Returns:
-            None or HttpResponseTooManyRequests if rate limit is exceeded
+            None or HttpResponse with 429 status if rate limit is exceeded
         """
         # Only apply to POST requests to form submission paths
         if request.method != 'POST' or not self._is_form_path(request.path):
@@ -154,7 +203,7 @@ class FormRateLimitMiddleware(MiddlewareMixin):
         # Check if this IP has exceeded the rate limit
         if self._is_rate_limited(cache_key):
             logger.warning(f"Rate limit exceeded for IP {ip} on path {request.path}")
-            return HttpResponseTooManyRequests("Too many requests. Please try again later.")
+            return HttpResponse("Too many requests. Please try again later.", status=429)
             
         return None
     

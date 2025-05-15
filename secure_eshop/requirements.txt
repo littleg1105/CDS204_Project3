@@ -217,6 +217,25 @@ pycparser==2.22
 # - Low-level infrastructure
 
 # ============================================================================
+# TWO-FACTOR AUTHENTICATION
+# ============================================================================
+
+django-otp==1.2.2
+# Χρησιμότητα:
+# - Two-factor authentication for Django
+# - Provides OTP (One-Time Password) functionality
+# - Supports TOTP (Time-based OTP)
+# - Used for admin authentication
+# - Adds extra security layer for sensitive operations
+
+qrcode==7.4.2
+# Χρησιμότητα:
+# - QR code generation for TOTP setup
+# - Used with django-otp for device enrollment
+# - Required for OTP device provisioning
+# - Generates scannable codes for authenticator apps
+
+# ============================================================================
 # DEVELOPMENT & DEBUGGING
 # ============================================================================
 

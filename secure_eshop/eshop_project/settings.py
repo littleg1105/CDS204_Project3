@@ -104,6 +104,9 @@ MIDDLEWARE = [
     # OTP Middleware - Enables two-factor authentication
     'django_otp.middleware.OTPMiddleware',
     
+    # OTP Lockout Middleware - Enforces OTP lockout
+    'eshop.middleware.OTPLockoutMiddleware',
+    
     # Messages - Σύστημα μηνυμάτων για feedback στον χρήστη
     'django.contrib.messages.middleware.MessageMiddleware',
     
@@ -131,7 +134,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         
         # Επιπλέον directories για templates (εκτός από app directories)
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         
         # Αναζήτηση templates μέσα στα 'templates' directories των apps
         'APP_DIRS': True,
