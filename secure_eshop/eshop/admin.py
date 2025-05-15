@@ -17,10 +17,15 @@ import logging
 from django_otp.admin import OTPAdminSite
 from django_otp.forms import OTPAuthenticationForm
 from django.dispatch import receiver
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
+from django_otp.plugins.otp_totp.admin import TOTPDeviceAdmin
+from django_otp.plugins.otp_static.admin import StaticDeviceAdmin
+from django.contrib.auth import get_user_model
 # Χρησιμότητα: Παρέχει two-factor authentication για το admin interface
 
 # Εισαγωγή όλων των μοντέλων που θέλουμε να διαχειριστούμε μέσω admin
-from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem
+from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem, CustomUser
 # Χρησιμότητα: Επιτρέπει την καταχώρηση αυτών των μοντέλων στο admin interface
 
 # Configure logger
@@ -274,6 +279,84 @@ admin.site.register(OrderItem)
 # - Διαχείριση προϊόντων μέσα σε παραγγελίες
 # - Προβολή λεπτομερειών κάθε παραγγελίας
 # - Παρακολούθηση ποσοτήτων και τιμών
+
+# ============================================================================
+# OTP DEVICE ADMIN REGISTRATION - Καταχώρηση μοντέλων OTP στο Admin
+# ============================================================================
+
+# Custom TOTP Device Admin
+class CustomTOTPDeviceAdmin(TOTPDeviceAdmin):
+    """
+    Enhanced TOTP Device admin that works with UUID-based user models
+    """
+    list_display = ['user', 'name', 'confirmed']
+    raw_id_fields = ['user']
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'user':
+            kwargs['queryset'] = get_user_model().objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+# Custom Static Device Admin for backup codes
+class CustomStaticDeviceAdmin(StaticDeviceAdmin):
+    """
+    Enhanced Static Device admin that works with UUID-based user models
+    """
+    list_display = ['user', 'name', 'confirmed']
+    raw_id_fields = ['user']
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'user':
+            kwargs['queryset'] = get_user_model().objects.all()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+# Register OTP models with custom admin - use unregister first to avoid AlreadyRegistered error
+from django.contrib.admin.sites import site as admin_site
+
+# Unregister the default OTP admin classes
+try:
+    admin_site.unregister(TOTPDevice)
+    admin_site.unregister(StaticDevice)
+except Exception:
+    pass  # These models might not be registered yet
+    
+# Register with our custom admin classes
+admin.site.register(TOTPDevice, CustomTOTPDeviceAdmin)
+admin.site.register(StaticDevice, CustomStaticDeviceAdmin)
+
+# ============================================================================
+# CUSTOM USER ADMIN - For UUID-based User model
+# ============================================================================
+from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
+
+class CustomUserAdmin(UserAdmin):
+    """
+    Custom admin for User model with UUID as primary key
+    """
+    model = CustomUser
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff')
+    
+    # Field sets for user add/change forms
+    fieldsets = (
+        (None, {'fields': ('username', 'password')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'profile_picture')}),
+        (_('Permissions'), {
+            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+        }),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+    )
+    
+    # Field sets for user add form
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2'),
+        }),
+    )
+    
+    # Register the custom user admin
+admin.site.register(CustomUser, CustomUserAdmin)
 
 
 # ============================================================================
