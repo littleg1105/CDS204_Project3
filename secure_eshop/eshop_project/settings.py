@@ -398,6 +398,10 @@ if DEBUG:
 # Χρησιμότητα: Όταν χρειάζεται authentication, redirect εδώ
 LOGIN_URL = 'login'
 
+# Custom User model setting
+# Χρησιμότητα: Χρησιμοποιεί το custom User model με UUIDs αντί για το default Django model
+AUTH_USER_MODEL = 'eshop.CustomUser'
+
 
 # ============================================================================
 # EMAIL SETTINGS

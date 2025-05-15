@@ -43,6 +43,18 @@ class EshopConfig(AppConfig):
     # - Πρέπει να ταιριάζει με το όνομα του directory
     # - Χρησιμοποιείται στο INSTALLED_APPS
     # - Reference για migrations, models, κλπ
+    
+    def ready(self):
+        """
+        Called when Django starts up. This is where we can perform app initialization.
+        
+        Χρησιμότητα:
+        - Εκτελείται όταν το Django φορτώνει το app
+        - Σημείο για register signals, connect event handlers, κλπ
+        - Custom initialization logic
+        """
+        # Make sure the User model is properly registered
+        # The User model is now defined in models.py
 
 #     Django Startup Process:
 # 1. Django reads INSTALLED_APPS

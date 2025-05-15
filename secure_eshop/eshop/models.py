@@ -6,9 +6,46 @@
 from django.db import models
 # Χρησιμότητα: Παρέχει Model class και όλα τα field types
 
-# Django User model για authentication
-from django.contrib.auth.models import User
-# Χρησιμότητα: Built-in User model για σύνδεση με τους χρήστες του συστήματος
+# Custom User model για authentication
+from django.conf import settings
+# Χρησιμότητα: Αναφορά στο custom User model για σύνδεση με τους χρήστες του συστήματος
+
+# Import the User model definition
+from django.contrib.auth.models import AbstractUser
+import uuid
+
+# Define the CustomUser model directly within models.py for discoverability
+class CustomUser(AbstractUser):
+    """
+    Custom User model that uses UUID as primary key instead of auto-incrementing integer.
+    
+    Χρησιμότητα:
+    - Ασφαλέστερη υλοποίηση με μη-προβλέψιμα IDs
+    - Αποφυγή enumeration attacks
+    - Συμβατότητα με το υπόλοιπο σχήμα της βάσης
+    - Προσαρμοσμένα πεδία για επιπλέον λειτουργικότητα
+    """
+    
+    # Override the id field to use UUID
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        verbose_name='ID'
+    )
+    
+    # Add a profile picture field
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        null=True,
+        blank=True,
+        verbose_name='Εικόνα Προφίλ'
+    )
+    
+    class Meta(AbstractUser.Meta):
+        swappable = 'AUTH_USER_MODEL'
+        verbose_name = 'Χρήστης'
+        verbose_name_plural = 'Χρήστες'
 
 # Validators για field validation
 from django.core.validators import MinValueValidator, RegexValidator
@@ -116,7 +153,7 @@ class Cart(models.Model):
     
     # Σύνδεση με χρήστη (1-1 relationship)
     user = models.OneToOneField(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE  # Διαγραφή καλαθιού αν διαγραφεί ο χρήστης
     )
     # Χρησιμότητα: Κάθε χρήστης έχει ακριβώς ένα καλάθι
@@ -248,7 +285,7 @@ class ShippingAddress(models.Model):
     
     # Foreign key στον χρήστη
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE  # Διαγραφή διευθύνσεων αν διαγραφεί ο χρήστης
     )
     # Χρησιμότητα: Σύνδεση διευθύνσεων με χρήστες
@@ -377,7 +414,7 @@ class Order(models.Model):
     
     # Foreign keys
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name='Χρήστης'
     )
