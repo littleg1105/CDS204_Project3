@@ -22,7 +22,8 @@ report_resources/
 /media/
 
 # Log files
-/logs/*.log
+/logs/
+*.log
 
 # Virtual environment
 venv/

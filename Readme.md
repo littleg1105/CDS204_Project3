@@ -80,14 +80,14 @@ For more details, see the [OTP Guide](ADMIN_OTP_SETUP.md).
 Generate a self-signed SSL certificate for HTTPS:
 ```bash
 mkdir -p certificates
-openssl req -x509 -newkey rsa:4096 -keyout certificates/key.pem -out certificates/cert.pem -days 365 -nodes
+openssl req -x509 -newkey rsa:4096 -keyout config/certificates/key.pem -out config/certificates/cert.pem -days 365 -nodes
 ```
 When prompted, provide the required information or press Enter to use defaults.
 
 ### Step 10: Start the Development Server
 Start the development server with SSL:
 ```bash
-python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem
+python manage.py runserver_plus --cert-file=config/certificates/cert.pem --key-file=config/certificates/key.pem
 ```
 
 ### Step 11: Access the Application

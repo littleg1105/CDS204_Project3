@@ -5,6 +5,8 @@ CLAUDE.md
 Documentation/CLAUDE_ANALYSIS.md
 secure-eshop/.DS_Store
 report_resources/
+secure_eshop/config/
+
 
 # Environment variables and secrets
 .env

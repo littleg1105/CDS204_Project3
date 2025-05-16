@@ -1,3 +1,4 @@
+CDS204_Project3
 ├── CLAUDE.md
 ├── Documentation
 │   ├── ADMIN_OTP_SETUP.md
@@ -8,9 +9,6 @@
 │   ├── security_analysis.md
 │   ├── security_documentation.md
 │   └── useful_commands.md
-├── eshop
-│   └── models
-│       └── __init__.py
 ├── Readme.md
 ├── report_resources
 │   ├── combine_code.sh
@@ -19,12 +17,11 @@
 │   ├── saved logging
 │   └── tree_with_greek_comments.txt
 └── secure_eshop
-    ├── __pycache__
-    ├── admin_qrcode.png
-    ├── certificates
-    │   ├── cert.pem
-    │   └── key.pem
-    ├── create_admin.py
+    ├── config
+    │   ├── admin_qrcode.png
+    │   └── certificates
+    │       ├── cert.pem
+    │       └── key.pem
     ├── db.sqlite3
     ├── eshop
     │   ├── __init__.py
@@ -62,11 +59,15 @@
     │   │   │   └── 0001_initial.cpython-313.pyc
     │   │   └── 0001_initial.py
     │   ├── models
+    │   │   ├── __init__.py
     │   │   ├── __pycache__
     │   │   │   ├── __init__.cpython-313.pyc
+    │   │   │   ├── orders.cpython-313.pyc
+    │   │   │   ├── products.cpython-313.pyc
     │   │   │   └── users.cpython-313.pyc
+    │   │   ├── orders.py
+    │   │   ├── products.py
     │   │   └── users.py
-    │   ├── models.py
     │   ├── static
     │   │   ├── css
     │   │   │   ├── notifications.css
@@ -100,7 +101,6 @@
     │   │   ├── test_views.py
     │   │   └── tests.py
     │   ├── urls.py
-    │   ├── users.py
     │   ├── utils
     │   │   ├── __init__.py
     │   │   ├── __pycache__
@@ -127,22 +127,12 @@
     ├── media
     │   └── products
     │       ├── product_bronzer_y8gfQEX.jpg
-    │       ├── product_bronzer.jpg
-    │       ├── product_bronzer.png
     │       ├── product_cream_IdjbQZ4.jpg
-    │       ├── product_cream.jpg
-    │       ├── product_cream.png
-    │       ├── product_lipstick_GFHtMQv.jpg
-    │       ├── product_lipstick.jpg
-    │       ├── product_lipstick.png
-    │       ├── product_nail_polish.jpg
-    │       └── product_nail_polish.png
+    │       └── product_lipstick_GFHtMQv.jpg
     ├── requirements.txt
-    ├── secure_eshop
-    │   └── eshop
-    │       └── migrations
-    │           └── __init__.py
-    ├── set_password.py
+    ├── scripts
+    │   ├── create_admin.py
+    │   └── set_password.py
     ├── static
     ├── staticfiles
     │   ├── admin
@@ -306,6 +296,7 @@
     │       ├── form-error-handler.js
     │       ├── notifications.js
     │       └── payment.js
+    ├── suggested_structure.md
     └── templates
         └── admin
             └── login.html

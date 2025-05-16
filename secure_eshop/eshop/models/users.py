@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 
 
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     """
     Custom User model that uses UUID as primary key instead of auto-incrementing integer.
     
@@ -11,6 +11,7 @@ class User(AbstractUser):
     - Ασφαλέστερη υλοποίηση με μη-προβλέψιμα IDs
     - Αποφυγή enumeration attacks
     - Συμβατότητα με το υπόλοιπο σχήμα της βάσης
+    - Προσαρμοσμένα πεδία για επιπλέον λειτουργικότητα
     """
     
     # Override the id field to use UUID
@@ -19,6 +20,14 @@ class User(AbstractUser):
         default=uuid.uuid4,
         editable=False,
         verbose_name='ID'
+    )
+    
+    # Add a profile picture field
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        null=True,
+        blank=True,
+        verbose_name='Εικόνα Προφίλ'
     )
     
     class Meta(AbstractUser.Meta):
