@@ -1,11 +1,19 @@
 /**
- * Notifications.js - A simple toast notification system
+ * Notifications.js - Ένα απλό σύστημα toast notifications
  * 
- * This module provides functionality to display toast notifications
- * for form validation errors and other messages.
+ * Αυτό το module παρέχει λειτουργίες για την εμφάνιση toast notifications
+ * για σφάλματα επικύρωσης φορμών και άλλα μηνύματα.
+ * 
+ * Χαρακτηριστικά:
+ * - Προστασία από XSS με escape HTML χαρακτήρων
+ * - Διαφορετικοί τύποι notifications (success, error, warning, info)
+ * - Αυτόματο κλείσιμο μετά από καθορισμένο χρόνο
+ * - Χειροκίνητο κλείσιμο με κουμπί
+ * - Animations για ομαλή εμφάνιση/εξαφάνιση
  */
 
-// Toast notification types
+// Τύποι toast notifications
+// Constant: Χρησιμοποιείται για αποφυγή string literals και εύκολη τροποποίηση
 const NOTIFICATION_TYPES = {
     SUCCESS: 'success',
     ERROR: 'error',
@@ -13,34 +21,43 @@ const NOTIFICATION_TYPES = {
     INFO: 'info'
 };
 
-// Main notification object
+// Κύριο αντικείμενο notifications
+// Module Pattern: Encapsulation όλων των μεθόδων σε ένα αντικείμενο
 const Notifications = {
     /**
-     * Create and show a toast notification
+     * Ασφαλής escape των ειδικών χαρακτήρων HTML για αποτροπή XSS επιθέσεων
      * 
-     * @param {string} message - The message to display
-     * @param {string} type - Notification type (success, error, warning, info)
-     * @param {number} duration - Duration in milliseconds (default: 5000)
-     */
-    /**
-     * Safely escape HTML special characters to prevent XSS
+     * XSS Prevention: Μετατρέπει ειδικούς χαρακτήρες σε HTML entities
+     * ώστε να μην εκτελεστούν ως κώδικας στον browser
      * 
-     * @param {string} str - The string to escape
-     * @returns {string} - The escaped string
+     * @param {string} str - Το string προς escape
+     * @returns {string} - Το escaped string
      */
     escapeHTML: function(str) {
         if (!str) return '';
         
+        // Αντικατάσταση όλων των επικίνδυνων χαρακτήρων με τα HTML entities τους
         return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+            .replace(/&/g, '&amp;')    // & -> &amp;
+            .replace(/</g, '&lt;')     // < -> &lt;
+            .replace(/>/g, '&gt;')     // > -> &gt;
+            .replace(/"/g, '&quot;')   // " -> &quot;
+            .replace(/'/g, '&#039;');  // ' -> &#039;
     },
     
+    /**
+     * Δημιουργία και εμφάνιση ενός toast notification
+     * 
+     * DOM Manipulation: Δημιουργεί και προσθέτει στοιχεία στο DOM με προγραμματιστικό τρόπο
+     * 
+     * @param {string} message - Το μήνυμα προς εμφάνιση
+     * @param {string} type - Τύπος notification (success, error, warning, info)
+     * @param {number} duration - Διάρκεια σε milliseconds (προεπιλογή: 5000)
+     * @returns {HTMLElement} - Το δημιουργημένο toast element
+     */
     showToast: function(message, type = NOTIFICATION_TYPES.INFO, duration = 5000) {
-        // Create container if it doesn't exist
+        // Δημιουργία container αν δεν υπάρχει
+        // Lazy Initialization: Δημιουργία του container μόνο όταν χρειάζεται
         let container = document.getElementById('toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -48,133 +65,163 @@ const Notifications = {
             document.body.appendChild(container);
         }
         
-        // Create toast element with escaped content
+        // Δημιουργία του toast element με ασφαλές περιεχόμενο
         const toast = document.createElement('div');
         toast.className = `toast toast-${this.escapeHTML(type)}`;
         
-        // Create content div
+        // Δημιουργία div περιεχομένου
         const contentDiv = document.createElement('div');
         contentDiv.className = 'toast-content';
         
-        // Create message span with safely escaped content
+        // Δημιουργία span μηνύματος με ασφαλώς escaped περιεχόμενο
+        // Security: Χρήση textContent αντί innerHTML για αυτόματο escaping
         const messageSpan = document.createElement('span');
         messageSpan.className = 'toast-message';
-        messageSpan.textContent = message; // Uses textContent for automatic escaping
+        messageSpan.textContent = message; // Χρησιμοποιεί textContent για αυτόματο escaping
         
-        // Create close button
+        // Δημιουργία κουμπιού κλεισίματος
         const closeButton = document.createElement('button');
         closeButton.className = 'toast-close';
         closeButton.textContent = '×';
         
-        // Append elements using DOM methods instead of innerHTML
+        // Προσθήκη στοιχείων χρησιμοποιώντας DOM methods αντί innerHTML
+        // Security Best Practice: Αποφυγή innerHTML για μεγαλύτερη ασφάλεια
         contentDiv.appendChild(messageSpan);
         contentDiv.appendChild(closeButton);
         toast.appendChild(contentDiv);
         
-        // Add toast to container
+        // Προσθήκη του toast στο container
         container.appendChild(toast);
         
-        // Show the toast with animation
+        // Εμφάνιση του toast με animation
+        // Animation Technique: Χρήση setTimeout για να επιτρέψει το browser να επεξεργαστεί 
+        // το νέο element πριν εφαρμόσει το animation class
         setTimeout(() => {
             toast.classList.add('toast-visible');
         }, 10);
         
-        // Set up close button
+        // Ρύθμιση του κουμπιού κλεισίματος
+        // Event Delegation: Προσθήκη event listener στο κουμπί κλεισίματος
         const closeButtonElement = toast.querySelector('.toast-close');
         closeButtonElement.addEventListener('click', () => {
             this.closeToast(toast);
         });
         
-        // Auto close after duration
+        // Αυτόματο κλείσιμο μετά από συγκεκριμένη διάρκεια
+        // Async: Χρήση setTimeout για προγραμματισμένο κλείσιμο του notification
         const toastTimeout = setTimeout(() => {
             this.closeToast(toast);
         }, duration);
         
-        // Store timeout to clear if manually closed
+        // Αποθήκευση του timeout για καθαρισμό σε περίπτωση χειροκίνητου κλεισίματος
+        // Memory Management: Αποφυγή memory leaks από orphaned timeouts
         toast.dataset.timeout = toastTimeout;
         
         return toast;
     },
     
     /**
-     * Close a toast notification
+     * Κλείσιμο ενός toast notification
      * 
-     * @param {HTMLElement} toast - The toast element to close
+     * Animation & Cleanup: Προσθέτει animation εξόδου και μετά αφαιρεί το element από το DOM
+     * 
+     * @param {HTMLElement} toast - Το toast element προς κλείσιμο
      */
     closeToast: function(toast) {
-        // Clear the timeout
+        // Καθαρισμός του timeout
+        // Memory Management: Αποφυγή εκτέλεσης timeouts σε elements που δεν υπάρχουν πλέον
         if (toast.dataset.timeout) {
             clearTimeout(parseInt(toast.dataset.timeout));
         }
         
-        // Add closing animation
+        // Προσθήκη animation κλεισίματος
+        // CSS Transitions: Χρήση CSS classes για animations
         toast.classList.remove('toast-visible');
         toast.classList.add('toast-hidden');
         
-        // Remove from DOM after animation
+        // Αφαίρεση από το DOM μετά το animation
+        // Async: Περιμένει να ολοκληρωθεί το animation πριν αφαιρέσει το element
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.parentElement.removeChild(toast);
             }
             
-            // Remove container if empty
+            // Αφαίρεση του container αν είναι άδειο
+            // DOM Cleanup: Διατηρεί το DOM καθαρό αφαιρώντας περιττά elements
             const container = document.getElementById('toast-container');
             if (container && container.children.length === 0) {
                 document.body.removeChild(container);
             }
-        }, 300);
+        }, 300); // 300ms είναι η διάρκεια του animation
     },
     
     /**
-     * Show a success notification
+     * Εμφάνιση notification επιτυχίας
      * 
-     * @param {string} message - The message to display
-     * @param {number} duration - Duration in milliseconds
+     * Utility Method: Convenience method για εύκολη δημιουργία notification επιτυχίας
+     * 
+     * @param {string} message - Το μήνυμα προς εμφάνιση
+     * @param {number} duration - Διάρκεια σε milliseconds
+     * @returns {HTMLElement} - Το δημιουργημένο toast element
      */
     success: function(message, duration) {
         return this.showToast(message, NOTIFICATION_TYPES.SUCCESS, duration);
     },
     
     /**
-     * Show an error notification
+     * Εμφάνιση notification σφάλματος
      * 
-     * @param {string} message - The message to display
-     * @param {number} duration - Duration in milliseconds
+     * Utility Method: Wrapper για εύκολη δημιουργία notification σφάλματος
+     * 
+     * @param {string} message - Το μήνυμα προς εμφάνιση
+     * @param {number} duration - Διάρκεια σε milliseconds
+     * @returns {HTMLElement} - Το δημιουργημένο toast element
      */
     error: function(message, duration) {
         return this.showToast(message, NOTIFICATION_TYPES.ERROR, duration);
     },
     
     /**
-     * Show a warning notification
+     * Εμφάνιση notification προειδοποίησης
      * 
-     * @param {string} message - The message to display
-     * @param {number} duration - Duration in milliseconds
+     * Utility Method: Wrapper για εύκολη δημιουργία notification προειδοποίησης
+     * 
+     * @param {string} message - Το μήνυμα προς εμφάνιση
+     * @param {number} duration - Διάρκεια σε milliseconds
+     * @returns {HTMLElement} - Το δημιουργημένο toast element
      */
     warning: function(message, duration) {
         return this.showToast(message, NOTIFICATION_TYPES.WARNING, duration);
     },
     
     /**
-     * Show an info notification
+     * Εμφάνιση notification πληροφοριών
      * 
-     * @param {string} message - The message to display
-     * @param {number} duration - Duration in milliseconds
+     * Utility Method: Wrapper για εύκολη δημιουργία notification πληροφοριών
+     * 
+     * @param {string} message - Το μήνυμα προς εμφάνιση
+     * @param {number} duration - Διάρκεια σε milliseconds
+     * @returns {HTMLElement} - Το δημιουργημένο toast element
      */
     info: function(message, duration) {
         return this.showToast(message, NOTIFICATION_TYPES.INFO, duration);
     },
     
     /**
-     * Display form validation errors as toast notifications
+     * Εμφάνιση σφαλμάτων επικύρωσης φόρμας ως toast notifications
      * 
-     * @param {Object} errors - Object containing field errors
+     * Form Error Handling: Μετατρέπει τα σφάλματα φόρμας σε user-friendly notifications
+     * 
+     * @param {Object} errors - Αντικείμενο που περιέχει σφάλματα πεδίων
      */
     showFormErrors: function(errors) {
+        // Iteration: Διατρέχει όλα τα πεδία με σφάλματα στο αντικείμενο
         for (const field in errors) {
+            // hasOwnProperty: Αποφεύγει την επεξεργασία κληρονομημένων ιδιοτήτων
             if (errors.hasOwnProperty(field)) {
                 const errorMessages = errors[field];
-                // Display each error message
+                // Εμφάνιση κάθε μηνύματος σφάλματος
+                // Array Iteration: Προσπελαύνει κάθε μήνυμα σφάλματος στον πίνακα
                 errorMessages.forEach(message => {
                     this.error(`${field}: ${message}`);
                 });
@@ -183,5 +230,6 @@ const Notifications = {
     }
 };
 
-// Export the Notifications object for use in other scripts
+// Εξαγωγή του αντικειμένου Notifications για χρήση σε άλλα scripts
+// Global Access: Καθιστά το Notifications προσβάσιμο από άλλα scripts μέσω του window
 window.Notifications = Notifications;

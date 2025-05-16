@@ -28,6 +28,18 @@ logger = logging.getLogger('orders')
 # Χρησιμότητα: Ξεχωριστός logger για order-related events
 
 
+# =============================================================================
+# ΑΣΦΑΛΕΣ ΣΥΣΤΗΜΑ ΕΙΔΟΠΟΙΗΣΕΩΝ EMAIL
+# =============================================================================
+# Η ασφαλής αποστολή email είναι κρίσιμη για την προστασία δεδομένων πελατών,
+# την αποφυγή διαρροών πληροφοριών, και την πρόληψη επιθέσεων phishing.
+# Το σύστημα email ακολουθεί τις εξής αρχές ασφαλείας:
+# 1. Χρήση templates αντί για δυναμική κατασκευή HTML (αποφυγή injection)
+# 2. Έλεγχος εξαιρέσεων για αποφυγή διαρροής εσωτερικών πληροφοριών
+# 3. Καταγραφή (logging) όλων των επιτυχημένων/αποτυχημένων αποστολών
+# 4. Ρυθμίσεις SMTP μέσω μεταβλητών περιβάλλοντος, όχι hardcoded
+
+
 # ============================================================================
 # SEND ORDER CONFIRMATION TO CUSTOMER
 # Αποστολή email επιβεβαίωσης παραγγελίας στον πελάτη
@@ -55,6 +67,15 @@ def send_order_confirmation(order, user_email):
         # Χρησιμότητα: Προετοιμασία context για templates
         order_items = order.items.all()  # Όλα τα προϊόντα της παραγγελίας
         shipping_address = order.shipping_address  # Διεύθυνση αποστολής
+        
+        # =============================================================================
+        # ΠΡΟΣΤΑΣΙΑ ΕΝΑΝΤΙΑ ΣΕ HTML INJECTION ΚΑΙ XSS
+        # =============================================================================
+        # Η χρήση προκαθορισμένων templates αντί για δυναμική κατασκευή HTML
+        # προστατεύει από επιθέσεις HTML injection που θα μπορούσαν να οδηγήσουν
+        # σε Cross-Site Scripting (XSS). Τα δεδομένα περνούν μέσω του συστήματος
+        # escape του Django template engine, το οποίο μετατρέπει αυτόματα ειδικούς
+        # χαρακτήρες σε HTML entities.
         
         # Context dictionary για template rendering
         # Χρησιμότητα: Παρέχει δεδομένα στα email templates
@@ -91,6 +112,14 @@ def send_order_confirmation(order, user_email):
         
         # Αποστολή email
         msg.send()
+        
+        # =============================================================================
+        # ΚΑΤΑΓΡΑΦΗ ΑΣΦΑΛΕΙΑΣ - AUDIT TRAIL
+        # =============================================================================
+        # Η λεπτομερής καταγραφή των επιτυχημένων αποστολών email είναι κρίσιμη για:
+        # 1. Δημιουργία audit trail για συμμόρφωση με κανονισμούς (GDPR, κλπ)
+        # 2. Εντοπισμό προβλημάτων στην παράδοση των emails
+        # 3. Επαλήθευση της σωστής λειτουργίας του συστήματος σε περίπτωση παραπόνων
         
         # Success logging
         # Χρησιμότητα: Audit trail, monitoring, debugging
@@ -136,6 +165,16 @@ def send_order_notification_to_admin(order):
         # Λήψη δεδομένων παραγγελίας
         order_items = order.items.all()
         shipping_address = order.shipping_address
+        
+        # =============================================================================
+        # ΠΡΟΣΤΑΣΙΑ ΕΥΑΙΣΘΗΤΩΝ ΔΕΔΟΜΕΝΩΝ
+        # =============================================================================
+        # Η αποστολή ευαίσθητων δεδομένων μέσω email απαιτεί ιδιαίτερη προσοχή.
+        # Στο συγκεκριμένο email:
+        # 1. Αποφεύγουμε την αποστολή πλήρων στοιχείων πληρωμής 
+        # 2. Η διεύθυνση αποστολής email του διαχειριστή προέρχεται από τις 
+        #    κεντρικές ρυθμίσεις (settings.ADMIN_EMAIL), όχι hardcoded
+        # 3. Αποφεύγουμε την αποστολή πληροφοριών ταυτοποίησης όπως αριθμούς ταυτότητας
         
         # Email metadata
         subject = f'Νέα παραγγελία #{order.id}'
@@ -190,87 +229,15 @@ def send_order_notification_to_admin(order):
         return True
         
     except Exception as e:
+        # =============================================================================
+        # ΑΣΦΑΛΗΣ ΧΕΙΡΙΣΜΟΣ ΕΞΑΙΡΕΣΕΩΝ
+        # =============================================================================
+        # Ο σωστός χειρισμός εξαιρέσεων είναι κρίσιμος για:
+        # 1. Αποφυγή διαρροής τεχνικών λεπτομερειών μέσω μηνυμάτων σφάλματος
+        # 2. Πρόληψη crash της εφαρμογής λόγω προβλημάτων με την αποστολή email
+        # 3. Καταγραφή λεπτομερών πληροφοριών σφάλματος για debugging και monitoring
+        # 4. Επιτρέπει τη συνέχιση της ροής της εφαρμογής, ακόμα και αν το email αποτύχει
+        
         # Error handling
         logger.error(f"Failed to send order notification email to admin: {str(e)}")
         return False
-    
-# ============================================================================
-# Ανάλυση Χρησιμότητας ανά Block
-# 1. Imports Section
-
-# settings: Κεντρική διαχείριση email configuration
-# EmailMultiAlternatives: Modern approach για multipart emails
-# render_to_string: Template-based email content
-# logging: Monitoring και debugging capabilities
-
-# 2. Order Confirmation Function
-# Sophisticated email για τον πελάτη:
-# Template-based Content
-
-# Maintainability: Εύκολη αλλαγή του design χωρίς code changes
-# Consistency: Ίδιο branding με το website
-# Localization ready: Templates μπορούν να μεταφραστούν
-
-# Multi-format Support
-
-# HTML version: Rich formatting, branding, styling
-# Plain text fallback: Universal compatibility
-# Best practice: Πάντα και τα δύο formats
-
-# Error Handling
-
-# Graceful failure: Δεν σταματά η διαδικασία παραγγελίας
-# Logging: Tracking για troubleshooting
-# Return value: Επιτρέπει handling στο calling code
-
-# 3. Admin Notification Function
-# Απλό, functional email για τον admin:
-# Plain Text Format
-
-# Simplicity: Γρήγορο reading, no distractions
-# Reliability: Works everywhere
-# Focus on content: Μόνο τα απαραίτητα data
-
-# Detailed Information
-
-# Complete order data: Όλα τα προϊόντα με τιμές
-# Customer info: Contact details για επικοινωνία
-# Shipping details: Πλήρης διεύθυνση
-
-# Conditional Fields
-
-# Clean output: Μόνο populated fields εμφανίζονται
-# No empty lines: Professional appearance
-# Flexibility: Works με optional fields
-
-# Security Considerations
-
-# Email Configuration: Από settings, όχι hardcoded
-# No Sensitive Data: Μόνο order details, όχι payment info
-# Admin Email: Configured centrally, not in code
-# Error Messages: Δεν expose internal details
-
-# Best Practices Implemented
-# 1. Template Usage
-
-# Separation of concerns (logic vs presentation)
-# Easy maintenance και updates
-# Consistent branding
-
-# 2. Multi-format Emails
-
-# HTML για rich experience
-# Plain text για compatibility
-# Both versions από templates
-
-# 3. Error Handling
-
-# Try-except blocks
-# Logging για monitoring
-# Return values για caller feedback
-
-# 4. Logging Strategy
-
-# Different log levels (info/error)
-# Descriptive messages
-# Order IDs για tracking

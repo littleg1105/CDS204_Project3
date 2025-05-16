@@ -1,96 +1,110 @@
 {% extends "admin/base_site.html" %}
 {% load i18n static %}
 
+{# Επέκταση του βασικού template διαχείρισης Django και φόρτωση βιβλιοθηκών #}
+
 {% block extrahead %}
 {{ block.super }}
 <style>
-  .otp-lockout-message {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    border-radius: 4px;
-    padding: 12px;
-    margin-bottom: 20px;
-  }
-  
-  .otp-warning-message {
-    color: #856404;
-    background-color: #fff3cd;
-    border: 1px solid #ffeeba;
-    border-radius: 4px;
-    padding: 12px;
-    margin-bottom: 20px;
-  }
+    /* Στυλ για μηνύματα σχετικά με OTP - Κόκκινο για κλείδωμα λογαριασμού */
+    .otp-lockout-message {
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+    /* Στυλ για προειδοποιητικά μηνύματα OTP - Κίτρινο για απλές προειδοποιήσεις */
+    .otp-warning-message {
+        color: #856404;
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
 </style>
 {% endblock %}
 
+{# Απενεργοποίηση των περιττών τμημάτων του διαχειριστικού για τη σελίδα σύνδεσης #}
 {% block bodyclass %}{{ block.super }} login{% endblock %}
-
 {% block usertools %}{% endblock %}
-
 {% block nav-global %}{% endblock %}
-
 {% block nav-sidebar %}{% endblock %}
-
 {% block content_title %}{% endblock %}
-
 {% block breadcrumbs %}{% endblock %}
 
 {% block content %}
-{% if form.errors and not form.non_field_errors %}
-<p class="errornote">
-{% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
-</p>
-{% endif %}
-
-{% if form.non_field_errors %}
-{% for error in form.non_field_errors %}
-<p class="errornote">
-    {{ error }}
-</p>
-{% endfor %}
-{% endif %}
-
-{% if user.is_authenticated %}
-<div class="otp-lockout-message">
-  <h2>{% translate "Two-Factor Authentication Required" %}</h2>
-  <p>{% translate "You are authenticated, but you need to verify with your OTP device to access the admin site." %}</p>
-</div>
-{% endif %}
-
-<!-- Check for lockout message -->
-{% if lockout_message %}
-<div class="otp-lockout-message">
-  <h2>{% translate "Account Temporarily Locked" %}</h2>
-  <p>{{ lockout_message }}</p>
-</div>
-{% endif %}
-
-<div id="content-main">
-  <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
-    <div class="form-row">
-      {{ form.username.errors }}
-      {{ form.username.label_tag }} {{ form.username }}
-    </div>
-    <div class="form-row">
-      {{ form.password.errors }}
-      {{ form.password.label_tag }} {{ form.password }}
-      <input type="hidden" name="next" value="{{ next }}">
-    </div>
-    <div class="form-row">
-      {{ form.otp_token.errors }}
-      {{ form.otp_token.label_tag }} {{ form.otp_token }}
-      <small>{% translate "Enter the verification code from your authenticator app" %}</small>
-    </div>
-    {% url 'admin_password_reset' as password_reset_url %}
-    {% if password_reset_url %}
-    <div class="password-reset-link">
-      <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
+    {# Εμφάνιση μηνυμάτων σφάλματος για προβλήματα στη φόρμα #}
+    {% if form.errors and not form.non_field_errors %}
+    <p class="errornote">
+        {% if form.errors.items|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+    </p>
+    {% endif %}
+    
+    {# Εμφάνιση γενικών σφαλμάτων φόρμας #}
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+        <p class="errornote">
+            {{ error }}
+        </p>
+        {% endfor %}
+    {% endif %}
+    
+    {# Μήνυμα για χρήστες που έχουν συνδεθεί αλλά χρειάζονται επαλήθευση OTP #}
+    {% if user.is_authenticated %}
+    <div class="otp-lockout-message">
+        <h2>{% translate "Two-Factor Authentication Required" %}</h2>
+        <p>{% translate "You are authenticated, but you need to verify with your OTP device to access the admin site." %}</p>
     </div>
     {% endif %}
-    <div class="submit-row">
-      <input type="submit" value="{% translate 'Log in' %}">
+    
+    {# Μήνυμα κλειδώματος λογαριασμού μετά από πολλαπλές αποτυχημένες προσπάθειες #}
+    {% if lockout_message %}
+    <div class="otp-lockout-message">
+        <h2>{% translate "Account Temporarily Locked" %}</h2>
+        <p>{{ lockout_message }}</p>
     </div>
-  </form>
-</div>
+    {% endif %}
+    
+    <div id="content-main">
+        {# Φόρμα σύνδεσης με πεδία για όνομα χρήστη, κωδικό και OTP #}
+        <form action="{{ app_path }}" method="post" id="login-form">
+            {% csrf_token %}  {# Προστασία από CSRF επιθέσεις #}
+            
+            {# Πεδίο ονόματος χρήστη με εμφάνιση σφαλμάτων #}
+            <div class="form-row">
+                {{ form.username.errors }}
+                {{ form.username.label_tag }} {{ form.username }}
+            </div>
+            
+            {# Πεδίο κωδικού πρόσβασης με κρυφό πεδίο για τη σελίδα ανακατεύθυνσης #}
+            <div class="form-row">
+                {{ form.password.errors }}
+                {{ form.password.label_tag }} {{ form.password }}
+                <input type="hidden" name="next" value="{{ next }}">
+            </div>
+            
+            {# Πεδίο για τον κωδικό OTP με επεξηγηματικό κείμενο #}
+            <div class="form-row">
+                {{ form.otp_token.errors }}
+                {{ form.otp_token.label_tag }} {{ form.otp_token }}
+                <small>{% translate "Enter the verification code from your authenticator app" %}</small>
+            </div>
+            
+            {# Σύνδεσμος επαναφοράς κωδικού πρόσβασης #}
+            {% url 'admin_password_reset' as password_reset_url %}
+            {% if password_reset_url %}
+            <div class="password-reset-link">
+                <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
+            </div>
+            {% endif %}
+            
+            {# Κουμπί υποβολής φόρμας #}
+            <div class="submit-row">
+                <input type="submit" value="{% translate 'Log in' %}">
+            </div>
+        </form>
+    </div>
 {% endblock %}

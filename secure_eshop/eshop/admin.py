@@ -31,7 +31,13 @@ from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem, 
 # Configure logger
 logger = logging.getLogger('security')
 
-# We'll use the admin login method instead of signals to track OTP verification failures
+# =============================================================================
+# ΜΗΧΑΝΙΣΜΟΣ ΑΣΦΑΛΕΙΑΣ OTP - ΠΡΟΣΤΑΣΙΑ ΑΠΟ BRUTE FORCE
+# =============================================================================
+# Η κλάση OTPLockoutTracker υλοποιεί έναν μηχανισμό προστασίας κατά επιθέσεων 
+# brute force στους κωδικούς OTP. Αυτό αποτρέπει επιθέσεις εξαντλητικής δοκιμής
+# όλων των πιθανών κωδικών OTP (στην περίπτωση TOTP, υπάρχουν μόνο 1.000.000
+# πιθανοί κωδικοί).
 
 # Custom OTP Authentication Form with enhanced security
 class OTPLockoutTracker:
@@ -93,6 +99,16 @@ class OTPLockoutTracker:
         # Also clear any lockout
         cache_key = f"otp_lockout:{username}"
         cache.delete(cache_key)
+
+# =============================================================================
+# ΠΡΟΣΑΡΜΟΣΜΕΝΟ ADMIN SITE ΜΕ TWO-FACTOR AUTHENTICATION
+# =============================================================================
+# Η κλάση SecureOTPAdmin επεκτείνει το OTPAdminSite του Django 
+# προσθέτοντας επιπλέον μέτρα ασφαλείας όπως:
+# 1. Αναγνώριση και επιβολή κλειδώματος λογαριασμών
+# 2. Καταγραφή αποτυχημένων προσπαθειών αυθεντικοποίησης
+# 3. Προειδοποιητικά μηνύματα για επικείμενο κλείδωμα
+# 4. Αυτόματο ξεκλείδωμα μετά από επιτυχημένη σύνδεση
 
 # Set up the OTP admin site
 class SecureOTPAdmin(OTPAdminSite):
@@ -193,7 +209,12 @@ class SecureOTPAdmin(OTPAdminSite):
         # Proceed with regular permission check
         return super().has_permission(request)
 
-# Replace the default admin site
+# =============================================================================
+# ΑΝΤΙΚΑΤΑΣΤΑΣΗ ΤΟΥ DEFAULT ADMIN SITE ΜΕ ΤΟ SECURE OTP ADMIN
+# =============================================================================
+# Αυτή η γραμμή αντικαθιστά την προεπιλεγμένη κλάση του admin site
+# με τη δική μας υλοποίηση που περιλαμβάνει two-factor authentication
+# και προστασία από επιθέσεις brute force.
 admin.site.__class__ = SecureOTPAdmin
 
 
@@ -280,9 +301,14 @@ admin.site.register(OrderItem)
 # - Προβολή λεπτομερειών κάθε παραγγελίας
 # - Παρακολούθηση ποσοτήτων και τιμών
 
-# ============================================================================
-# OTP DEVICE ADMIN REGISTRATION - Καταχώρηση μοντέλων OTP στο Admin
-# ============================================================================
+# =============================================================================
+# ΠΡΟΣΑΡΜΟΣΜΕΝΟΙ ΔΙΑΧΕΙΡΙΣΤΕΣ ΣΥΣΚΕΥΩΝ OTP
+# =============================================================================
+# Οι παρακάτω κλάσεις CustomTOTPDeviceAdmin και CustomStaticDeviceAdmin 
+# επεκτείνουν τις αντίστοιχες προεπιλεγμένες κλάσεις διαχείρισης συσκευών OTP,
+# προσθέτοντας υποστήριξη για UUID primary keys που χρησιμοποιούνται στο 
+# custom user model της εφαρμογής. Αυτό επιτρέπει τη σωστή διαχείριση των 
+# συσκευών OTP των χρηστών από το περιβάλλον διαχείρισης.
 
 # Custom TOTP Device Admin
 class CustomTOTPDeviceAdmin(TOTPDeviceAdmin):
@@ -324,9 +350,14 @@ except Exception:
 admin.site.register(TOTPDevice, CustomTOTPDeviceAdmin)
 admin.site.register(StaticDevice, CustomStaticDeviceAdmin)
 
-# ============================================================================
-# CUSTOM USER ADMIN - For UUID-based User model
-# ============================================================================
+# =============================================================================
+# ΠΡΟΣΑΡΜΟΣΜΕΝΟΣ ΔΙΑΧΕΙΡΙΣΤΗΣ ΧΡΗΣΤΩΝ - CustomUserAdmin
+# =============================================================================
+# Η κλάση CustomUserAdmin επεκτείνει τον προεπιλεγμένο UserAdmin του Django
+# για να υποστηρίζει το CustomUser model που χρησιμοποιεί UUID ως primary key.
+# Η κλάση αυτή ορίζει ποια πεδία θα εμφανίζονται στη λίστα χρηστών και ποια 
+# πεδία θα είναι διαθέσιμα στις φόρμες προσθήκης/επεξεργασίας χρηστών.
+
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
@@ -357,7 +388,6 @@ class CustomUserAdmin(UserAdmin):
     
     # Register the custom user admin
 admin.site.register(CustomUser, CustomUserAdmin)
-
 
 # ============================================================================
 # ΣΧΟΛΙΑ ΠΕΡΙΓΡΑΦΗΣ

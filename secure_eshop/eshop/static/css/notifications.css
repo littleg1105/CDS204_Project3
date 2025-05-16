@@ -1,102 +1,106 @@
 /**
  * Toast notification styling
+ * 
+ * Αυτό το CSS αρχείο καθορίζει την εμφάνιση και τις animations των toast notifications.
+ * Περιλαμβάνει styling για διαφορετικούς τύπους notifications (success, error, warning, info)
+ * και animations για την εμφάνιση/εξαφάνισή τους.
  */
 
-/* Toast container */
+/* Toast container - Το βασικό container που κρατάει όλα τα toast notifications */
 #toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    max-width: 350px;
+    position: fixed;           /* Σταθερή θέση ανεξάρτητα από το scrolling */
+    top: 20px;                 /* Απόσταση από την κορυφή της οθόνης */
+    right: 20px;               /* Τοποθέτηση στη δεξιά πλευρά της οθόνης */
+    z-index: 9999;             /* Υψηλό z-index για να εμφανίζεται πάνω από άλλα στοιχεία */
+    max-width: 350px;          /* Περιορισμός πλάτους για καλύτερη αναγνωσιμότητα */
 }
 
-/* Base toast styling */
+/* Base toast styling - Βασικό styling για όλα τα toast notifications */
 .toast {
-    margin-bottom: 10px;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all 0.3s ease-in-out;
-    overflow: hidden;
+    margin-bottom: 10px;       /* Κενό μεταξύ διαδοχικών toasts */
+    padding: 15px;             /* Εσωτερικό περιθώριο για καλύτερη εμφάνιση */
+    border-radius: 5px;        /* Στρογγυλεμένες γωνίες για μοντέρνα εμφάνιση */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* Σκιά για εφέ ανύψωσης (elevation) */
+    opacity: 0;                /* Αρχικά αόρατο πριν την animation */
+    transform: translateX(100%);  /* Αρχική θέση εκτός οθόνης (δεξιά) */
+    transition: all 0.3s ease-in-out;  /* Ομαλή μετάβαση για animations */
+    overflow: hidden;          /* Αποτροπή εμφάνισης περιεχομένου εκτός των ορίων */
 }
 
-/* Toast visibility states */
+/* Toast visibility states - Καταστάσεις ορατότητας του toast */
 .toast-visible {
-    opacity: 1;
-    transform: translateX(0);
+    opacity: 1;                /* Πλήρης ορατότητα όταν εμφανίζεται */
+    transform: translateX(0);  /* Τελική θέση στην οθόνη */
 }
 
 .toast-hidden {
-    opacity: 0;
-    transform: translateX(100%);
+    opacity: 0;                /* Εξαφάνιση με διαφάνεια */
+    transform: translateX(100%);  /* Μετακίνηση εκτός οθόνης κατά την εξαφάνιση */
 }
 
-/* Toast content structure */
+/* Toast content structure - Δομή περιεχομένου του toast */
 .toast-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex;             /* Χρήση Flexbox για flexible layout */
+    justify-content: space-between;  /* Κατανομή περιεχομένου στα άκρα */
+    align-items: center;       /* Κάθετη ευθυγράμμιση στο κέντρο */
 }
 
 .toast-message {
-    flex-grow: 1;
-    margin-right: 15px;
-    font-size: 14px;
-    line-height: 1.5;
+    flex-grow: 1;              /* Επέκταση για κάλυψη διαθέσιμου χώρου */
+    margin-right: 15px;        /* Κενό μεταξύ μηνύματος και κουμπιού κλεισίματος */
+    font-size: 14px;           /* Μέγεθος γραμματοσειράς για καλή αναγνωσιμότητα */
+    line-height: 1.5;          /* Ύψος γραμμής για καλύτερη αναγνωσιμότητα */
 }
 
-/* Close button */
+/* Close button - Κουμπί κλεισίματος */
 .toast-close {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: inherit;
-    opacity: 0.7;
-    transition: opacity 0.3s;
+    background: none;          /* Αφαίρεση προεπιλεγμένου background */
+    border: none;              /* Αφαίρεση περιγράμματος */
+    font-size: 20px;           /* Μεγαλύτερο μέγεθος για το σύμβολο × */
+    cursor: pointer;           /* Δείκτης χεριού για υπόδειξη ότι είναι κλικαρίσιμο */
+    color: inherit;            /* Κληρονομεί το χρώμα από το parent element */
+    opacity: 0.7;              /* Ελαφρώς διαφανές για subtle εμφάνιση */
+    transition: opacity 0.3s;  /* Ομαλή μετάβαση για το hover effect */
 }
 
 .toast-close:hover {
-    opacity: 1;
+    opacity: 1;                /* Πλήρης αδιαφάνεια στο hover για feedback */
 }
 
-/* Toast types */
+/* Toast types - Διαφορετικοί τύποι toast με χρωματικές διαφοροποιήσεις */
 .toast-success {
-    background-color: #d4edda;
-    color: #155724;
-    border-left: 5px solid #28a745;
+    background-color: #d4edda;  /* Απαλό πράσινο φόντο */
+    color: #155724;            /* Σκούρο πράσινο κείμενο για αντίθεση */
+    border-left: 5px solid #28a745;  /* Έντονο πράσινο αριστερό περίγραμμα για έμφαση */
 }
 
 .toast-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-left: 5px solid #dc3545;
+    background-color: #f8d7da;  /* Απαλό κόκκινο φόντο */
+    color: #721c24;            /* Σκούρο κόκκινο κείμενο */
+    border-left: 5px solid #dc3545;  /* Έντονο κόκκινο αριστερό περίγραμμα */
 }
 
 .toast-warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border-left: 5px solid #ffc107;
+    background-color: #fff3cd;  /* Απαλό κίτρινο φόντο */
+    color: #856404;            /* Καφέ-κίτρινο κείμενο */
+    border-left: 5px solid #ffc107;  /* Έντονο κίτρινο αριστερό περίγραμμα */
 }
 
 .toast-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border-left: 5px solid #17a2b8;
+    background-color: #d1ecf1;  /* Απαλό μπλε φόντο */
+    color: #0c5460;            /* Σκούρο μπλε κείμενο */
+    border-left: 5px solid #17a2b8;  /* Έντονο μπλε αριστερό περίγραμμα */
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments - Προσαρμογές για μικρότερες οθόνες */
 @media (max-width: 576px) {
     #toast-container {
-        left: 20px;
+        left: 20px;            /* Επέκταση container σε όλο το πλάτος της οθόνης */
         right: 20px;
-        max-width: none;
+        max-width: none;       /* Αφαίρεση περιορισμού πλάτους */
     }
     
     .toast {
-        width: 100%;
+        width: 100%;           /* Πλήρες πλάτος για μικρές οθόνες */
     }
 }

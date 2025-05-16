@@ -1,7 +1,8 @@
 """
-Custom middleware for enhanced security.
+Custom middleware για ενισχυμένη ασφάλεια.
 
-This module provides middleware classes for additional security protections.
+Αυτό το module παρέχει κλάσεις middleware για πρόσθετες προστασίες ασφαλείας.
+Υλοποιεί μηχανισμούς όπως κλείδωμα OTP, rate limiting και προστασία φορμών.
 """
 
 import logging
@@ -14,51 +15,61 @@ import time
 import hashlib
 import functools
 
-# Configure logger
+# Ρύθμιση logger για καταγραφή συμβάντων ασφαλείας
 logger = logging.getLogger('security')
 
 class OTPLockoutMiddleware(MiddlewareMixin):
     """
-    Middleware to enforce OTP lockout on all admin requests.
+    Middleware για επιβολή κλειδώματος OTP σε όλα τα αιτήματα διαχείρισης.
     
-    This middleware checks if a user is locked out from OTP verification
-    and blocks access to admin pages if they are.
+    Αυτό το middleware ελέγχει αν ένας χρήστης είναι κλειδωμένος από την επαλήθευση OTP
+    και αποκλείει την πρόσβαση στις σελίδες διαχείρισης εάν είναι.
+    
+    Λειτουργεί σε δύο επίπεδα:
+    1. Στη σελίδα σύνδεσης: Ελέγχει αν το όνομα χρήστη είναι κλειδωμένο
+    2. Σε όλες τις σελίδες διαχείρισης: Αναγκάζει αποσύνδεση για κλειδωμένους χρήστες
     """
     
     def process_request(self, request):
         """
-        Check if user is locked out from OTP and enforce lockout.
+        Ελέγχει αν ο χρήστης είναι κλειδωμένος από το OTP και επιβάλλει το κλείδωμα.
+        
+        Args:
+            request: Το αντικείμενο αιτήματος Django
+            
+        Returns:
+            None ή ανακατεύθυνση σε περίπτωση κλειδώματος
         """
-        # For login page, check if the username in POST is locked out
+        # Για τη σελίδα σύνδεσης, έλεγχος αν το όνομα χρήστη στο POST είναι κλειδωμένο
         if request.path == '/admin/login/' and request.method == 'POST':
             username = request.POST.get('username')
             if username:
-                # Check if this username is locked out
+                # Έλεγχος αν αυτό το όνομα χρήστη είναι κλειδωμένο
                 from .admin import OTPLockoutTracker
                 if OTPLockoutTracker.check_lockout(username):
-                    # Redirect to admin login with lockout message in context
+                    # Ανακατεύθυνση στη σύνδεση διαχείρισης με μήνυμα κλειδώματος
                     from django.shortcuts import redirect
                     from django.contrib import messages
                     
-                    # Instead of trying to use messages, we'll handle this
-                    # through the admin login view which adds messages to context
+                    # Αντί να προσπαθούμε να χρησιμοποιήσουμε messages, θα το χειριστούμε
+                    # μέσω του admin login view που προσθέτει μηνύματα στο context
                     return redirect('/admin/login/')
         
-        # For all admin pages, enforce lockout if authenticated
+        # Για όλες τις σελίδες διαχείρισης, επιβολή κλειδώματος αν είναι πιστοποιημένος
         elif request.path.startswith('/admin/'):
-            # Skip if not authenticated
+            # Παράλειψη αν δεν είναι πιστοποιημένος
             if not request.user.is_authenticated:
                 return None
                 
-            # Check if user is locked out
+            # Έλεγχος αν ο χρήστης είναι κλειδωμένος
             username = request.user.username
             from .admin import OTPLockoutTracker
             if OTPLockoutTracker.check_lockout(username):
-                # User is locked out - force logout and redirect to login
+                # Ο χρήστης είναι κλειδωμένος - αναγκαστική αποσύνδεση και ανακατεύθυνση
                 from django.contrib.auth import logout
                 logout(request)
                 
-                # Redirect to login page
+                # Ανακατεύθυνση στη σελίδα σύνδεσης
                 from django.shortcuts import redirect
                 return redirect('/admin/login/')
             
@@ -67,98 +78,106 @@ class OTPLockoutMiddleware(MiddlewareMixin):
 
 def custom_ratelimit(key='ip', rate='10/m', method=None, block=True):
     """
-    Custom rate limiting decorator using Django's built-in cache.
+    Προσαρμοσμένος decorator περιορισμού ρυθμού χρησιμοποιώντας την ενσωματωμένη cache του Django.
+    
+    Επιτρέπει τον έλεγχο του αριθμού των αιτημάτων που μπορεί να κάνει ένας χρήστης ή μια IP
+    σε συγκεκριμένο χρονικό διάστημα, αποτρέποντας επιθέσεις brute force και DoS.
     
     Args:
-        key: 'ip' or 'user' to determine the rate limit key
-        rate: format like '10/m' for 10 requests per minute
-        method: list of methods to apply rate limiting (e.g., ['POST'])
-        block: whether to block the request if rate limit is exceeded
+        key: 'ip' ή 'user' για καθορισμό του κλειδιού περιορισμού ρυθμού
+        rate: μορφή όπως '10/m' για 10 αιτήματα ανά λεπτό
+        method: λίστα μεθόδων για εφαρμογή περιορισμού ρυθμού (π.χ., ['POST'])
+        block: αν θα μπλοκάρει το αίτημα όταν ξεπεραστεί το όριο ρυθμού
         
     Returns:
-        Decorator function that applies rate limiting
+        Συνάρτηση decorator που εφαρμόζει περιορισμό ρυθμού
     """
     def decorator(view_func):
-        @functools.wraps(view_func)
+        @functools.wraps(view_func)  # Διατηρεί τα μεταδεδομένα της αρχικής συνάρτησης
         def wrapped_view(request, *args, **kwargs):
-            # Check if method should be rate limited
+            # Έλεγχος αν η μέθοδος πρέπει να περιοριστεί
             if method and request.method not in method:
                 return view_func(request, *args, **kwargs)
                 
-            # Parse rate limit
+            # Ανάλυση ορίου ρυθμού
             count, period = rate.split('/')
             count = int(count)
             
-            # Convert period to seconds
+            # Μετατροπή περιόδου σε δευτερόλεπτα
             if period == 's':
-                period_seconds = 1
+                period_seconds = 1  # δευτερόλεπτα
             elif period == 'm':
-                period_seconds = 60
+                period_seconds = 60  # λεπτά
             elif period == 'h':
-                period_seconds = 3600
+                period_seconds = 3600  # ώρες
             elif period == 'd':
-                period_seconds = 86400
+                period_seconds = 86400  # ημέρες
             else:
-                raise ValueError(f"Invalid rate period: {period}")
+                raise ValueError(f"Μη έγκυρη περίοδος ρυθμού: {period}")
                 
-            # Get the key value based on the key type
+            # Λήψη της τιμής κλειδιού με βάση τον τύπο κλειδιού
             if key == 'ip':
-                # Get client IP
+                # Λήψη IP πελάτη, υποστηρίζει σενάρια πίσω από proxy
                 x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
                 if x_forwarded_for:
                     key_value = x_forwarded_for.split(',')[0].strip()
                 else:
                     key_value = request.META.get('REMOTE_ADDR')
             elif key == 'user':
+                # Χρήση ID χρήστη για συνδεδεμένους χρήστες, αλλιώς IP
                 if request.user.is_authenticated:
                     key_value = str(request.user.id)
                 else:
                     key_value = request.META.get('REMOTE_ADDR')
             else:
-                raise ValueError(f"Invalid key type: {key}")
+                raise ValueError(f"Μη έγκυρος τύπος κλειδιού: {key}")
                 
-            # Create a cache key
+            # Δημιουργία κλειδιού cache
+            # Συνδυάζει τον τύπο κλειδιού, την τιμή και το όνομα της συνάρτησης για μοναδικότητα
             cache_key = f"ratelimit:{key}:{key_value}:{view_func.__name__}"
             
-            # Get current count
+            # Λήψη τρέχοντος μετρητή
             submission_data = cache.get(cache_key)
             current_time = time.time()
             
             if submission_data is None:
-                # First submission in period
+                # Πρώτη υποβολή στην περίοδο - αρχικοποίηση μετρητή
                 submission_data = {
                     'count': 1,
                     'first_submission': current_time
                 }
                 cache.set(cache_key, submission_data, period_seconds)
             else:
-                # Check if period has elapsed
+                # Έλεγχος αν έχει παρέλθει η περίοδος
                 if current_time - submission_data['first_submission'] > period_seconds:
-                    # Reset for new period
+                    # Επαναφορά για νέα περίοδο
                     submission_data = {
                         'count': 1,
                         'first_submission': current_time
                     }
                     cache.set(cache_key, submission_data, period_seconds)
                 else:
-                    # Increment counter
+                    # Αύξηση μετρητή για υπάρχουσα περίοδο
                     submission_data['count'] += 1
                     cache.set(cache_key, submission_data, period_seconds)
                     
-                    # Check if rate limit exceeded
+                    # Έλεγχος αν έχει ξεπεραστεί το όριο ρυθμού
                     if submission_data['count'] > count:
+                        # Καταγραφή του συμβάντος για ανάλυση ασφαλείας
                         logger.warning(
-                            f"Rate limit exceeded - IP: {request.META.get('REMOTE_ADDR')}, "
+                            f"Υπέρβαση ορίου ρυθμού - IP: {request.META.get('REMOTE_ADDR')}, "
                             f"User: {request.user}, Path: {request.path}"
                         )
                         
                         if block:
+                            # Επιστροφή HTTP 429 Too Many Requests
                             return HttpResponse(
                                 "Έχετε υποβάλει πάρα πολλές αιτήσεις σε σύντομο χρονικό διάστημα. "
                                 "Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.",
                                 status=429
                             )
                     
+            # Εκτέλεση της αρχικής συνάρτησης view αν δεν υπάρχει υπέρβαση
             return view_func(request, *args, **kwargs)
             
         return wrapped_view
@@ -166,80 +185,121 @@ def custom_ratelimit(key='ip', rate='10/m', method=None, block=True):
 
 class FormRateLimitMiddleware(MiddlewareMixin):
     """
-    Middleware to rate limit form submissions.
+    Middleware για περιορισμό ρυθμού υποβολών φόρμας.
     
-    This middleware prevents brute force attacks by limiting the rate at which
-    users can submit forms, based on their IP address.
+    Αυτό το middleware αποτρέπει επιθέσεις brute force περιορίζοντας το ρυθμό με τον οποίο
+    οι χρήστες μπορούν να υποβάλλουν φόρμες, με βάση τη διεύθυνση IP τους.
+    
+    Εστιάζει στην προστασία κρίσιμων endpoints όπως σελίδες σύνδεσης και πληρωμών.
     """
     
-    # Rate limit configuration
-    RATE_LIMIT = 10     # Maximum submissions
-    TIME_PERIOD = 60    # Time period in seconds
-    FORM_PATHS = [      # Paths to rate limit
+    # Ρύθμιση περιορισμού ρυθμού
+    RATE_LIMIT = 10     # Μέγιστες υποβολές
+    TIME_PERIOD = 60    # Χρονική περίοδος σε δευτερόλεπτα
+    FORM_PATHS = [      # Διαδρομές για περιορισμό ρυθμού
         '/login/',
         '/payment/',
     ]
     
     def process_request(self, request):
         """
-        Process incoming requests to limit form submissions.
+        Επεξεργασία εισερχόμενων αιτημάτων για περιορισμό υποβολών φόρμας.
         
         Args:
-            request: The Django request object
+            request: Το αντικείμενο αιτήματος Django
             
         Returns:
-            None or HttpResponse with 429 status if rate limit is exceeded
+            None ή HttpResponse με κατάσταση 429 αν ξεπεραστεί το όριο ρυθμού
         """
-        # Only apply to POST requests to form submission paths
+        # Μόνο εφαρμογή σε αιτήματα POST σε διαδρομές υποβολής φόρμας
         if request.method != 'POST' or not self._is_form_path(request.path):
             return None
             
-        # Get client IP (considering X-Forwarded-For for proxy environments)
+        # Λήψη IP πελάτη (λαμβάνοντας υπόψη το X-Forwarded-For για περιβάλλοντα proxy)
         ip = self._get_client_ip(request)
         
-        # Create a unique cache key for this IP and path
+        # Δημιουργία μοναδικού κλειδιού cache για αυτήν την IP και διαδρομή
         cache_key = self._get_cache_key(ip, request.path)
         
-        # Check if this IP has exceeded the rate limit
+        # Έλεγχος αν αυτή η IP έχει ξεπεράσει το όριο ρυθμού
         if self._is_rate_limited(cache_key):
-            logger.warning(f"Rate limit exceeded for IP {ip} on path {request.path}")
-            return HttpResponse("Too many requests. Please try again later.", status=429)
+            # Καταγραφή του συμβάντος για ανάλυση ασφαλείας
+            logger.warning(f"Υπέρβαση ορίου ρυθμού για IP {ip} στη διαδρομή {request.path}")
+            return HttpResponse("Πολλά αιτήματα. Δοκιμάστε ξανά αργότερα.", status=429)
             
         return None
     
     def _is_form_path(self, path):
-        """Check if the path is a form submission path to be rate limited."""
+        """
+        Ελέγχει αν η διαδρομή είναι μια διαδρομή υποβολής φόρμας που πρέπει να περιοριστεί.
+        
+        Args:
+            path: Η διαδρομή URL του αιτήματος
+            
+        Returns:
+            Boolean: True αν η διαδρομή πρέπει να περιοριστεί, False διαφορετικά
+        """
         return any(path.startswith(form_path) for form_path in self.FORM_PATHS)
     
     def _get_client_ip(self, request):
-        """Get the client IP address considering proxies."""
+        """
+        Λήψη της διεύθυνσης IP του πελάτη λαμβάνοντας υπόψη proxies.
+        
+        Υποστηρίζει τόσο άμεσες συνδέσεις όσο και περιβάλλοντα πίσω από proxy,
+        αποκτώντας την πραγματική IP του τελικού χρήστη.
+        
+        Args:
+            request: Το αντικείμενο αιτήματος Django
+            
+        Returns:
+            str: Η διεύθυνση IP του πελάτη
+        """
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            # Get the client's IP (first in the list)
+            # Λήψη της IP του πελάτη (πρώτη στη λίστα)
             ip = x_forwarded_for.split(',')[0].strip()
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
     
     def _get_cache_key(self, ip, path):
-        """Create a cache key from IP and path."""
-        # Hash the IP for privacy
+        """
+        Δημιουργία κλειδιού cache από IP και διαδρομή.
+        
+        Κρυπτογραφεί την IP για λόγους ιδιωτικότητας, ώστε να μην αποθηκεύονται
+        διευθύνσεις IP σε απλή μορφή στην cache.
+        
+        Args:
+            ip: Η διεύθυνση IP του πελάτη
+            path: Η διαδρομή URL του αιτήματος
+            
+        Returns:
+            str: Το δημιουργημένο κλειδί cache
+        """
+        # Hash της IP για ιδιωτικότητα
         hashed_ip = hashlib.sha256(ip.encode()).hexdigest()
         return f"form_ratelimit:{hashed_ip}:{path}"
     
     def _is_rate_limited(self, cache_key):
         """
-        Check if the request is rate limited and update the counter.
+        Έλεγχος αν το αίτημα έχει περιορισμένο ρυθμό και ενημέρωση του μετρητή.
         
-        Returns True if rate limited, False otherwise.
+        Παρακολουθεί τον αριθμό των αιτημάτων που έχουν γίνει στη συγκεκριμένη περίοδο
+        και αποφασίζει αν πρέπει να επιβληθεί περιορισμός.
+        
+        Args:
+            cache_key: Το κλειδί cache για αναγνώριση του χρήστη και της διαδρομής
+            
+        Returns:
+            Boolean: True αν έχει περιορισμένο ρυθμό, False διαφορετικά
         """
-        # Get the current submission counter
+        # Λήψη του τρέχοντος μετρητή υποβολών
         submission_data = cache.get(cache_key)
         
         current_time = time.time()
         
         if submission_data is None:
-            # First submission in the period
+            # Πρώτη υποβολή στην περίοδο
             submission_data = {
                 'count': 1,
                 'first_submission': current_time
@@ -247,9 +307,9 @@ class FormRateLimitMiddleware(MiddlewareMixin):
             cache.set(cache_key, submission_data, self.TIME_PERIOD)
             return False
             
-        # Check if time period has elapsed
+        # Έλεγχος αν έχει παρέλθει η χρονική περίοδος
         if current_time - submission_data['first_submission'] > self.TIME_PERIOD:
-            # Reset counter for new period
+            # Επαναφορά μετρητή για νέα περίοδο
             submission_data = {
                 'count': 1,
                 'first_submission': current_time
@@ -257,11 +317,11 @@ class FormRateLimitMiddleware(MiddlewareMixin):
             cache.set(cache_key, submission_data, self.TIME_PERIOD)
             return False
             
-        # Increment counter
+        # Αύξηση μετρητή
         submission_data['count'] += 1
         cache.set(cache_key, submission_data, self.TIME_PERIOD)
         
-        # Check if rate limit exceeded
+        # Έλεγχος αν έχει ξεπεραστεί το όριο ρυθμού
         if submission_data['count'] > self.RATE_LIMIT:
             return True
             

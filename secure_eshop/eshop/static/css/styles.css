@@ -1,36 +1,55 @@
-/* Γενικά styles */
+/**
+ * Στυλ Ηλεκτρονικού Καταστήματος
+ * 
+ * Αυτό το CSS αρχείο περιέχει στυλ για την εμφάνιση των προϊόντων, 
+ * των στοιχείων του καλαθιού και της σελίδας πληρωμής του e-shop.
+ */
+
+/* Γενικά styles - Βασικά στυλ για τα στοιχεία του καταλόγου προϊόντων */
+
+/* Product card - Στυλ για τις κάρτες προϊόντων στον κατάλογο */
 .product-card {
-    height: 100%;
-    transition: transform 0.3s;
-}
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-.add-to-cart-btn {
-    width: 100%;
-}
-.cart-indicator {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(255, 255, 255, 0.95);
-    padding: 10px 0;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    z-index: 1000;
+    height: 100%;              /* Πλήρες ύψος του container του */
+    transition: transform 0.3s; /* Ομαλή μετάβαση για το hover effect */
 }
 
-/* Styles για την payment page */
-.product-img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 4px;
+/* Hover effect για τις κάρτες προϊόντων - δημιουργεί αίσθηση ανύψωσης */
+.product-card:hover {
+    transform: translateY(-5px);       /* Μικρή μετακίνηση προς τα πάνω */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1); /* Προσθήκη σκιάς για εφέ βάθους */
 }
+
+/* Κουμπί προσθήκης στο καλάθι - καταλαμβάνει όλο το πλάτος της κάρτας */
+.add-to-cart-btn {
+    width: 100%; /* Επέκταση του κουμπιού στο πλήρες πλάτος του container */
+}
+
+/* Δείκτης καλαθιού - μπάρα πληροφοριών καλαθιού στο κάτω μέρος της οθόνης */
+.cart-indicator {
+    position: fixed;           /* Σταθερή θέση ανεξάρτητα από το scrolling */
+    bottom: 0;                 /* Τοποθέτηση στο κάτω μέρος της οθόνης */
+    left: 0;                   /* Επέκταση από το αριστερό άκρο */
+    right: 0;                  /* Επέκταση μέχρι το δεξί άκρο */
+    background-color: rgba(255, 255, 255, 0.95); /* Ημιδιαφανές λευκό φόντο */
+    padding: 10px 0;           /* Εσωτερικό περιθώριο πάνω-κάτω */
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* Σκιά στο πάνω μέρος για διαχωρισμό */
+    z-index: 1000;             /* Υψηλή τιμή z-index για εμφάνιση πάνω από άλλα στοιχεία */
+}
+
+/* Styles για την payment page - Ειδικά στυλ για τη σελίδα πληρωμής/checkout */
+
+/* Εικόνες προϊόντων στο καλάθι/σύνοψη παραγγελίας */
+.product-img {
+    width: 60px;               /* Σταθερό πλάτος για ομοιομορφία */
+    height: 60px;              /* Σταθερό ύψος για ομοιομορφία */
+    object-fit: cover;         /* Διατηρεί τις αναλογίες της εικόνας με crop αν χρειάζεται */
+    border-radius: 4px;        /* Ελαφρώς στρογγυλεμένες γωνίες */
+}
+
+/* Περιοχή επιβεβαίωσης διεύθυνσης στη σελίδα checkout */
 .address-confirmation {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
+    background-color: #f8f9fa; /* Ανοιχτό γκρι φόντο για οπτικό διαχωρισμό */
+    padding: 15px;             /* Εσωτερικό περιθώριο */
+    border-radius: 5px;        /* Στρογγυλεμένες γωνίες */
+    margin-bottom: 20px;       /* Κενό από τα επόμενα στοιχεία */
 }
