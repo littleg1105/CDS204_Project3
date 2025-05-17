@@ -44,6 +44,7 @@ cryptography==44.0.3
 # - Handles SSL/TLS operations
 # - Provides encryption/decryption utilities
 # - Used for secure token generation
+# - Powers Fernet encryption for field-level data encryption
 
 pyOpenSSL==25.0.0
 # Χρησιμότητα:

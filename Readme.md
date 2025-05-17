@@ -18,6 +18,7 @@ A secure e-commerce application developed with Django 5.2 LTS, designed with sec
 - [Security Documentation](SECURITY.md) - Overview of security features and protections
 - [Admin Guide](ADMIN_GUIDE.md) - Guide for administrators, including OTP setup
 - [Developer Guide](DEVELOPER_GUIDE.md) - Technical documentation for developers
+- [Encryption Guide](secure_eshop/ENCRYPTION_GUIDE.md) - Complete guide for database encryption setup
 
 ## Quick Start
 
@@ -43,8 +44,15 @@ pip install -r requirements.txt
 mkdir -p logs
 touch logs/app.log
 
+# Set up environment variables
+cp secure_eshop/.env.example secure_eshop/.env
+# Edit .env file and add your encryption key and database settings
+
 # Run migrations
 python manage.py migrate
+
+# Encrypt existing data (if upgrading from unencrypted version)
+python manage.py encrypt_existing_data
 
 # Create superuser
 python manage.py createsuperuser

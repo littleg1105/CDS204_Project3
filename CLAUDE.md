@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Activate venv: `source venv/bin/activate` (macOS/Linux) or `venv\Scripts\activate` (Windows)
 - Install requirements: `pip install -r requirements.txt`
 - Run migrations: `python manage.py migrate`
+- Encrypt existing data: `python manage.py encrypt_existing_data` (run after adding encryption)
 - Run server: `python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem`
 - Run a specific test: `python manage.py test eshop.tests.TestClassName.test_method_name`
 

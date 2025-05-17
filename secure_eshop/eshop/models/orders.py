@@ -5,6 +5,7 @@ import uuid
 import random
 import string
 from .products import Product
+from ..utils.fields import EncryptedCharField, EncryptedTextField
 
 
 class ShippingAddress(models.Model):
@@ -42,8 +43,8 @@ class ShippingAddress(models.Model):
     # Σχέση: Ένας χρήστης μπορεί να έχει πολλές διευθύνσεις (one-to-many)
     
     # Πεδία διεύθυνσης με ελληνικά verbose names
-    name = models.CharField(max_length=100, verbose_name='Ονοματεπώνυμο')
-    address = models.CharField(max_length=200, verbose_name='Διεύθυνση')
+    name = EncryptedCharField(max_length=100, verbose_name='Ονοματεπώνυμο')
+    address = EncryptedCharField(max_length=200, verbose_name='Διεύθυνση')
     city = models.CharField(max_length=100, verbose_name='Πόλη')
     
     # Ταχυδρομικός κώδικας με validation για ελληνικό format (5 ψηφία)
@@ -64,7 +65,7 @@ class ShippingAddress(models.Model):
     country = models.CharField(max_length=100, verbose_name='Χώρα')
     
     # Τηλέφωνο με validation για ελληνικό format
-    phone = models.CharField(
+    phone = EncryptedCharField(
         max_length=20,
         verbose_name='Τηλέφωνο',
         validators=[
@@ -87,7 +88,8 @@ class ShippingAddress(models.Model):
     # UX: Το help_text παρέχει παραδείγματα αποδεκτών μορφών
     
     # Email με υποχρεωτική συμπλήρωση και built-in validation
-    email = models.EmailField(
+    email = EncryptedCharField(
+        max_length=254,  # Standard email max length
         verbose_name='Email',
         help_text='Απαιτείται για επικοινωνία σχετικά με την παραγγελία',
         blank=False,   # Δεν επιτρέπεται κενό στις forms (υποχρεωτικό πεδίο)

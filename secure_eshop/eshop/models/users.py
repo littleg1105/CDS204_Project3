@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
+from ..utils.fields import EncryptedCharField, EncryptedTextField
 
 class CustomUser(AbstractUser):
     """
@@ -28,6 +29,31 @@ class CustomUser(AbstractUser):
     )
     # Χρησιμότητα: Αντικαθιστά το αυτόματα αυξανόμενο ID με ένα UUID
     # Ασφάλεια: Τα UUIDs είναι πρακτικά αδύνατο να μαντευτούν ή να προβλεφθούν
+    
+    # Override sensitive fields from AbstractUser with encrypted versions
+    # Email field - encrypted for privacy
+    email = EncryptedCharField(
+        max_length=254,                           # Standard email max length
+        blank=True,                               # Optional field
+        verbose_name='email address',             # Django standard naming
+        help_text='Email address (encrypted)'
+    )
+    
+    # First name - encrypted for privacy
+    first_name = EncryptedCharField(
+        max_length=150,                           # Django default length
+        blank=True,                               # Optional field
+        verbose_name='first name',                # Django standard naming
+        help_text='First name (encrypted)'
+    )
+    
+    # Last name - encrypted for privacy
+    last_name = EncryptedCharField(
+        max_length=150,                           # Django default length
+        blank=True,                               # Optional field
+        verbose_name='last name',                 # Django standard naming
+        help_text='Last name (encrypted)'
+    )
     
     # Προσθήκη πεδίου για εικόνα προφίλ
     profile_picture = models.ImageField(

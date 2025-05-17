@@ -214,6 +214,13 @@ DATABASES = {
 #         'OPTIONS': {
 #             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
 #             'charset': 'utf8mb4',
+#             # SSL/TLS Configuration for encrypted connections
+#             'ssl': {
+#                 'ca': os.getenv('DB_SSL_CA'),  # Path to CA certificate
+#                 # Uncomment if client certificates are required:
+#                 # 'cert': os.getenv('DB_SSL_CERT'),  # Client certificate
+#                 # 'key': os.getenv('DB_SSL_KEY'),    # Client key
+#             } if os.getenv('DB_SSL_CA') else None,
 #         }
 #     }
 # }
@@ -228,11 +235,19 @@ DATABASES = {
 # DATABASES = {
 #       'default': {
 #           'ENGINE': 'django.db.backends.postgresql',
-#           'NAME': 'secure_eshop',
-#           'USER': 'eshop_user',
-#           'PASSWORD': '*********',  # Replace with your actual password
-#           'HOST': 'localhost',
-#           'PORT': '',
+#           'NAME': os.getenv('DB_NAME', 'secure_eshop'),
+#           'USER': os.getenv('DB_USER', 'eshop_user'),
+#           'PASSWORD': os.getenv('DB_PASSWORD'),  # Use environment variable
+#           'HOST': os.getenv('DB_HOST', 'localhost'),
+#           'PORT': os.getenv('DB_PORT', ''),
+#           'OPTIONS': {
+#               # SSL/TLS Mode - Options: disable, allow, prefer, require, verify-ca, verify-full
+#               'sslmode': os.getenv('DB_SSL_MODE', 'require'),
+#               # Optional SSL certificate paths (uncomment if needed):
+#               # 'sslcert': os.getenv('DB_SSL_CERT'),  # Client certificate
+#               # 'sslkey': os.getenv('DB_SSL_KEY'),    # Client key
+#               # 'sslrootcert': os.getenv('DB_SSL_CA'), # CA certificate
+#           }
 #     }
 # }
 
