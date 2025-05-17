@@ -307,6 +307,18 @@ mysqldump -u username -h username.mysql.pythonanywhere-services.com 'username$se
 - Ensure database name follows format `username$dbname`
 - Check you've created the database in the Databases tab
 
+### Issue: Database needs reset
+**Solution**:
+- Open mySQL terminal
+- DROP DATABASE `georgeg$default`;
+- CREATE DATABASE `georgeg$default` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+- In secure_eshop dir
+    - python manage.py migrate
+    - python manage.py createsuperuser
+    - python manage.py add_otp_device {admin_user}
+- use georgeg$default; show tables; to check; (in SQL terminal)
+- Reload from web app gui
+
 ### Issue: 500 Internal Server Error
 **Solution**: 
 1. Check the error log (link in Web tab)
@@ -318,3 +330,21 @@ mysqldump -u username -h username.mysql.pythonanywhere-services.com 'username$se
 
 - [Official PythonAnywhere deployment guide](https://help.pythonanywhere.com/pages/DeployExistingDjangoProject/)
 - [Django Deployment Checklist](https://docs.djangoproject.com/en/stable/howto/deployment/checklist/)
+
+
+## If You've done the above and just pulled from repository, open terminal and
+
+cd CDS204_Project3/
+git pull origin main
+git stash (if above fails you have stashed changes - usually settings.py)
+git pull origin main
+cd secure_eshop/eshop_project/
+nano settings.py (change databases - change debug to false)
+cd ..  (now in CDS204_Project3/secure_eshop)
+source ../.venv/bin/activate
+python manage.py makemigrations 
+python manage.py makemigrations eshop
+python manage.py migrate
+python manage.py createsuperuser;
+python manage.py add_otp_device admin
+python manage.py collectstatic
