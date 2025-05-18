@@ -51,3 +51,7 @@ env/
 # Local development settings
 local_settings.py
 secure_eshop/certificates/admin_qrcode.png
+git_small.log
+.gitignore
+git.log
+secure_eshop/combined_code_files.txt

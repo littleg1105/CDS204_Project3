@@ -36,7 +36,18 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 # Το κλειδί αυτό είναι η βάση όλων των κρυπτογραφικών λειτουργιών του Django.
 # ΠΟΤΕ μην δημοσιεύετε αυτό το κλειδί ή το αποθηκεύετε σε συστήματα ελέγχου εκδόσεων!
 # Στην παραγωγή, ΠΑΝΤΑ χρησιμοποιείτε περιβαλλοντικές μεταβλητές για αποθήκευση κλειδιών.
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j*m(@j8q)n_p4z^x!^k1ek11r(1*wbg3kc)!_0t4)r-#wp6=9a')
+
+# WARNING: Create a new SECRET_KEY and remove the hardcoded default
+# You can generate a new key using:
+# python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+# Ensure SECRET_KEY is set
+if not SECRET_KEY:
+    raise ValueError(
+        "SECRET_KEY environment variable is not set. "
+        "Please set it in your .env file."
+    )
 
 # Debug mode - ΠΡΕΠΕΙ να είναι False σε production
 # Χρησιμότητα: 

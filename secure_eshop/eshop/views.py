@@ -230,7 +230,28 @@ def login_view(request):
             # Redirect στο 'next' URL ή στον κατάλογο
             # Χρησιμότητα: Επιστροφή στη σελίδα που ζήτησε authentication
             # UX: Διατηρεί την αρχική πρόθεση του χρήστη μετά το login
-            return redirect(request.GET.get('next', 'catalog'))
+            # Security: Validate the redirect URL to prevent open redirects
+            next_url = request.GET.get('next', 'catalog')
+            
+            # If next_url is provided, validate it
+            if next_url and next_url != 'catalog':
+                from django.urls import reverse, resolve
+                from django.http import HttpResponseRedirect
+                
+                # Check if URL is relative and safe
+                if next_url.startswith('/'):
+                    try:
+                        # Try to resolve the URL to ensure it's internal
+                        resolve(next_url)
+                        return redirect(next_url)
+                    except:
+                        # If URL doesn't resolve, redirect to catalog
+                        return redirect('catalog')
+                else:
+                    # External URLs are not allowed - redirect to catalog
+                    return redirect('catalog')
+            else:
+                return redirect(next_url)
         else:
             # Store form with errors for context processor
             # Technical: Επιτρέπει στο context processor να εμφανίσει τα errors σε base template
