@@ -44,8 +44,13 @@ class EncryptedCharField(models.CharField):
     
     def __init__(self, *args, **kwargs):
         # Encrypted values are longer than original, adjust max_length
+        # Base64 encoding increases size by ~1.4x, encryption adds overhead
+        # Using 3x multiplier for safety, but capping at MySQL limit
         if 'max_length' in kwargs:
-            kwargs['max_length'] = kwargs.get('max_length', 255) * 3
+            original_length = kwargs.get('max_length', 255)
+            # Calculate encrypted length but cap at MySQL's limit
+            encrypted_length = min(original_length * 3, 1000)
+            kwargs['max_length'] = encrypted_length
         super().__init__(*args, **kwargs)
     
     def get_prep_value(self, value):
