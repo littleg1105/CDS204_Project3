@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Προσθήκη/ενημέρωση μηνύματος επικύρωσης
             // Τεχνική: DOM manipulation για εμφάνιση μηνυμάτων σφάλματος
             let feedbackElement = input.nextElementSibling;
-            if (!feedbackElement || !feedbackElement.classList.contains('invalid-feedback')) {
+            if (!feedbackElement?.classList.contains('invalid-feedback')) {
                 feedbackElement = document.createElement('div');
                 feedbackElement.className = 'invalid-feedback';
                 input.parentNode.insertBefore(feedbackElement, input.nextSibling);
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Προσθήκη μηνύματος επικύρωσης
                     let feedbackElement = this.nextElementSibling;
-                    if (!feedbackElement || !feedbackElement.classList.contains('invalid-feedback')) {
+                    if (!feedbackElement?.classList.contains('invalid-feedback')) {
                         feedbackElement = document.createElement('div');
                         feedbackElement.className = 'invalid-feedback';
                         this.parentNode.insertBefore(feedbackElement, this.nextSibling);

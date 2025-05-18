@@ -392,23 +392,28 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Καθορίζει ακριβώς από ποιες πηγές επιτρέπεται να φορτωθούν πόροι,
 # μπλοκάροντας αυτόματα κακόβουλα scripts και injections.
 # Αυτή η πολιτική επιτρέπει μόνο scripts από τον server μας και το CDN.
+
+# CSP Sources
+CSP_SELF = "'self'"
+CSP_CDN = "https://cdn.jsdelivr.net"
+
 # Default policy - μόνο από τον ίδιο server
-CSP_DEFAULT_SRC = ("'self'",)
+CSP_DEFAULT_SRC = (CSP_SELF,)
 
 # Scripts - από τον server και CDN
-CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_SCRIPT_SRC = (CSP_SELF, CSP_CDN)
 
 # Styles - από τον server και CDN  
-CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_STYLE_SRC = (CSP_SELF, CSP_CDN)
 
 # Fonts - από τον server και CDN
-CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
+CSP_FONT_SRC = (CSP_SELF, CSP_CDN)
 
 # Images - από τον server και data: URIs
-CSP_IMG_SRC = ("'self'", "data:")
+CSP_IMG_SRC = (CSP_SELF, "data:")
 
 # AJAX/Fetch - μόνο στον ίδιο server
-CSP_CONNECT_SRC = ("'self'",)
+CSP_CONNECT_SRC = (CSP_SELF,)
 
 # Χρήση nonce για inline scripts
 CSP_INCLUDE_NONCE_IN_SCRIPT_SRC = True

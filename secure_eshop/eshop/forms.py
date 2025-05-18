@@ -154,21 +154,6 @@ class LoginForm(forms.Form):
             # Καταγραφή χρόνου έναρξης για timing protection
             start_time = time.time()
             
-            # Constant-time string comparison function
-            # Χρησιμότητα: Αποφεύγει timing leaks σε string comparisons
-            def constant_time_compare(val1, val2):
-                """
-                Σύγκριση strings με σταθερό χρόνο εκτέλεσης.
-                
-                Χρησιμότητα:
-                - Δεν leak πληροφορίες μέσω execution time
-                - Χρησιμοποιεί secure HMAC comparison
-                """
-                return hmac.compare_digest(
-                    str(val1).encode('utf-8'),
-                    str(val2).encode('utf-8')
-                )
-            
             # Πραγματικός έλεγχος αυθεντικοποίησης
             # Χρησιμότητα: Django's built-in authentication με session support
             user = authenticate(self.request, username=username, password=password)
@@ -323,7 +308,7 @@ class ShippingAddressForm(forms.ModelForm):
             phone = re.sub(r'[\s-]', '', phone)
             
             # Έλεγχος αν το τηλέφωνο είναι έγκυρο ελληνικό
-            greek_phone_pattern = r'^(?:\+30|0030)?(?:\s*)(?:(?:69\d{8})|(?:2\d{9}))$'
+            greek_phone_pattern = r'^(?:\+30|0030)?\s*(?:(?:69\d{8})|(?:2\d{9}))$'
             if not re.match(greek_phone_pattern, phone):
                 raise ValidationError('Παρακαλώ εισάγετε έγκυρο ελληνικό αριθμό τηλεφώνου (σταθερό ή κινητό).')
             

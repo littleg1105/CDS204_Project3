@@ -68,7 +68,6 @@ async function handleAddToCart(event) {
     
     // Λήψη απαραίτητων δεδομένων από data attributes του κουμπιού
     const productId = button.getAttribute('data-product-id');
-    const productName = button.getAttribute('data-product-name');
     const csrfToken = button.getAttribute('data-csrf-token');
     
     // Ενημέρωση UI για feedback στο χρήστη (loading state)
