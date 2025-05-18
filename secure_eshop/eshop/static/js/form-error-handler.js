@@ -11,97 +11,116 @@
  * - Μορφοποίηση και εμφάνιση σφαλμάτων ως toast notifications
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Αναζήτηση για στοιχεία που περιέχουν σφάλματα φόρμας
-    // Selector: Επιλέγει όλα τα elements με το data attribute 'data-form-errors'
-    const errorContainers = document.querySelectorAll('[data-form-errors]');
-    
-    // Επεξεργασία κάθε container σφαλμάτων
-    // Pattern: Iteration over NodeList για επεξεργασία πολλαπλών elements
-    errorContainers.forEach(container => {
-        try {
-            // Ανάλυση των δεδομένων σφάλματος από το data attribute
-            // JSON.parse: Μετατροπή του JSON string σε JavaScript object
-            const errorsData = JSON.parse(container.dataset.formErrors);
-            
-            // Εμφάνιση σφαλμάτων πεδίων (field errors)
-            if (errorsData.field_errors) {
-                // Object.entries: Μετατροπή του object σε array από key-value pairs
-                // για εύκολη επανάληψη
-                Object.entries(errorsData.field_errors).forEach(([field, errors]) => {
-                    errors.forEach(error => {
-                        // Μορφοποίηση του ονόματος πεδίου για εμφάνιση
-                        // (κεφαλαιοποίηση, αφαίρεση underscores)
-                        // Τεχνική: Regular expressions για μορφοποίηση κειμένου
-                        const fieldName = field
-                            .replace(/_/g, ' ')               // Αντικατάσταση _ με κενό
-                            .replace(/\b\w/g, l => l.toUpperCase()); // Κεφαλαιοποίηση πρώτου γράμματος κάθε λέξης
-                        
-                        // Ασφαλής εμφάνιση σφάλματος - τόσο το fieldName όσο και το error 
-                        // έχουν ήδη sanitized από το Django
-                        // Ασφάλεια: Χρήση concatenation για σωστό escaping του μηνύματος
-                        Notifications.error(fieldName + ': ' + error, 7000); // 7000ms = 7 δευτερόλεπτα εμφάνισης
-                    });
-                });
-            }
-            
-            // Εμφάνιση γενικών σφαλμάτων φόρμας (non-field errors)
-            // Τα non-field errors αφορούν ολόκληρη τη φόρμα και όχι συγκεκριμένα πεδία
-            if (errorsData.non_field_errors) {
-                errorsData.non_field_errors.forEach(error => {
-                    Notifications.error(error, 7000);
-                });
-            }
-            
-            // Μετά την εμφάνιση των σφαλμάτων, αφαίρεση του data attribute
-            // για αποφυγή επανεμφάνισης στην ανανέωση της σελίδας
-            // Βελτιστοποίηση: Αποτροπή διπλής εμφάνισης των ίδιων σφαλμάτων
-            container.removeAttribute('data-form-errors');
-        } catch (e) {
-            // Χειρισμός σφαλμάτων ανάλυσης JSON
-            // Debugging: Καταγραφή σφαλμάτων στην κονσόλα για διάγνωση προβλημάτων
-            console.error('Error parsing form errors:', e);
-        }
+// Helper function για μορφοποίηση ονομάτων πεδίων
+function formatFieldName(field) {
+    // Αντικατάσταση _ με κενό και κεφαλαιοποίηση πρώτου γράμματος κάθε λέξης
+    return field
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// Helper function για εμφάνιση field errors
+function displayFieldError(field, error) {
+    const fieldName = formatFieldName(field);
+    // Ασφαλής εμφάνιση σφάλματος - τόσο το fieldName όσο και το error 
+    // έχουν ήδη sanitized από το Django
+    Notifications.error(fieldName + ': ' + error, 7000); // 7000ms = 7 δευτερόλεπτα εμφάνισης
+}
+
+// Helper function για επεξεργασία field errors
+function processFieldErrors(fieldErrors) {
+    // Object.entries: Μετατροπή του object σε array από key-value pairs
+    Object.entries(fieldErrors).forEach(([field, errors]) => {
+        errors.forEach(error => displayFieldError(field, error));
     });
+}
+
+// Helper function για επεξεργασία non-field errors
+function processNonFieldErrors(nonFieldErrors) {
+    nonFieldErrors.forEach(error => {
+        Notifications.error(error, 7000);
+    });
+}
+
+// Helper function για εμφάνιση μηνύματος με βάση το level
+function displayMessageByLevel(message) {
+    const duration = 7000; // 7 δευτερόλεπτα
+    
+    switch(message.level) {
+        case 'error':
+            // Κρίσιμα σφάλματα - χρήση κόκκινου χρώματος
+            Notifications.error(message.text, duration);
+            break;
+        case 'warning':
+            // Προειδοποιήσεις - χρήση πορτοκαλί/κίτρινου χρώματος
+            Notifications.warning(message.text, duration);
+            break;
+        case 'success':
+            // Επιτυχείς ενέργειες - χρήση πράσινου χρώματος
+            Notifications.success(message.text, duration);
+            break;
+        default:
+            // Πληροφοριακά μηνύματα (info) - χρήση μπλε χρώματος
+            Notifications.info(message.text, duration);
+    }
+}
+
+// Helper function για επεξεργασία Django messages
+function processDjangoMessages(messagesData) {
+    messagesData.forEach(displayMessageByLevel);
+}
+
+// Main function για επεξεργασία container σφαλμάτων
+function processErrorContainer(container) {
+    try {
+        // Ανάλυση των δεδομένων σφάλματος από το data attribute
+        const errorsData = JSON.parse(container.dataset.formErrors);
+        
+        // Εμφάνιση σφαλμάτων πεδίων (field errors)
+        if (errorsData.field_errors) {
+            processFieldErrors(errorsData.field_errors);
+        }
+        
+        // Εμφάνιση γενικών σφαλμάτων φόρμας (non-field errors)
+        if (errorsData.non_field_errors) {
+            processNonFieldErrors(errorsData.non_field_errors);
+        }
+        
+        // Αφαίρεση του data attribute για αποφυγή επανεμφάνισης
+        container.removeAttribute('data-form-errors');
+    } catch (e) {
+        // Χειρισμός σφαλμάτων ανάλυσης JSON
+        console.error('Error parsing form errors:', e);
+    }
+}
+
+// Main function για επεξεργασία container μηνυμάτων
+function processMessageContainer(container) {
+    try {
+        // Ανάλυση των δεδομένων μηνυμάτων από το data attribute
+        const messagesData = JSON.parse(container.dataset.messages);
+        
+        // Εμφάνιση κάθε μηνύματος με βάση το επίπεδο (level)
+        processDjangoMessages(messagesData);
+        
+        // Αφαίρεση του data attribute για αποφυγή επανεμφάνισης
+        container.removeAttribute('data-messages');
+    } catch (e) {
+        // Χειρισμός σφαλμάτων ανάλυσης JSON
+        console.error('Error parsing messages:', e);
+    }
+}
+
+// Αρχικοποίηση όταν φορτωθεί το DOM
+function initializeFormErrorHandler() {
+    // Αναζήτηση για στοιχεία που περιέχουν σφάλματα φόρμας
+    const errorContainers = document.querySelectorAll('[data-form-errors]');
+    errorContainers.forEach(processErrorContainer);
     
     // Αναζήτηση για Django messages
-    // Django messages: Σύστημα προσωρινών μηνυμάτων του Django για feedback στο χρήστη
     const messageContainers = document.querySelectorAll('[data-messages]');
-    
-    // Επεξεργασία κάθε container μηνυμάτων
-    messageContainers.forEach(container => {
-        try {
-            // Ανάλυση των δεδομένων μηνυμάτων από το data attribute
-            const messagesData = JSON.parse(container.dataset.messages);
-            
-            // Εμφάνιση κάθε μηνύματος με βάση το επίπεδο (level)
-            // Django Message Levels: Κατηγοριοποίηση μηνυμάτων ανά τύπο
-            messagesData.forEach(message => {
-                switch(message.level) {
-                    case 'error':
-                        // Κρίσιμα σφάλματα - χρήση κόκκινου χρώματος
-                        Notifications.error(message.text, 7000);
-                        break;
-                    case 'warning':
-                        // Προειδοποιήσεις - χρήση πορτοκαλί/κίτρινου χρώματος
-                        Notifications.warning(message.text, 7000);
-                        break;
-                    case 'success':
-                        // Επιτυχείς ενέργειες - χρήση πράσινου χρώματος
-                        Notifications.success(message.text, 7000);
-                        break;
-                    default:
-                        // Πληροφοριακά μηνύματα (info) - χρήση μπλε χρώματος
-                        // Default case: Χειρισμός περιπτώσεων που δεν καλύπτονται ρητά
-                        Notifications.info(message.text, 7000);
-                }
-            });
-            
-            // Αφαίρεση του data attribute για αποφυγή επανεμφάνισης
-            container.removeAttribute('data-messages');
-        } catch (e) {
-            // Χειρισμός σφαλμάτων ανάλυσης JSON
-            console.error('Error parsing messages:', e);
-        }
-    });
-});
+    messageContainers.forEach(processMessageContainer);
+}
+
+// Εκκίνηση όταν φορτωθεί το DOM
+document.addEventListener('DOMContentLoaded', initializeFormErrorHandler);
