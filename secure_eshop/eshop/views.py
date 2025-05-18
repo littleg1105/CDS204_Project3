@@ -60,6 +60,12 @@ from django.db.models import Q
 # Χρησιμότητα: Επιτρέπει complex queries με OR/AND conditions
 # Performance: Βελτιστοποιεί database queries με σύνθετα filter conditions
 
+# URL handling
+from django.urls import resolve
+from django.urls.exceptions import Resolver404
+# Χρησιμότητα: URL resolution για ασφαλή validation των redirects
+# Ασφάλεια: Αποτρέπει open redirect attacks
+
 # JSON handling
 import json
 # Χρησιμότητα: Parse/serialize JSON data για AJAX
@@ -99,6 +105,17 @@ from django.core.cache import cache
 from django.http import HttpResponse
 from django_ratelimit.decorators import ratelimit
 
+
+# ============================================================================
+# CONSTANTS AND CONFIGURATION
+# ============================================================================
+
+# Error messages
+ERROR_INVALID_JSON = 'Invalid JSON'
+ERROR_SERVER = 'Server error'
+
+# Template paths
+TEMPLATE_PAYMENT = 'eshop/payment.html'
 
 # ============================================================================
 # LOGGING CONFIGURATION
@@ -227,31 +244,8 @@ def login_view(request):
             # Success message
             messages.success(request, f"Καλώς ήρθατε, {user.username}!")
             
-            # Redirect στο 'next' URL ή στον κατάλογο
-            # Χρησιμότητα: Επιστροφή στη σελίδα που ζήτησε authentication
-            # UX: Διατηρεί την αρχική πρόθεση του χρήστη μετά το login
-            # Security: Validate the redirect URL to prevent open redirects
-            next_url = request.GET.get('next', 'catalog')
-            
-            # If next_url is provided, validate it
-            if next_url and next_url != 'catalog':
-                from django.urls import reverse, resolve
-                from django.http import HttpResponseRedirect
-                
-                # Check if URL is relative and safe
-                if next_url.startswith('/'):
-                    try:
-                        # Try to resolve the URL to ensure it's internal
-                        resolve(next_url)
-                        return redirect(next_url)
-                    except:
-                        # If URL doesn't resolve, redirect to catalog
-                        return redirect('catalog')
-                else:
-                    # External URLs are not allowed - redirect to catalog
-                    return redirect('catalog')
-            else:
-                return redirect(next_url)
+            # Handle redirect
+            return _handle_login_redirect(request)
         else:
             # Store form with errors for context processor
             # Technical: Επιτρέπει στο context processor να εμφανίσει τα errors σε base template
@@ -262,6 +256,42 @@ def login_view(request):
     
     # Render login template με το form
     return render(request, 'eshop/login.html', {'form': form})
+
+
+def _handle_login_redirect(request):
+    """
+    Handle the redirect after successful login.
+    
+    Validates the 'next' URL parameter to prevent open redirects.
+    
+    Args:
+        request: Django request object
+        
+    Returns:
+        HttpResponseRedirect to the validated URL
+    """
+    # Redirect στο 'next' URL ή στον κατάλογο
+    # Χρησιμότητα: Επιστροφή στη σελίδα που ζήτησε authentication
+    # UX: Διατηρεί την αρχική πρόθεση του χρήστη μετά το login
+    # Security: Validate the redirect URL to prevent open redirects
+    next_url = request.GET.get('next', 'catalog')
+    
+    # If next_url is not provided or is 'catalog', use default
+    if not next_url or next_url == 'catalog':
+        return redirect('catalog')
+    
+    # Check if URL is relative and safe
+    if not next_url.startswith('/'):
+        # External URLs are not allowed - redirect to catalog
+        return redirect('catalog')
+    
+    # Try to resolve the URL to ensure it's internal
+    try:
+        resolve(next_url)
+        return redirect(next_url)
+    except Resolver404:
+        # If URL doesn't resolve, redirect to catalog
+        return redirect('catalog')
 
 
 # ============================================================================
@@ -438,13 +468,13 @@ def add_to_cart(request):
     except json.JSONDecodeError:
         # Invalid JSON handling
         # Security: Αποφυγή crashing με malformed JSON input
-        return JsonResponse({'error': 'Invalid JSON'}, status=400, encoder=UUIDEncoder)
+        return JsonResponse({'error': ERROR_INVALID_JSON}, status=400, encoder=UUIDEncoder)
     except Exception as e:
         # Generic error handling με logging
         # Χρησιμότητα: Security monitoring, debugging
         # DevOps: Επιτρέπει proactive monitoring για errors
         logger.error(f"Error adding to cart: {str(e)}")
-        return JsonResponse({'error': 'Server error'}, status=500, encoder=UUIDEncoder)
+        return JsonResponse({'error': ERROR_SERVER}, status=500, encoder=UUIDEncoder)
 
 
 # ============================================================================
@@ -483,164 +513,221 @@ def payment_view(request):
         HttpResponse με rendered template ή redirect
     """
     
-    # Λήψη καλαθιού και προϊόντων
-    cart, created = Cart.objects.get_or_create(user=request.user)
-    # select_related για optimization - μειώνει database queries
-    # Performance: Αποφυγή N+1 query problem
-    cart_items = cart.cartitem_set.all().select_related('product')
-    
-    # Υπολογισμοί για το καλάθι
-    total_price = cart.get_total_price()
-    cart_items_count = cart.get_total_items()
-    
-    # Έλεγχος αν το καλάθι είναι άδειο
-    # Χρησιμότητα: Αποτρέπει checkout με άδειο καλάθι
-    # UX: Early validation για καλύτερη εμπειρία χρήστη
-    if not cart_items.exists():
+    # Λήψη και έλεγχος καλαθιού
+    cart_data = _get_cart_data(request.user)
+    if not cart_data:
         messages.warning(request, "Το καλάθι σας είναι άδειο. Προσθέστε προϊόντα πριν προχωρήσετε στην πληρωμή.")
         return redirect('catalog')
     
-    # POST request handling
+    # Handle different request types
     if request.method == 'POST':
-        # Step 2: Επιβεβαίωση παραγγελίας
         if 'confirm_order' in request.POST:
-            # Ανάκτηση address ID από session
-            # Χρησιμότητα: Ασφαλής μεταφορά data μεταξύ requests
-            # Security: Stateful process για έλεγχο ότι το address επιλέχθηκε νωρίτερα
-            address_id = request.session.get('shipping_address_id')
-            
-            if not address_id:
-                messages.error(request, "Η διεύθυνση αποστολής δεν βρέθηκε.")
-                return redirect('payment')
-            
-            # Ασφαλής ανάκτηση address - έλεγχος ownership
-            # Security: Αποτρέπει access σε addresses άλλων χρηστών
-            # Technical note: The address_id is stored as a string in the session
-            shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
-            
-            try:
-                # Δημιουργία νέας παραγγελίας
-                # Transaction: Ιδανικά θα έπρεπε να χρησιμοποιηθεί transaction.atomic() για atomicity
-                order = Order.objects.create(
-                    user=request.user,
-                    shipping_address=shipping_address,
-                    total_price=total_price,
-                    status='pending'
-                )
-                
-                # Μεταφορά items από cart σε order
-                # Χρησιμότητα: Διατήρηση ιστορικού τιμών
-                # Business logic: Αποτροπή αλλαγών τιμών μετά την παραγγελία
-                for item in cart_items:
-                    OrderItem.objects.create(
-                        order=order,
-                        product=item.product,
-                        quantity=item.quantity,
-                        price=item.product.price  # Αποθήκευση τρέχουσας τιμής
-                    )
-                
-                # Email στον πελάτη
-                # Priority: Address email > User email
-                # Flexibility: Επιτρέπει διαφορετικό email για κάθε παραγγελία
-                user_email = shipping_address.email or request.user.email
-                if user_email:
-                    success = send_order_confirmation(order, user_email)
-                    if not success:
-                        logger.error(f"Failed to send order confirmation email to customer ({user_email})")
-                else:
-                    logger.warning("No user email found for order confirmation")
-                
-                # Email στον admin
-                # Notification: Ενημερώνει τους διαχειριστές για νέες παραγγελίες
-                admin_notification_success = send_order_notification_to_admin(order)
-                if not admin_notification_success:
-                    logger.error("Failed to send order notification email to admin")
-                
-                # Καθαρισμός μετά την παραγγελία
-                # 1. Άδειασμα καλαθιού
-                # UX: Αποτρέπει διπλές παραγγελίες από το ίδιο καλάθι
-                cart_items.delete()
-                
-                # 2. Καθαρισμός session data
-                # Security: Αποτρέπει επαναχρησιμοποίηση του address_id
-                if 'shipping_address_id' in request.session:
-                    del request.session['shipping_address_id']
-                
-                # Success message και redirect
-                messages.success(request, f"Η παραγγελία σας καταχωρήθηκε επιτυχώς με κωδικό #{order.id}! Θα λάβετε σύντομα email με όλες τις λεπτομέρειες.")
-                return redirect('catalog')
-                
-            except Exception as e:
-                # Error handling με logging
-                # DevOps: Καταγραφή σφαλμάτων για troubleshooting
-                logger.error(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
-                messages.error(request, "Προέκυψε σφάλμα κατά την καταχώρηση της παραγγελίας. Παρακαλώ προσπαθήστε ξανά.")
-                return redirect('payment')
-        
-        # Step 1: Υποβολή shipping address
-        form = ShippingAddressForm(request.POST)
-        
-        if form.is_valid():
-            # Αποθήκευση address με user association
-            address = form.save(commit=False)  # Δεν αποθηκεύει ακόμα
-            address.user = request.user        # Σύνδεση με χρήστη
-            address.save()                     # Τώρα αποθήκευση
-            
-            # Αποθήκευση στο session για το επόμενο βήμα
-            # Convert UUID to string to make it JSON serializable
-            # Technical: UUIDs δεν είναι JSON serializable by default
-            request.session['shipping_address_id'] = str(address.id)
-            
-            # Success message
-            messages.success(request, "Η διεύθυνση αποστολής καταχωρήθηκε επιτυχώς. Παρακαλώ επιβεβαιώστε την παραγγελία σας.")
-            
-            # Προετοιμασία για confirmation page
-            context = {
-                'cart_items': cart_items,
-                'cart_items_count': cart_items_count,
-                'total_price': total_price,
-                'shipping_address': address,
-                'is_confirmation': True  # Flag για το template
-            }
-            return render(request, 'eshop/payment.html', context)
+            return _handle_order_confirmation(request, cart_data)
         else:
-            # Store form with errors for context processor
-            request.form_errors = form
-            
-            # Warning message about validation errors
-            messages.warning(request, "Παρακαλώ διορθώστε τα σφάλματα στη φόρμα και δοκιμάστε ξανά.")
-            
-            # Form errors - επανεμφάνιση με errors
-            context = {
-                'form': form, 
-                'cart_items': cart_items,
-                'cart_items_count': cart_items_count,
-                'total_price': total_price,
-                'is_confirmation': False
-            }
-            return render(request, 'eshop/payment.html', context)
+            return _handle_address_submission(request, cart_data)
     else:
-        # GET request - Εμφάνιση address form
-        try:
-            # Pre-fill με την τελευταία διεύθυνση του χρήστη
-            # Χρησιμότητα: Βελτίωση user experience
-            # UX: Μειώνει data entry για επαναλαμβανόμενους χρήστες
-            last_address = ShippingAddress.objects.filter(user=request.user).order_by('-id').first()
-            form = ShippingAddressForm(instance=last_address)
-        except:
-            # Empty form αν δεν υπάρχει προηγούμενη διεύθυνση
-            form = ShippingAddressForm()
+        return _handle_get_request(request, cart_data)
+
+
+def _get_cart_data(user):
+    """
+    Retrieve cart data for the user.
     
-    # Context για initial form display
-    context = {
-        'form': form,
+    Returns:
+        dict: Cart data or None if cart is empty
+    """
+    cart, created = Cart.objects.get_or_create(user=user)
+    cart_items = cart.cartitem_set.all().select_related('product')
+    
+    if not cart_items.exists():
+        return None
+    
+    return {
+        'cart': cart,
         'cart_items': cart_items,
-        'cart_items_count': cart_items_count,
-        'total_price': total_price,
-        'is_confirmation': False
+        'total_price': cart.get_total_price(),
+        'cart_items_count': cart.get_total_items()
+    }
+
+
+def _handle_order_confirmation(request, cart_data):
+    """
+    Handle order confirmation step.
+    
+    Args:
+        request: Django request object
+        cart_data: Dictionary with cart information
+        
+    Returns:
+        HttpResponse: Redirect or rendered template
+    """
+    address_id = request.session.get('shipping_address_id')
+    
+    if not address_id:
+        messages.error(request, "Η διεύθυνση αποστολής δεν βρέθηκε.")
+        return redirect('payment')
+    
+    try:
+        shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
+        order = _create_order(request.user, shipping_address, cart_data)
+        _send_order_emails(order, shipping_address)
+        _cleanup_after_order(request, cart_data['cart_items'])
+        
+        messages.success(request, f"Η παραγγελία σας καταχωρήθηκε επιτυχώς με κωδικό #{order.id}! Θα λάβετε σύντομα email με όλες τις λεπτομέρειες.")
+        return redirect('catalog')
+        
+    except Exception as e:
+        logger.error(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
+        messages.error(request, "Προέκυψε σφάλμα κατά την καταχώρηση της παραγγελίας. Παρακαλώ προσπαθήστε ξανά.")
+        return redirect('payment')
+
+
+def _create_order(user, shipping_address, cart_data):
+    """
+    Create order and order items.
+    
+    Args:
+        user: User object
+        shipping_address: ShippingAddress object
+        cart_data: Dictionary with cart information
+        
+    Returns:
+        Order: Created order object
+    """
+    order = Order.objects.create(
+        user=user,
+        shipping_address=shipping_address,
+        total_price=cart_data['total_price'],
+        status='pending'
+    )
+    
+    # Create order items
+    for item in cart_data['cart_items']:
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity,
+            price=item.product.price
+        )
+    
+    return order
+
+
+def _send_order_emails(order, shipping_address):
+    """
+    Send order confirmation emails.
+    
+    Args:
+        order: Order object
+        shipping_address: ShippingAddress object
+    """
+    # Email to customer
+    user_email = shipping_address.email or order.user.email
+    if user_email:
+        success = send_order_confirmation(order, user_email)
+        if not success:
+            logger.error(f"Failed to send order confirmation email to customer ({user_email})")
+    else:
+        logger.warning("No user email found for order confirmation")
+    
+    # Email to admin
+    admin_notification_success = send_order_notification_to_admin(order)
+    if not admin_notification_success:
+        logger.error("Failed to send order notification email to admin")
+
+
+def _cleanup_after_order(request, cart_items):
+    """
+    Clean up cart and session after order completion.
+    
+    Args:
+        request: Django request object
+        cart_items: Cart items queryset
+    """
+    cart_items.delete()
+    
+    if 'shipping_address_id' in request.session:
+        del request.session['shipping_address_id']
+
+
+def _handle_address_submission(request, cart_data):
+    """
+    Handle shipping address form submission.
+    
+    Args:
+        request: Django request object
+        cart_data: Dictionary with cart information
+        
+    Returns:
+        HttpResponse: Rendered template
+    """
+    form = ShippingAddressForm(request.POST)
+    
+    if form.is_valid():
+        address = form.save(commit=False)
+        address.user = request.user
+        address.save()
+        
+        request.session['shipping_address_id'] = str(address.id)
+        messages.success(request, "Η διεύθυνση αποστολής καταχωρήθηκε επιτυχώς. Παρακαλώ επιβεβαιώστε την παραγγελία σας.")
+        
+        context = _build_context(cart_data, shipping_address=address, is_confirmation=True)
+        return render(request, TEMPLATE_PAYMENT, context)
+    else:
+        request.form_errors = form
+        messages.warning(request, "Παρακαλώ διορθώστε τα σφάλματα στη φόρμα και δοκιμάστε ξανά.")
+        
+        context = _build_context(cart_data, form=form, is_confirmation=False)
+        return render(request, TEMPLATE_PAYMENT, context)
+
+
+def _handle_get_request(request, cart_data):
+    """
+    Handle GET request for payment view.
+    
+    Args:
+        request: Django request object
+        cart_data: Dictionary with cart information
+        
+    Returns:
+        HttpResponse: Rendered template
+    """
+    try:
+        last_address = ShippingAddress.objects.filter(user=request.user).order_by('-id').first()
+        form = ShippingAddressForm(instance=last_address)
+    except Exception:
+        form = ShippingAddressForm()
+    
+    context = _build_context(cart_data, form=form, is_confirmation=False)
+    return render(request, TEMPLATE_PAYMENT, context)
+
+
+def _build_context(cart_data, form=None, shipping_address=None, is_confirmation=False):
+    """
+    Build context for payment template.
+    
+    Args:
+        cart_data: Dictionary with cart information
+        form: ShippingAddressForm instance (optional)
+        shipping_address: ShippingAddress instance (optional)
+        is_confirmation: Boolean flag for confirmation page
+        
+    Returns:
+        dict: Context dictionary for template
+    """
+    context = {
+        'cart_items': cart_data['cart_items'],
+        'cart_items_count': cart_data['cart_items_count'],
+        'total_price': cart_data['total_price'],
+        'is_confirmation': is_confirmation
     }
     
-    return render(request, 'eshop/payment.html', context)
+    if form:
+        context['form'] = form
+    if shipping_address:
+        context['shipping_address'] = shipping_address
+    
+    return context
 
 
 # ============================================================================
@@ -705,10 +792,10 @@ def remove_from_cart(request):
         }, encoder=UUIDEncoder)
     
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400, encoder=UUIDEncoder)
+        return JsonResponse({'error': ERROR_INVALID_JSON}, status=400, encoder=UUIDEncoder)
     except Exception as e:
         logger.error(f"Error removing from cart: {str(e)}")
-        return JsonResponse({'error': 'Server error'}, status=500, encoder=UUIDEncoder)
+        return JsonResponse({'error': ERROR_SERVER}, status=500, encoder=UUIDEncoder)
     
 
 # ============================================================================
@@ -792,8 +879,8 @@ def update_cart_item(request):
         }, encoder=UUIDEncoder)
     
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400, encoder=UUIDEncoder)
+        return JsonResponse({'error': ERROR_INVALID_JSON}, status=400, encoder=UUIDEncoder)
     except Exception as e:
         logger.error(f"Error updating cart item: {str(e)}")
-        return JsonResponse({'error': 'Server error'}, status=500, encoder=UUIDEncoder)
+        return JsonResponse({'error': ERROR_SERVER}, status=500, encoder=UUIDEncoder)
 
