@@ -5,6 +5,27 @@
  * των στοιχείων του καλαθιού και της σελίδας πληρωμής του e-shop.
  */
 
+/* Logout button styling - Μορφοποίηση του κουμπιού αποσύνδεσης ως σύνδεσμος */
+.nav-item form {
+    margin: 0;
+    padding: 0;
+}
+
+.nav-link.btn-link {
+    border: none;
+    background: none;
+    text-decoration: none;
+    cursor: pointer;
+    padding: .5rem 1rem;
+    color: rgba(255,255,255,.5);
+    display: block;
+}
+
+.nav-link.btn-link:hover {
+    text-decoration: none;
+    color: rgba(255,255,255,.75);
+}
+
 /* Γενικά styles - Βασικά στυλ για τα στοιχεία του καταλόγου προϊόντων */
 
 /* Product card - Στυλ για τις κάρτες προϊόντων στον κατάλογο */

@@ -34,7 +34,10 @@
                                 <a class="nav-link" href="{% url 'payment' %}">Καλάθι</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'logout' %}">Αποσύνδεση</a>
+                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="nav-link btn btn-link">Αποσύνδεση</button>
+                                </form>
                             </li>
                         {% else %}
                             <li class="nav-item">
