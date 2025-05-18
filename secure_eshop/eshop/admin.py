@@ -121,72 +121,85 @@ class SecureOTPAdmin(OTPAdminSite):
         from .forms import SecureOTPAuthenticationForm
         return SecureOTPAuthenticationForm
     
+    def _is_user_locked_out(self, username):
+        """Check if user is locked out."""
+        return username and OTPLockoutTracker.check_lockout(username)
+    
+    def _render_lockout_page(self, request, extra_context=None):
+        """Render the lockout page."""
+        from django.shortcuts import render
+        from django.contrib.auth.forms import AuthenticationForm
+        
+        context = self.each_context(request)
+        context['form'] = AuthenticationForm(request)
+        context['title'] = 'Log in'
+        context['app_path'] = request.path
+        context['lockout_message'] = "Account locked due to too many failed verification attempts. Please try again later or contact an administrator."
+        
+        if extra_context:
+            context.update(extra_context)
+            
+        return render(request, 'admin/login.html', context)
+    
+    def _add_attempt_warning(self, username, extra_context):
+        """Add warning about failed attempts to context."""
+        if not username:
+            return
+            
+        attempts = OTPLockoutTracker.get_attempts(username)
+        if attempts > 0:
+            extra_context['lockout_message'] = f"Warning: {attempts} failed verification attempt(s). Your account will be locked after {OTPLockoutTracker.MAX_ATTEMPTS} failed attempts."
+    
+    def _handle_failed_otp_verification(self, request, username):
+        """Handle failed OTP verification after successful password check."""
+        from django.contrib.auth import get_user_model, authenticate
+        from django.shortcuts import redirect
+        
+        if not username:
+            return None
+            
+        User = get_user_model()
+        password = request.POST.get('password')
+        
+        try:
+            user = User.objects.get(username=username)
+            user_auth = authenticate(request, username=username, password=password)
+            
+            if user_auth is not None:
+                # Password was correct, but OTP failed
+                remaining = OTPLockoutTracker.log_failed_attempt(username)
+                if remaining == 0:
+                    return redirect(request.path)
+        except User.DoesNotExist:
+            pass
+            
+        return None
+    
     def login(self, request, extra_context=None):
         """Override login to implement OTP lockout"""
         username = request.POST.get('username')
+        extra_context = extra_context or {}
         
-        # Create a context dictionary if none was passed
-        if extra_context is None:
-            extra_context = {}
-            
-        # Check if user is locked out
-        if username and OTPLockoutTracker.check_lockout(username):
-            from django.shortcuts import render
-            from django.contrib.auth.forms import AuthenticationForm
-            
-            # Return the login page without processing the form
-            context = self.each_context(request)
-            context['form'] = AuthenticationForm(request)
-            context['title'] = 'Log in'
-            context['app_path'] = request.path
-            
-            # Add lockout message directly in the context
-            context['lockout_message'] = "Account locked due to too many failed verification attempts. Please try again later or contact an administrator."
-            
-            # Add extra context from the argument
-            context.update(extra_context)
-            
-            # Important: We return here to block further login processing
-            return render(request, 'admin/login.html', context)
+        # Handle locked out users
+        if self._is_user_locked_out(username):
+            return self._render_lockout_page(request, extra_context)
         
-        # If not locked out, check for attempts and add warning to context if needed
-        if username:
-            attempts = OTPLockoutTracker.get_attempts(username)
-            if attempts > 0:
-                extra_context['lockout_message'] = f"Warning: {attempts} failed verification attempt(s). Your account will be locked after {OTPLockoutTracker.MAX_ATTEMPTS} failed attempts."
-                
-        # If not locked out, proceed with standard OTP login
+        # Add warning for failed attempts
+        self._add_attempt_warning(username, extra_context)
+        
+        # Proceed with standard OTP login
         response = super().login(request, extra_context)
         
-        # Check if login succeeded
-        if request.method == 'POST' and not request.user.is_authenticated:
-            # Login didn't succeed - check if it was a valid username but wrong OTP
-            from django.contrib.auth import get_user_model
-            User = get_user_model()
-            
-            if username:
-                try:
-                    user = User.objects.get(username=username)
-                    
-                    # Check if the password was correct but OTP failed
-                    from django.contrib.auth import authenticate
-                    password = request.POST.get('password')
-                    user_auth = authenticate(request, username=username, password=password)
-                    
-                    if user_auth is not None:
-                        # Password was correct, but OTP failed - track as OTP failure
-                        remaining = OTPLockoutTracker.log_failed_attempt(username)
-                        if remaining == 0:
-                            # Account is now locked - force a reload to show the lockout message
-                            from django.shortcuts import redirect
-                            return redirect(request.path)
-                except User.DoesNotExist:
-                    # Username doesn't exist - not an OTP failure
-                    pass
-        
-        # If user logged in successfully, clear attempts counter
-        if request.user.is_authenticated:
-            OTPLockoutTracker.clear_attempts(username)
+        # Handle post-login processing
+        if request.method == 'POST':
+            if not request.user.is_authenticated:
+                # Login failed - check if it was OTP failure
+                redirect_response = self._handle_failed_otp_verification(request, username)
+                if redirect_response:
+                    return redirect_response
+            else:
+                # Login succeeded - clear attempts
+                OTPLockoutTracker.clear_attempts(username)
         
         return response
         
