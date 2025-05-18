@@ -75,14 +75,14 @@ class OTPLockoutTracker:
         attempts = cache.get(attempts_key, 0) + 1
         cache.set(attempts_key, attempts, cls.LOCKOUT_TIME)
         
-        # Log the attempt
-        logger.warning(f"OTP verification failed for user {username}. Attempt {attempts}")
+        # Log the attempt - avoid logging user-controlled data directly
+        logger.warning(f"OTP verification failed for a user. Attempt {attempts}")
         
         if attempts >= cls.MAX_ATTEMPTS:
             # Lock the account
             cache_key = f"otp_lockout:{username}"
             cache.set(cache_key, True, cls.LOCKOUT_TIME)
-            logger.warning(f"User {username} locked out due to too many failed OTP attempts")
+            logger.warning("User locked out due to too many failed OTP attempts")
             return 0  # No attempts remaining
         
         return cls.MAX_ATTEMPTS - attempts
@@ -158,11 +158,11 @@ class SecureOTPAdmin(OTPAdminSite):
         if not username:
             return None
             
-        User = get_user_model()
+        user_model = get_user_model()
         password = request.POST.get('password')
         
         try:
-            user = User.objects.get(username=username)
+            user = user_model.objects.get(username=username)
             user_auth = authenticate(request, username=username, password=password)
             
             if user_auth is not None:
@@ -170,7 +170,7 @@ class SecureOTPAdmin(OTPAdminSite):
                 remaining = OTPLockoutTracker.log_failed_attempt(username)
                 if remaining == 0:
                     return redirect(request.path)
-        except User.DoesNotExist:
+        except user_model.DoesNotExist:
             pass
             
         return None
