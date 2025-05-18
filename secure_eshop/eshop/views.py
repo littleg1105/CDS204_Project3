@@ -299,6 +299,7 @@ def _handle_login_redirect(request):
 # Χρησιμότητα: Ασφαλής τερματισμός user session
 # ============================================================================
 
+@require_http_methods(["POST"])  # Logout should only accept POST for security
 def logout_view(request):
     """
     Αποσυνδέει τον χρήστη και τον ανακατευθύνει στη σελίδα login.
@@ -307,6 +308,7 @@ def logout_view(request):
     - Καθαρίζει όλα τα session data
     - Invalidates session cookie
     - Πλήρης καταστροφή του session για αποτροπή session hijacking
+    - Restricted to POST to prevent CSRF via GET requests
     
     Args:
         request: Django request object
@@ -325,6 +327,7 @@ def logout_view(request):
 # ============================================================================
 
 @login_required  # Απαιτεί authentication
+@require_http_methods(["GET"])  # Only allow GET for data retrieval
 def catalog_view(request):
     """
     Εμφανίζει τον κατάλογο προϊόντων με δυνατότητα αναζήτησης.
@@ -333,6 +336,7 @@ def catalog_view(request):
     - Login required (προστασία private data)
     - Search query sanitization με bleach (XSS protection)
     - Protection από SQL injection μέσω Django ORM
+    - Restricted to GET method (data retrieval only)
     
     Features:
     - Product search με πολλαπλά κριτήρια (name, description)
@@ -372,7 +376,7 @@ def catalog_view(request):
     # Λήψη ή δημιουργία καλαθιού για τον χρήστη
     # Χρησιμότητα: Εξασφαλίζει ότι κάθε χρήστης έχει καλάθι
     # Django pattern: get_or_create για atomic operations
-    cart, created = Cart.objects.get_or_create(user=request.user)
+    cart, _ = Cart.objects.get_or_create(user=request.user)
     
     # Υπολογισμός στοιχείων καλαθιού
     cart_items_count = cart.get_total_items()
@@ -441,7 +445,7 @@ def add_to_cart(request):
         product = get_object_or_404(Product, id=product_id)
         
         # Λήψη ή δημιουργία καλαθιού
-        cart, created = Cart.objects.get_or_create(user=request.user)
+        cart, _ = Cart.objects.get_or_create(user=request.user)
         
         # Λήψη ή δημιουργία cart item
         # Χρησιμότητα: Αποφυγή διπλότυπων, increment quantity αν υπάρχει
@@ -483,6 +487,7 @@ def add_to_cart(request):
 # ============================================================================
 
 @login_required
+@require_http_methods(["GET", "POST"])  # Only allow GET (display form) and POST (process form)
 @ratelimit(key='user', rate='5/m', method=['POST'], block=True)  # Rate limit: 5 attempts per minute per user
 def payment_view(request):
     """
@@ -499,6 +504,7 @@ def payment_view(request):
     - CSRF protection (Django middleware)
     - Input sanitization (στο ShippingAddressForm)
     - Rate limiting για αποφυγή abuse
+    - Restricted to GET and POST methods
     
     Flow:
     1. GET: Εμφάνιση shipping address form
@@ -536,7 +542,7 @@ def _get_cart_data(user):
     Returns:
         dict: Cart data or None if cart is empty
     """
-    cart, created = Cart.objects.get_or_create(user=user)
+    cart, _ = Cart.objects.get_or_create(user=user)
     cart_items = cart.cartitem_set.all().select_related('product')
     
     if not cart_items.exists():
