@@ -245,36 +245,36 @@ When working with static files:
 
 ### Test Environment Setup
 
-The tests require a special settings file that properly configures the encryption key and test database. A test settings file has been created at `eshop_project/test_settings.py`.
+The tests require a special settings file that properly configures the encryption key and test database. A test settings file has been created at `eshop/tests/test_settings.py`.
 
 ### Running Tests
 
 Run all tests with the test settings:
 ```bash
-python manage.py test --settings=eshop_project.test_settings
+python manage.py test --settings=eshop.tests.test_settings
 ```
 
 Run a specific test:
 ```bash
-python manage.py test eshop.tests.TestClassName.test_method_name --settings=eshop_project.test_settings
+python manage.py test eshop.tests.TestClassName.test_method_name --settings=eshop.tests.test_settings
 ```
 
 Run tests from a specific module:
 ```bash
-python manage.py test eshop.tests.test_authentication --settings=eshop_project.test_settings
+python manage.py test eshop.tests.test_authentication --settings=eshop.tests.test_settings
 ```
 
 ### Alternative Methods
 
 You can also set the DJANGO_SETTINGS_MODULE environment variable:
 ```bash
-export DJANGO_SETTINGS_MODULE=eshop_project.test_settings
+export DJANGO_SETTINGS_MODULE=eshop.tests.test_settings
 python manage.py test
 ```
 
 Or create an alias for easier use:
 ```bash
-alias test-eshop="python manage.py test --settings=eshop_project.test_settings"
+alias test-eshop="python manage.py test --settings=eshop.tests.test_settings"
 test-eshop
 ```
 
@@ -285,7 +285,7 @@ test-eshop
 ValueError: FIELD_ENCRYPTION_KEY must be set in production
 ```
 
-The test settings file (`eshop_project/test_settings.py`) handles:
+The test settings file (`eshop/tests/test_settings.py`) handles:
 - Setting up the encryption key
 - Configuring an in-memory test database
 - Disabling security features for testing

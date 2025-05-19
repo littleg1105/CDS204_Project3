@@ -5,7 +5,7 @@ from cryptography.fernet import Fernet
 os.environ['FIELD_ENCRYPTION_KEY'] = Fernet.generate_key().decode()
 
 # Import all settings from the base settings
-from .settings import *
+from eshop_project.settings import *
 
 # Override any settings for testing
 DEBUG = True

@@ -7,7 +7,7 @@ This guide explains how to reset your database to implement the encryption chang
 For a quick reset in development, use the bash script:
 
 ```bash
-cd secure_eshop/scripts
+cd secure_eshop/scripts/db
 ./reset_db.sh
 ```
 
@@ -25,7 +25,7 @@ For a more comprehensive reset with data backup:
 
 ```bash
 cd secure_eshop
-python scripts/reset_database.py
+python scripts/db/reset_database.py
 ```
 
 This will:

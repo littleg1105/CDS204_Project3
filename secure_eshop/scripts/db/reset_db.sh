@@ -6,14 +6,18 @@
 echo "Quick Database Reset for Encryption Implementation"
 echo "================================================"
 
-# Navigate to project directory
-cd "$(dirname "$0")/.."
+# Navigate to project directory (where manage.py is located)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$PROJECT_ROOT"
 
 # Activate virtual environment if it exists
 if [ -d "venv" ]; then
     source venv/bin/activate
 elif [ -d "../venv" ]; then
     source ../venv/bin/activate
+elif [ -d "../../venv" ]; then
+    source ../../venv/bin/activate
 fi
 
 # Delete SQLite database
@@ -22,9 +26,9 @@ rm -f db.sqlite3
 
 # Delete migration files
 echo "Removing migration files..."
-find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
-find . -path "*/migrations/*.pyc" -delete
-find . -path "*/__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
+find "$PROJECT_ROOT" -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find "$PROJECT_ROOT" -path "*/migrations/*.pyc" -delete
+find "$PROJECT_ROOT" -path "*/__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 
 # Create new migrations
 echo "Creating new migrations..."
@@ -56,4 +60,4 @@ echo "Database reset completed!"
 echo ""
 echo "Next steps:"
 echo "1. Add the FIELD_ENCRYPTION_KEY to your .env file"
-echo "2. Run 'python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem'"
+echo "2. Run 'python manage.py runserver_plus --cert-file=config/certificates/cert.pem --key-file=config/certificates/key.pem'"

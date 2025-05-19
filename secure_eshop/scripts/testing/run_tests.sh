@@ -6,7 +6,7 @@ echo "🧪 Running tests with documentation..."
 echo
 
 # Run tests
-python manage.py test --settings=eshop_project.test_settings
+python manage.py test --settings=eshop.tests.test_settings
 
 echo
 echo "📊 Finding latest test documentation..."

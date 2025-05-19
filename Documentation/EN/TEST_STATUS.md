@@ -42,7 +42,7 @@
 
 Tests must be run with the test settings:
 ```bash
-python manage.py test --settings=eshop_project.test_settings
+python manage.py test --settings=eshop.tests.test_settings
 ```
 
 ### Documentation

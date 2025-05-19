@@ -3,6 +3,11 @@ import os
 import sys
 import django
 
+# Add the project root to the Python path
+script_path = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.join(script_path, '../../')
+sys.path.insert(0, project_root)
+
 # Ρύθμιση του περιβάλλοντος Django - Καθορίζουμε το module ρυθμίσεων
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eshop_project.settings')
 

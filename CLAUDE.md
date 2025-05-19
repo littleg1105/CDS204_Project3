@@ -8,8 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Run migrations: `python manage.py migrate`
 - Encrypt existing data: `python manage.py encrypt_existing_data` (run after adding encryption)
 - Run server: `python manage.py runserver_plus --cert-file=certificates/cert.pem --key-file=certificates/key.pem`
-- Run all tests: `python manage.py test --settings=eshop_project.test_settings`
-- Run a specific test: `python manage.py test eshop.tests.TestClassName.test_method_name --settings=eshop_project.test_settings`
+- Run all tests: `python manage.py test --settings=eshop.tests.test_settings`
+- Run a specific test: `python manage.py test eshop.tests.TestClassName.test_method_name --settings=eshop.tests.test_settings`
 
 ## Code Style Guidelines
 - **Imports**: Group Django imports first, followed by third-party, then local app imports
