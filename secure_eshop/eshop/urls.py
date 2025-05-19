@@ -15,6 +15,9 @@ from . import views
 # URL PATTERNS - Ορισμός των διαδρομών του application
 # ============================================================================
 
+# Namespace for the app - Required for tests
+app_name = 'eshop'
+
 urlpatterns = [
     # -------------------------------------------------------------------------
     # AUTHENTICATION URLs - Διαδρομές για σύνδεση/αποσύνδεση χρηστών

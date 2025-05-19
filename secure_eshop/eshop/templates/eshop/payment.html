@@ -14,7 +14,7 @@
     
     {% if cart_items_count == 0 %}
         <div class="alert alert-warning">
-            Το καλάθι σας είναι άδειο. <a href="{% url 'catalog' %}">Επιστροφή στον κατάλογο</a>
+            Το καλάθι σας είναι άδειο. <a href="{% url 'eshop:catalog' %}">Επιστροφή στον κατάλογο</a>
         </div>
     {% elif is_confirmation %}
         <!-- Confirmation Screen -->
@@ -85,11 +85,11 @@
                             {% endif %}
                         </div>
                         
-                        <form method="post" action="{% url 'payment' %}">
+                        <form method="post" action="{% url 'eshop:payment' %}">
                             {% csrf_token %}
                             <input type="hidden" name="confirm_order" value="1">
                             <div class="d-flex mt-4">
-                                <a href="{% url 'payment' %}" class="btn btn-secondary me-2">Επιστροφή</a>
+                                <a href="{% url 'eshop:payment' %}" class="btn btn-secondary me-2">Επιστροφή</a>
                                 <button type="submit" class="btn btn-success">Ολοκλήρωση Παραγγελίας</button>
                             </div>
                         </form>
@@ -201,7 +201,7 @@
                         <h5 class="mb-0">Διεύθυνση Αποστολής</h5>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{% url 'payment' %}" id="shipping-form" class="shipping-address-form">
+                        <form method="post" action="{% url 'eshop:payment' %}" id="shipping-form" class="shipping-address-form">
                             {% csrf_token %}
                             <div class="row g-3">
                                 <div class="col-12">

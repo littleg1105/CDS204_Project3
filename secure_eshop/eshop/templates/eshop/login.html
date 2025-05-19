@@ -10,7 +10,7 @@
                 <h4 class="mb-0">Σύνδεση</h4>
             </div>
             <div class="card-body">
-                <form method="post" action="{% url 'login' %}">
+                <form method="post" action="{% url 'eshop:login' %}">
                     {% csrf_token %}
                     
                     {% if form.non_field_errors %}

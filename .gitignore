@@ -6,6 +6,7 @@ Documentation/CLAUDE_ANALYSIS.md
 secure-eshop/.DS_Store
 report_resources/
 secure_eshop/config/
+secure_eshop/htmlcov/
 
 
 # Environment variables and secrets
@@ -24,6 +25,7 @@ __pycache__/
 
 # Static files collected
 /staticfiles/
+secure_eshop/staticfiles/
 
 # Report files
 report_resources/
@@ -33,6 +35,7 @@ report_resources/
 
 # Log files
 /logs/*.log
+secure_eshop/logs/*.log
 
 # Virtual environment
 venv/
@@ -55,3 +58,11 @@ git_small.log
 .gitignore
 git.log
 secure_eshop/combined_code_files.txt
+
+# Test artifacts
+secure_eshop/htmlcov/
+secure_eshop/eshop/tests/test_documentation_*.json
+secure_eshop/eshop/tests/test_documentation_*.md
+
+# Empty directories
+secure_eshop/static/

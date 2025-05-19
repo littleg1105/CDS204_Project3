@@ -22,26 +22,26 @@
     <header class="mb-4">
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-                <a class="navbar-brand" href="{% url 'catalog' %}">Secure E-Shop</a>
+                <a class="navbar-brand" href="{% url 'eshop:catalog' %}">Secure E-Shop</a>
                 
                 <div class="collapse navbar-collapse">
                     <ul class="navbar-nav ms-auto">
                         {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'catalog' %}">Κατάλογος</a>
+                                <a class="nav-link" href="{% url 'eshop:catalog' %}">Κατάλογος</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'payment' %}">Καλάθι</a>
+                                <a class="nav-link" href="{% url 'eshop:payment' %}">Καλάθι</a>
                             </li>
                             <li class="nav-item">
-                                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                                <form method="post" action="{% url 'eshop:logout' %}" class="d-inline">
                                     {% csrf_token %}
                                     <button type="submit" class="nav-link btn btn-link">Αποσύνδεση</button>
                                 </form>
                             </li>
                         {% else %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'login' %}">Σύνδεση</a>
+                                <a class="nav-link" href="{% url 'eshop:login' %}">Σύνδεση</a>
                             </li>
                         {% endif %}
                     </ul>

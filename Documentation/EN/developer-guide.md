@@ -243,17 +243,75 @@ When working with static files:
 
 ## Testing
 
+### Test Environment Setup
+
+The tests require a special settings file that properly configures the encryption key and test database. A test settings file has been created at `eshop_project/test_settings.py`.
+
 ### Running Tests
 
-Run all tests:
+Run all tests with the test settings:
 ```bash
-python manage.py test
+python manage.py test --settings=eshop_project.test_settings
 ```
 
 Run a specific test:
 ```bash
-python manage.py test eshop.tests.TestClassName.test_method_name
+python manage.py test eshop.tests.TestClassName.test_method_name --settings=eshop_project.test_settings
 ```
+
+Run tests from a specific module:
+```bash
+python manage.py test eshop.tests.test_authentication --settings=eshop_project.test_settings
+```
+
+### Alternative Methods
+
+You can also set the DJANGO_SETTINGS_MODULE environment variable:
+```bash
+export DJANGO_SETTINGS_MODULE=eshop_project.test_settings
+python manage.py test
+```
+
+Or create an alias for easier use:
+```bash
+alias test-eshop="python manage.py test --settings=eshop_project.test_settings"
+test-eshop
+```
+
+### Important Notes
+
+**Important**: Always use the test settings when running tests. Without it, tests will fail with encryption key errors:
+```
+ValueError: FIELD_ENCRYPTION_KEY must be set in production
+```
+
+The test settings file (`eshop_project/test_settings.py`) handles:
+- Setting up the encryption key
+- Configuring an in-memory test database
+- Disabling security features for testing
+- Using DEBUG mode for better error messages
+
+### Test Documentation
+
+The test suite includes automatic documentation generation. After each test run, it creates:
+
+1. **Markdown Report** (`test_documentation_YYYYMMDD_HHMMSS.md`):
+   - Summary of test results
+   - List of successful tests with descriptions
+   - Failed tests with error messages
+   - Test categorization by type
+   - Execution times for each test
+
+2. **JSON Report** (`test_documentation_YYYYMMDD_HHMMSS.json`):
+   - Machine-readable test results
+   - Complete test metadata
+   - Can be used for CI/CD integration
+
+These files are saved in the `eshop/tests/` directory and provide:
+- Track record of test runs
+- Documentation of what each test verifies
+- Performance metrics for test execution
+- Test coverage by category
 
 ### Writing Tests
 

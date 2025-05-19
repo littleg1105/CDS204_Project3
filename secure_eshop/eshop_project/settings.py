@@ -466,7 +466,7 @@ if DEBUG:
 
 # URL για login redirect
 # Χρησιμότητα: Όταν χρειάζεται authentication, redirect εδώ
-LOGIN_URL = 'login'
+LOGIN_URL = 'eshop:login'
 
 # Custom User model setting
 # Χρησιμότητα: Χρησιμοποιεί το custom User model με UUIDs αντί για το default Django model

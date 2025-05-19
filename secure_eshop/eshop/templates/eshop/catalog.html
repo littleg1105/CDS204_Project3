@@ -10,7 +10,7 @@
     <!-- Search Form -->
     <div class="row mb-4">
         <div class="col-md-6 offset-md-3">
-            <form method="GET" action="{% url 'catalog' %}" class="d-flex">
+            <form method="GET" action="{% url 'eshop:catalog' %}" class="d-flex">
                 <input type="text" name="q" class="form-control me-2" placeholder="Αναζήτηση προϊόντων..." value="{{ search_query }}">
                 <button type="submit" class="btn btn-primary">Αναζήτηση</button>
             </form>
@@ -23,7 +23,7 @@
             {% if is_search_results %}
                 <div class="alert alert-info">
                     Εμφανίζονται αποτελέσματα αναζήτησης για: <strong>{{ search_query }}</strong>
-                    <a href="{% url 'catalog' %}" class="float-end">Προβολή όλων των προϊόντων</a>
+                    <a href="{% url 'eshop:catalog' %}" class="float-end">Προβολή όλων των προϊόντων</a>
                 </div>
             {% endif %}
         </div>
@@ -81,7 +81,7 @@
                     </span>
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="{% url 'payment' %}" class="btn btn-success payment-button {% if cart_items_count == 0 %}disabled{% endif %}">
+                    <a href="{% url 'eshop:payment' %}" class="btn btn-success payment-button {% if cart_items_count == 0 %}disabled{% endif %}">
                         Προχωρήστε στην πληρωμή
                     </a>
                 </div>

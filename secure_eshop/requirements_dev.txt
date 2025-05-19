@@ -1,0 +1,510 @@
+# ============================================================================
+# TESTING & CODE QUALITY
+# ============================================================================
+
+pytest==7.4.0
+# Χρησιμότητα:
+# - Python testing framework
+# - Powerful fixture system
+# - Parameterized testing support
+# - Detailed testing reports
+# - Plugin architecture
+# - Integration with CI/CD tools
+
+pytest-django==4.5.2
+# Χρησιμότητα:
+# - Django-specific pytest extensions
+# - Test client integration
+# - Database transaction handling
+# - Django settings management
+# - Test fixtures για Django
+# - Admin και auth testing helpers
+
+coverage==7.2.7
+# Χρησιμότητα:
+# - Code coverage measurement tool
+# - Reports on untested code paths
+# - Branch και statement coverage
+# - HTML/XML/JSON reports
+# - Integration με pytest
+# - CI/CD friendly reporting
+
+flake8==6.0.0
+# Χρησιμότητα:
+# - Python code linter
+# - PEP8 style guide enforcement
+# - Static code analysis
+# - Finds errors και stylistic issues
+# - Customizable rule set
+# - Pre-commit hook compatible
+
+pylint==2.17.4
+# Χρησιμότητα:
+# - Comprehensive Python linter
+# - Advanced code analysis
+# - Error detection και code smells
+# - Code quality rating
+# - Customizable rule configuration
+# - Integrates with CI/CD pipelines
+
+astroid==2.15.8
+# Χρησιμότητα:
+# - Abstract Syntax Tree for Python
+# - Required by pylint
+# - Code structure analysis
+# - Type inference
+# - Symbol resolution
+
+isort==5.13.2
+# Χρησιμότητα:
+# - Python import statement organizer
+# - Sorts imports alphabetically
+# - Groups imports by type
+# - Removes unused imports
+# - Configurable sorting rules
+# - Pre-commit hook compatible
+
+mccabe==0.7.0
+# Χρησιμότητα:
+# - McCabe complexity checker
+# - Measures cyclomatic complexity
+# - Used by flake8
+# - Identifies overly complex functions
+# - Code maintainability metrics
+
+pycodestyle==2.10.0
+# Χρησιμότητα:
+# - PEP8 style guide checker
+# - Used by flake8
+# - Format και style validation
+# - Standardized coding conventions
+# - Line length και indentation checks
+
+pyflakes==3.0.1
+# Χρησιμότητα:
+# - Python source code checker
+# - Used by flake8
+# - Detects undefined names
+# - Finds unused imports
+# - Identifies redefined functions
+
+dill==0.4.0
+# Χρησιμότητα:
+# - Extended pickling functionality
+# - Used by pylint
+# - Object serialization
+# - Function και class serialization
+# - Enables object inspection
+
+# ============================================================================
+# SECURITY TOOLS
+# ============================================================================
+
+bandit==1.7.7
+# Χρησιμότητα:
+# - Security-focused code linter
+# - Finds common security issues
+# - SAST (Static Application Security Testing)
+# - Configurable severity levels
+# - CI/CD pipeline integration
+# - Python-specific security checks
+
+safety==2.3.5
+# Χρησιμότητα:
+# - Dependency vulnerability scanner
+# - Checks requirements against database
+# - Alerts για known vulnerabilities
+# - Integrates with CI/CD pipelines
+# - Provides upgrade paths
+# - Vulnerability reporting
+
+python-owasp-zap-v2.4==0.0.21
+# Χρησιμότητα:
+# - OWASP ZAP API client
+# - Automated security scanning
+# - DAST (Dynamic Application Security Testing)
+# - Penetration testing automation
+# - Security report generation
+# - CI/CD security integration
+
+dparse==0.6.4
+# Χρησιμότητα:
+# - Dependency file parser
+# - Used by safety
+# - Handles requirements.txt parsing
+# - Supports multiple format types
+# - Enables dependency analysis
+
+# ============================================================================
+# LOAD TESTING
+# ============================================================================
+
+locust==2.15.1
+# Χρησιμότητα:
+# - Load testing framework
+# - Scalable user simulation
+# - Distributed load generation
+# - Real-time metrics και charts
+# - Customizable test scenarios
+# - HTTP και WebSocket support
+
+gevent==25.5.1
+# Χρησιμότητα:
+# - Coroutine-based networking library
+# - Required by locust
+# - Async I/O operations
+# - High-performance concurrency
+# - Monkey patching για standard library
+
+geventhttpclient==2.3.3
+# Χρησιμότητα:
+# - HTTP client για gevent
+# - Used by locust
+# - Connection pooling
+# - Keep-alive support
+# - High-performance HTTP requests
+
+roundrobin==0.0.4
+# Χρησιμότητα:
+# - Round-robin scheduling implementation
+# - Used by locust
+# - Task distribution
+# - Load balancing functionality
+# - Fair resource allocation
+
+# ============================================================================
+# HTTP & WEB FRAMEWORKS
+# ============================================================================
+
+Flask==3.1.1
+# Χρησιμότητα:
+# - Lightweight web framework
+# - API development και microservices
+# - Testing utilities
+# - Rapid prototype development
+# - Admin interface για locust
+
+Flask-BasicAuth==0.2.0
+# Χρησιμότητα:
+# - Basic authentication για Flask
+# - Protects web interface
+# - Simple security layer
+# - Used by locust UI
+# - Username/password protection
+
+flask-cors==6.0.0
+# Χρησιμότητα:
+# - Cross-Origin Resource Sharing for Flask
+# - API access control
+# - Security policy implementation
+# - Frontend-backend integration
+# - AJAX request handling
+
+blinker==1.9.0
+# Χρησιμότητα:
+# - Signal/event handling library
+# - Required by Flask
+# - Implements Observer pattern
+# - Decouples application components
+# - Event-driven architecture support
+
+Jinja2==3.1.6
+# Χρησιμότητα:
+# - Template engine
+# - Used by Flask
+# - HTML rendering
+# - Template inheritance
+# - Context-aware escaping
+# - Extensible syntax
+
+click==8.2.0
+# Χρησιμότητα:
+# - Command-line interface toolkit
+# - Used by Flask CLI
+# - Argument parsing
+# - Help text generation
+# - Command group support
+# - Rich command completion
+
+itsdangerous==2.2.0
+# Χρησιμότητα:
+# - Data signing library
+# - Used by Flask για session cookies
+# - Secure token generation
+# - Timestamp validation
+# - Serialization security
+
+Brotli==1.1.0
+# Χρησιμότητα:
+# - Compression algorithm
+# - Better than gzip/deflate
+# - Improves page load times
+# - Reduces bandwidth usage
+# - HTTP content encoding support
+
+# ============================================================================
+# UTILITIES & DEPENDENCIES
+# ============================================================================
+
+certifi==2025.4.26
+# Χρησιμότητα:
+# - CA certificate bundle
+# - Required by requests
+# - SSL certificate validation
+# - Secure HTTPS connections
+# - Root certificates management
+
+charset-normalizer==3.4.2
+# Χρησιμότητα:
+# - Character encoding detector
+# - Required by requests
+# - Unicode normalization
+# - Handles text encoding edge cases
+# - Improves text processing reliability
+
+idna==3.10
+# Χρησιμότητα:
+# - International Domain Names
+# - Required by requests
+# - Unicode domain processing
+# - URL handling και validation
+# - Internationalized hostnames
+
+requests==2.32.2
+# Χρησιμότητα:
+# - HTTP library for Python
+# - Simple API requests
+# - Session management
+# - Authentication support
+# - File uploads και downloads
+# - HTTP/2 και streaming support
+
+urllib3==2.4.0
+# Χρησιμότητα:
+# - HTTP client για Python
+# - Required by requests
+# - Connection pooling
+# - Retry handling
+# - SSL/TLS verification
+# - Proxy support
+
+ConfigArgParse==1.7
+# Χρησιμότητα:
+# - Command-line argument parser
+# - Config file support
+# - Environment variable integration
+# - Used by locust
+# - Hierarchical configuration
+
+iniconfig==2.1.0
+# Χρησιμότητα:
+# - INI file parser
+# - Required by pytest
+# - Simple configuration format
+# - Section-based organization
+# - Key-value configuration storage
+
+markdown-it-py==3.0.0
+# Χρησιμότητα:
+# - Markdown parser
+# - Documentation rendering
+# - Rich text formatting
+# - Used by documentation tools
+# - Extensible syntax
+
+mdurl==0.1.2
+# Χρησιμότητα:
+# - URL utilities για Markdown
+# - Required by markdown-it-py
+# - Link parsing και validation
+# - URL normalization
+# - Path handling
+
+msgpack==1.1.0
+# Χρησιμότητα:
+# - Fast serialization library
+# - Binary format (smaller than JSON)
+# - Cross-language compatibility
+# - Used for data exchange
+# - Network communication optimization
+
+platformdirs==4.3.8
+# Χρησιμότητα:
+# - Platform-specific directories
+# - Finds user data/config paths
+# - Cross-platform compatibility
+# - Cache location management
+# - Application data storage
+
+pluggy==1.6.0
+# Χρησιμότητα:
+# - Plugin system για Python
+# - Required by pytest
+# - Hook specification and implementation
+# - Plugin discovery και registration
+# - Extensible architecture support
+
+psutil==7.0.0
+# Χρησιμότητα:
+# - Process και system utilities
+# - System monitoring
+# - Resource usage statistics
+# - Cross-platform compatibility
+# - Performance metrics collection
+
+pyparsing==3.2.3
+# Χρησιμότητα:
+# - Text parsing library
+# - Creating parsers για domain languages
+# - Alternative to regular expressions
+# - Used by packaging και others
+# - Complex grammar definitions
+
+pypng==0.20220715.0
+# Χρησιμότητα:
+# - Pure Python PNG image encoder/decoder
+# - Used by qrcode
+# - Image processing capabilities
+# - No external dependencies
+# - QR code image generation
+
+pyzmq==26.4.0
+# Χρησιμότητα:
+# - ZeroMQ bindings για Python
+# - Used by locust για distributed testing
+# - High-performance messaging
+# - Asynchronous communication
+# - Distributed system architecture
+
+rich==14.0.0
+# Χρησιμότητα:
+# - Terminal text formatting
+# - Pretty-printing
+# - Colorized output
+# - Progress bars και status displays
+# - Table formatting
+# - Syntax highlighting
+
+PyYAML==6.0.2
+# Χρησιμότητα:
+# - YAML parser και emitter
+# - Configuration file handling
+# - Data serialization
+# - Human-readable data format
+# - Used by many tools και libraries
+
+ruamel.yaml==0.18.10
+# Χρησιμότητα:
+# - Advanced YAML parser
+# - Preserves comments και formatting
+# - Round-trip editing
+# - Better error messages than PyYAML
+# - YAML 1.2 specification compliance
+
+setuptools==80.7.1
+# Χρησιμότητα:
+# - Python packaging utility
+# - Required by various packages
+# - Package installation και distribution
+# - Entry point management
+# - Dependency resolution
+
+six==1.17.0
+# Χρησιμότητα:
+# - Python 2/3 compatibility library
+# - Required by various packages
+# - Cross-version utilities
+# - Compatibility wrappers
+# - Smooths version differences
+
+Pygments==2.19.1
+# Χρησιμότητα:
+# - Syntax highlighting library
+# - Code formatting
+# - Used by documentation tools
+# - Multiple language support
+# - HTML/terminal output
+
+# ============================================================================
+# VERSION CONTROL & AUTOMATION
+# ============================================================================
+
+GitPython==3.1.44
+# Χρησιμότητα:
+# - Git repository interaction
+# - Code versioning operations
+# - Commit history analysis
+# - Repository management
+# - Used by security και audit tools
+
+gitdb==4.0.12
+# Χρησιμότητα:
+# - Git database access layer
+# - Required by GitPython
+# - Efficient object storage
+# - Git object database interface
+# - Repository data structure
+
+smmap==5.0.2
+# Χρησιμότητα:
+# - Memory mapped access
+# - Required by gitdb
+# - Efficient file access
+# - Sliding window implementation
+# - Large file handling
+
+tomlkit==0.13.2
+# Χρησιμότητα:
+# - TOML file parser και writer
+# - Configuration management
+# - Preserves comments και formatting
+# - Used by modern Python tools
+# - pyproject.toml handling
+
+typing_extensions==4.13.2
+# Χρησιμότητα:
+# - Backported typing hints
+# - Type annotation support
+# - Enhanced type checking
+# - Static code analysis support
+# - IDE integration για type hints
+
+wrapt==1.17.2
+# Χρησιμότητα:
+# - Decorator και proxy library
+# - Used by pylint και others
+# - Function wrapping utilities
+# - Object proxy implementation
+# - Cross-Python-version functionality
+
+pbr==6.1.1
+# Χρησιμότητα:
+# - Python Build Reasonableness
+# - Standardizes setup.py files
+# - Used by OpenStack projects
+# - Simplifies packaging
+# - Version management from git
+
+stevedore==5.4.1
+# Χρησιμότητα:
+# - Plugin management library
+# - Dynamic extension loading
+# - Plugin discovery και registration
+# - Used by safety και bandit
+# - Extensible architecture support
+
+zope.interface==7.2
+# Χρησιμότητα:
+# - Interface definition library
+# - Component architecture
+# - Explicit API contracts
+# - Dependency injection support
+# - Object capability patterns
+
+zope.event==5.0
+# Χρησιμότητα:
+# - Event publishing system
+# - Used with zope.interface
+# - Simple event dispatching
+# - Observer pattern implementation
+# - Decoupled component communication

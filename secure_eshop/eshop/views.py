@@ -220,7 +220,7 @@ def login_view(request):
     # Χρησιμότητα: Αποφυγή περιττού re-authentication
     # UX: Καλύτερη εμπειρία χρήστη - αποφυγή περιττών form συμπληρώσεων
     if request.user.is_authenticated:
-        return redirect('catalog')
+        return redirect('eshop:catalog')
     
     # POST request - Υποβολή login credentials
     if request.method == 'POST':
@@ -274,16 +274,16 @@ def _handle_login_redirect(request):
     # Χρησιμότητα: Επιστροφή στη σελίδα που ζήτησε authentication
     # UX: Διατηρεί την αρχική πρόθεση του χρήστη μετά το login
     # Security: Validate the redirect URL to prevent open redirects
-    next_url = request.GET.get('next', 'catalog')
+    next_url = request.GET.get('next', 'eshop:catalog')
     
     # If next_url is not provided or is 'catalog', use default
-    if not next_url or next_url == 'catalog':
-        return redirect('catalog')
+    if not next_url or next_url == 'catalog' or next_url == 'eshop:catalog':
+        return redirect('eshop:catalog')
     
     # Check if URL is relative and safe
     if not next_url.startswith('/'):
         # External URLs are not allowed - redirect to catalog
-        return redirect('catalog')
+        return redirect('eshop:catalog')
     
     # Try to resolve the URL to ensure it's internal
     try:
@@ -291,7 +291,7 @@ def _handle_login_redirect(request):
         return redirect(next_url)
     except Resolver404:
         # If URL doesn't resolve, redirect to catalog
-        return redirect('catalog')
+        return redirect('eshop:catalog')
 
 
 # ============================================================================
@@ -318,7 +318,7 @@ def logout_view(request):
     """
     logout(request)  # Django's logout function
     # Technical: Η logout() του Django διαγράφει το session data και invalidates το cookie
-    return redirect('login')
+    return redirect('eshop:login')
 
 
 # ============================================================================
@@ -523,7 +523,7 @@ def payment_view(request):
     cart_data = _get_cart_data(request.user)
     if not cart_data:
         messages.warning(request, "Το καλάθι σας είναι άδειο. Προσθέστε προϊόντα πριν προχωρήσετε στην πληρωμή.")
-        return redirect('catalog')
+        return redirect('eshop:catalog')
     
     # Handle different request types
     if request.method == 'POST':
@@ -571,7 +571,7 @@ def _handle_order_confirmation(request, cart_data):
     
     if not address_id:
         messages.error(request, "Η διεύθυνση αποστολής δεν βρέθηκε.")
-        return redirect('payment')
+        return redirect('eshop:payment')
     
     try:
         shipping_address = get_object_or_404(ShippingAddress, id=address_id, user=request.user)
@@ -580,12 +580,12 @@ def _handle_order_confirmation(request, cart_data):
         _cleanup_after_order(request, cart_data['cart_items'])
         
         messages.success(request, f"Η παραγγελία σας καταχωρήθηκε επιτυχώς με κωδικό #{order.id}! Θα λάβετε σύντομα email με όλες τις λεπτομέρειες.")
-        return redirect('catalog')
+        return redirect('eshop:catalog')
         
     except Exception as e:
         logger.error(f"Σφάλμα κατά τη δημιουργία παραγγελίας: {str(e)}")
         messages.error(request, "Προέκυψε σφάλμα κατά την καταχώρηση της παραγγελίας. Παρακαλώ προσπαθήστε ξανά.")
-        return redirect('payment')
+        return redirect('eshop:payment')
 
 
 def _create_order(user, shipping_address, cart_data):
