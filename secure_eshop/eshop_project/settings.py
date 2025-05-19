@@ -370,6 +370,14 @@ SECURE_HSTS_PRELOAD = True            # Συμπερίληψη στη browser pr
 # Χρησιμότητα: Αποτρέπει κλοπή session cookies μέσω unencrypted connections
 SESSION_COOKIE_SECURE = True
 
+# Αποτρέπει JavaScript πρόσβαση στα session cookies
+# Χρησιμότητα: Προστασία από XSS επιθέσεις που στοχεύουν session hijacking
+SESSION_COOKIE_HTTPONLY = True
+
+# Περιορίζει πότε στέλνεται το session cookie σε cross-site requests
+# Χρησιμότητα: Προστασία από CSRF επιθέσεις
+SESSION_COOKIE_SAMESITE = 'Lax'
+
 # XSS filter των browsers
 # Χρησιμότητα: Ενεργοποιεί built-in XSS protection των browsers
 SECURE_BROWSER_XSS_FILTER = True

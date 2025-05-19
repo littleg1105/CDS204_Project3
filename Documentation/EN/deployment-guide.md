@@ -348,3 +348,37 @@ python manage.py migrate
 python manage.py createsuperuser;
 python manage.py add_otp_device admin
 python manage.py collectstatic
+
+
+
+  # Run all tests in the eshop app
+  python manage.py test eshop.tests
+
+  # Run all tests more verbosely
+  python manage.py test eshop.tests -v 2
+
+  # Run all tests with coverage
+  coverage run --source='.' manage.py test eshop.tests
+  coverage report
+
+  # Run the security test script which runs everything
+  ./scripts/run_security_tests.sh
+
+  # Or if you just want to run the security-focused tests
+  python scripts/security_tests.py
+
+  The most comprehensive option is to use the security testing script:
+
+  cd /Users/georgeg/Local_Documents/Dev/CDS204_p3/CDS204_Project3/secure_eshop
+  ./scripts/run_security_tests.sh
+
+  This will:
+  1. Run static code analysis (Bandit, safety, flake8)
+  2. Run all unit tests (authentication, validation, etc.)
+  3. Run integration tests (cart API, order flow)
+  4. Generate code coverage reports
+  5. Run penetration tests (if OWASP ZAP is running)
+  6. Generate a comprehensive security report
+
+  For just Django tests without the static analysis:
+  python manage.py test eshop.tests
