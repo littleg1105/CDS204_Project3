@@ -18,6 +18,63 @@ import functools
 # Ρύθμιση logger για καταγραφή συμβάντων ασφαλείας
 logger = logging.getLogger('security')
 
+class SecurityHeadersMiddleware(MiddlewareMixin):
+    """
+    Middleware to add security headers to all responses.
+    
+    Adds several important security headers:
+    - X-XSS-Protection: Helps prevent cross-site scripting attacks
+    - Content-Security-Policy: Restricts which resources can be loaded
+    - Cache-Control: Controls browser caching behavior
+    - Permissions-Policy: Restricts which browser features the site can use
+    - Referrer-Policy: Controls how much referrer information is included
+    """
+    
+    def process_response(self, request, response):
+        # X-XSS-Protection header
+        # Mode=block tells the browser to block the response rather than sanitize
+        # Adding report parameter for better security monitoring
+        response['X-XSS-Protection'] = '1; mode=block; report=self'
+        
+        # Content Security Policy
+        # Define CSP based on project settings
+        csp_directives = [
+            "default-src 'self'",
+            "script-src 'self' https://cdn.jsdelivr.net",
+            "style-src 'self' https://cdn.jsdelivr.net",
+            "font-src 'self' https://cdn.jsdelivr.net",
+            "img-src 'self' data:",
+            "connect-src 'self'",
+            "frame-ancestors 'self'",
+            "form-action 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "upgrade-insecure-requests",
+        ]
+        response['Content-Security-Policy'] = '; '.join(csp_directives)
+        
+        # Cache Control
+        # Prevents storing sensitive data in cache
+        response['Cache-Control'] = 'no-store, max-age=0'
+        
+        # Permissions Policy (previously Feature Policy)
+        # Restricts which browser features the site can use
+        permissions = [
+            "camera=()",
+            "microphone=()",
+            "geolocation=()",
+            "payment=()",
+            "usb=()",
+            "fullscreen=(self)"
+        ]
+        response['Permissions-Policy'] = ', '.join(permissions)
+        
+        # Referrer Policy
+        # Controls how much referrer information is sent
+        response['Referrer-Policy'] = 'same-origin'
+        
+        return response
+
 # Σταθερές για τις διαδρομές URL
 ADMIN_LOGIN_PATH = '/admin/login/'
 

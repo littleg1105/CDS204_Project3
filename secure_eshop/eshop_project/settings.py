@@ -109,8 +109,8 @@ MIDDLEWARE = [
     # Security middleware - ΠΡΩΤΟ για μέγιστη ασφάλεια
     'django.middleware.security.SecurityMiddleware',
     
-    # Content Security Policy - Προστασία από XSS
-    'csp.middleware.CSPMiddleware',
+    # Custom security headers middleware - Adds all security headers
+    'eshop.middleware.SecurityHeadersMiddleware',
     
     # Session management - Διαχείριση sessions
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -127,7 +127,7 @@ MIDDLEWARE = [
     # OTP Middleware - Enables two-factor authentication
     'django_otp.middleware.OTPMiddleware',
     
-    # OTP Lockout Middleware - Enforces OTP lockout
+    # OTP Lockout Middleware - Enforces OTP lockout (from main middleware.py)
     'eshop.middleware.OTPLockoutMiddleware',
     
     # Messages - Σύστημα μηνυμάτων για feedback στον χρήστη
@@ -404,6 +404,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # CSP Sources
 CSP_SELF = "'self'"
 CSP_CDN = "https://cdn.jsdelivr.net"
+CSP_NONE = "'none'"
 
 # Default policy - μόνο από τον ίδιο server
 CSP_DEFAULT_SRC = (CSP_SELF,)
@@ -423,11 +424,29 @@ CSP_IMG_SRC = (CSP_SELF, "data:")
 # AJAX/Fetch - μόνο στον ίδιο server
 CSP_CONNECT_SRC = (CSP_SELF,)
 
+# Object sources - restrict plugins
+CSP_OBJECT_SRC = (CSP_NONE,)
+
+# Frame ancestors - prevent clickjacking
+CSP_FRAME_ANCESTORS = (CSP_SELF,)
+
+# Form action - restrict form submissions to same origin
+CSP_FORM_ACTION = (CSP_SELF,)
+
+# Base URI - restrict base tag to same origin
+CSP_BASE_URI = (CSP_SELF,)
+
 # Χρήση nonce για inline scripts
-CSP_INCLUDE_NONCE_IN_SCRIPT_SRC = True
+CSP_INCLUDE_NONCE_IN = ['script-src']
 
 # Απαγόρευση mixed content (HTTP σε HTTPS pages)
 CSP_BLOCK_ALL_MIXED_CONTENT = True
+
+# Force HTTPS for all resources
+CSP_UPGRADE_INSECURE_REQUESTS = True
+
+# Add X-XSS-Protection header
+SECURE_BROWSER_XSS_FILTER = True
 
 
 # ============================================================================
