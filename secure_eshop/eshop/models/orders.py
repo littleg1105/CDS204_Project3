@@ -43,8 +43,8 @@ class ShippingAddress(models.Model):
     # Σχέση: Ένας χρήστης μπορεί να έχει πολλές διευθύνσεις (one-to-many)
     
     # Πεδία διεύθυνσης με ελληνικά verbose names
-    name = EncryptedCharField(max_length=100, verbose_name='Ονοματεπώνυμο')
-    address = EncryptedCharField(max_length=200, verbose_name='Διεύθυνση')
+    name = EncryptedCharField(max_length=900, verbose_name='Ονοματεπώνυμο')
+    address = EncryptedCharField(max_length=1000, verbose_name='Διεύθυνση')
     city = models.CharField(max_length=100, verbose_name='Πόλη')
     
     # Ταχυδρομικός κώδικας με validation για ελληνικό format (5 ψηφία)
@@ -66,7 +66,7 @@ class ShippingAddress(models.Model):
     
     # Τηλέφωνο με validation για ελληνικό format
     phone = EncryptedCharField(
-        max_length=20,
+        max_length=1000,
         verbose_name='Τηλέφωνο',
         validators=[
             RegexValidator(
@@ -89,7 +89,7 @@ class ShippingAddress(models.Model):
     
     # Email με υποχρεωτική συμπλήρωση και built-in validation
     email = EncryptedCharField(
-        max_length=254,  # Standard email max length
+        max_length=1000,  # Increased max length for encrypted data
         verbose_name='Email',
         help_text='Απαιτείται για επικοινωνία σχετικά με την παραγγελία',
         blank=False,   # Δεν επιτρέπεται κενό στις forms (υποχρεωτικό πεδίο)
