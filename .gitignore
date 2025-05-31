@@ -5,8 +5,11 @@ CLAUDE.md
 Documentation/CLAUDE_ANALYSIS.md
 secure-eshop/.DS_Store
 report_resources/
-secure_eshop/config/
+secure_eshop/config/certificates/cert.pem
+secure_eshop/config/certificates/key.pem
+secure_eshop/config/admin_qrcode.png
 secure_eshop/htmlcov/
+.claude/
 
 
 # Environment variables and secrets
