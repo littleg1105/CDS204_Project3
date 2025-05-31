@@ -461,7 +461,7 @@ CSRF_COOKIE_SECURE = True
 
 # SameSite policy για CSRF cookie
 # Χρησιμότητα: Περιορίζει πότε στέλνεται το cookie σε cross-site requests
-CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Strict'
 
 # Trusted origins για CSRF
 CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']

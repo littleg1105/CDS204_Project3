@@ -34,7 +34,7 @@ secure_eshop/staticfiles/
 report_resources/
 
 # Media uploads
-/media/
+/media/products/*
 
 # Log files
 /logs/*.log
