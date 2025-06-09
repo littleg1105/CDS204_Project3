@@ -99,6 +99,18 @@ urlpatterns = [
     # - Methods: GET και POST
     # - Σκοπός: Διαδικασία checkout (shipping address + order confirmation)
     # - Σημείωση: Ενημερώθηκε για να χρησιμοποιεί το σωστό view
+    
+    # -------------------------------------------------------------------------
+    # PRODUCT URLs - Product detail and reviews (VULNERABLE TO XSS)
+    # -------------------------------------------------------------------------
+    
+    # Product detail URL
+    path('product/<int:product_id>/', views.product_detail, name='product_detail'),
+    # WARNING: This view displays unescaped user reviews (XSS vulnerability)
+    
+    # Submit review URL
+    path('product/<int:product_id>/review/', views.submit_review, name='submit_review'),
+    # WARNING: This endpoint stores unsanitized user input (XSS vulnerability)
 ]
 
 # ============================================================================

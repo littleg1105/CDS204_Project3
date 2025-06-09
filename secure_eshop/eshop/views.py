@@ -77,13 +77,14 @@ from .utils.json_utils import dumps as json_dumps, UUIDEncoder
 # Τεχνικό: Τα UUID fields δεν σειριοποιούνται αυτόματα από το default JSON encoder
 
 # Security - input sanitization
-import bleach
+# VULNERABILITY: Commented out bleach for XSS vulnerability
+# import bleach
 # Χρησιμότητα: Καθαρίζει user input από malicious HTML/scripts (XSS protection)
 # Ασφάλεια: Αποτρέπει Cross-Site Scripting (XSS) attacks σε user-generated content
 
 # Local imports
-from .forms import LoginForm, ShippingAddressForm
-from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem
+from .forms import LoginForm, ShippingAddressForm, ProductReviewForm
+from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem, ProductReview
 from .emails import send_order_confirmation, send_order_notification_to_admin
 
 # Logging
@@ -353,20 +354,46 @@ def catalog_view(request):
     # Λήψη search query από GET parameters
     search_query = request.GET.get('q', '')
     
-    # XSS Protection: Καθαρισμός του query με bleach
-    # Χρησιμότητα: Αφαιρεί malicious HTML/JavaScript
-    # Security: Αποτρέπει stored/reflected XSS attacks
-    clean_query = bleach.clean(search_query)
+    # VULNERABILITY: SQL Injection - Direct SQL query with user input
+    # WARNING: This code is intentionally vulnerable for educational purposes
+    # The search query is directly concatenated into SQL without sanitization
     
-    # Αναζήτηση προϊόντων
-    if clean_query:
-        # Complex query με Q objects
-        # Χρησιμότητα: Αναζήτηση σε name ΚΑΙ description ταυτόχρονα
-        # Performance: Βελτιστοποιεί το SQL query σε OR conditions
-        products = Product.objects.filter(
-            Q(name__icontains=clean_query) |      # Case-insensitive search στο name
-            Q(description__icontains=clean_query)  # ή στο description
-        )
+    if search_query:
+        from django.db import connection
+        
+        # UNSAFE: Direct string concatenation allows SQL injection
+        # Example attack: q=' OR '1'='1' -- 
+        # This will return all products regardless of search term
+        raw_query = f"""
+        SELECT id, name, description, price, stock, created_at, updated_at 
+        FROM eshop_product 
+        WHERE name LIKE '%%{search_query}%%' 
+        OR description LIKE '%%{search_query}%%'
+        """
+        
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute(raw_query)
+                columns = [col[0] for col in cursor.description]
+                products_raw = cursor.fetchall()
+                
+                # Convert raw results to Product-like objects
+                products = []
+                for row in products_raw:
+                    product_dict = dict(zip(columns, row))
+                    # Create a simple object to mimic Product model
+                    class ProductObj:
+                        def __init__(self, **kwargs):
+                            for key, value in kwargs.items():
+                                setattr(self, key, value)
+                    products.append(ProductObj(**product_dict))
+                    
+            except Exception as e:
+                # VULNERABILITY: Information Disclosure
+                # Exposing database errors helps attackers understand the schema
+                products = []
+                messages.error(request, f"Database error: {str(e)}")
+                
         is_search_results = True
     else:
         # Εμφάνιση όλων των προϊόντων αν δεν υπάρχει query
@@ -385,7 +412,7 @@ def catalog_view(request):
     # Context για το template
     context = {
         'products': products,
-        'search_query': clean_query,
+        'search_query': search_query,  # VULNERABILITY: Using unsanitized query
         'is_search_results': is_search_results,
         'cart_items_count': cart_items_count,
         'cart_items': cart_items
@@ -889,4 +916,85 @@ def update_cart_item(request):
     except Exception as e:
         logger.error(f"Error updating cart item: {str(e)}")
         return JsonResponse({'error': ERROR_SERVER}, status=500, encoder=UUIDEncoder)
+
+
+# ============================================================================
+# PRODUCT REVIEW VIEWS - VULNERABLE TO XSS
+# ============================================================================
+
+@login_required
+@require_http_methods(["POST"])
+def submit_review(request, product_id):
+    """
+    Submit a product review - VULNERABLE TO XSS
+    
+    WARNING: This view intentionally does NOT sanitize user input
+    Allows storage of malicious scripts in the database
+    """
+    product = get_object_or_404(Product, id=product_id)
+    
+    # Check if user already reviewed this product
+    existing_review = ProductReview.objects.filter(
+        product=product,
+        user=request.user
+    ).first()
+    
+    if existing_review:
+        messages.error(request, "You have already reviewed this product.")
+        return redirect('product_detail', product_id=product_id)
+    
+    form = ProductReviewForm(request.POST)
+    
+    if form.is_valid():
+        # VULNERABILITY: No sanitization of form data
+        # Directly saving user input without cleaning
+        review = ProductReview(
+            product=product,
+            user=request.user,
+            title=form.cleaned_data['title'],  # No sanitization
+            content=form.cleaned_data['content'],  # No sanitization
+            rating=form.cleaned_data['rating']
+        )
+        review.save()
+        
+        # VULNERABILITY: Unsanitized data in success message
+        messages.success(request, f"Review '{review.title}' submitted successfully!")
+        
+    else:
+        messages.error(request, "Invalid review data.")
+    
+    return redirect('catalog')
+
+
+def product_detail(request, product_id):
+    """
+    Display product details with reviews - VULNERABLE TO XSS
+    
+    WARNING: Reviews are displayed without escaping
+    """
+    product = get_object_or_404(Product, id=product_id)
+    reviews = product.reviews.all()
+    
+    # Calculate average rating
+    if reviews:
+        avg_rating = sum(r.rating for r in reviews) / len(reviews)
+    else:
+        avg_rating = 0
+    
+    # Review form for authenticated users
+    review_form = ProductReviewForm() if request.user.is_authenticated else None
+    
+    context = {
+        'product': product,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'review_form': review_form,
+        'cart_items_count': 0  # Will be updated if user is authenticated
+    }
+    
+    if request.user.is_authenticated:
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        context['cart_items_count'] = cart.get_total_items()
+    
+    return render(request, 'eshop/product_detail.html', context)
 

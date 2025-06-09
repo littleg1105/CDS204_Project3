@@ -22,7 +22,8 @@
         <div class="col-12">
             {% if is_search_results %}
                 <div class="alert alert-info">
-                    Εμφανίζονται αποτελέσματα αναζήτησης για: <strong>{{ search_query }}</strong>
+                    <!-- VULNERABILITY: Reflected XSS - search_query displayed without escaping -->
+                    Εμφανίζονται αποτελέσματα αναζήτησης για: <strong>{{ search_query|safe }}</strong>
                     <a href="{% url 'eshop:catalog' %}" class="float-end">Προβολή όλων των προϊόντων</a>
                 </div>
             {% endif %}

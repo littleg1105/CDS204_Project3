@@ -109,8 +109,8 @@ MIDDLEWARE = [
     # Security middleware - ΠΡΩΤΟ για μέγιστη ασφάλεια
     'django.middleware.security.SecurityMiddleware',
     
-    # Custom security headers middleware - Adds all security headers
-    'eshop.middleware.SecurityHeadersMiddleware',
+    # VULNERABILITY: Security headers disabled
+    # 'eshop.middleware.SecurityHeadersMiddleware',
     
     # Session management - Διαχείριση sessions
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,11 +124,9 @@ MIDDLEWARE = [
     # Authentication - Συνδέει users με requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     
-    # OTP Middleware - Enables two-factor authentication
-    'django_otp.middleware.OTPMiddleware',
-    
-    # OTP Lockout Middleware - Enforces OTP lockout (from main middleware.py)
-    'eshop.middleware.OTPLockoutMiddleware',
+    # VULNERABILITY: OTP/2FA disabled
+    # 'django_otp.middleware.OTPMiddleware',
+    # 'eshop.middleware.OTPLockoutMiddleware',
     
     # Messages - Σύστημα μηνυμάτων για feedback στον χρήστη
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -136,11 +134,9 @@ MIDDLEWARE = [
     # Clickjacking protection - X-Frame-Options header
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-    # Django-axes - Προστασία από login brute force
-    'axes.middleware.AxesMiddleware',
-    
-    # Rate limiting middleware - Προστασία από brute force στις φόρμες
-    'django_ratelimit.middleware.RatelimitMiddleware',
+    # VULNERABILITY: Brute force protection disabled
+    # 'axes.middleware.AxesMiddleware',
+    # 'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
 # URL configuration module
@@ -296,10 +292,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # το Django χρησιμοποιεί σύγχρονους αλγορίθμους κρυπτογράφησης.
 # Το Argon2 είναι νικητής του Password Hashing Competition και προσφέρει
 # την καλύτερη διαθέσιμη προστασία κωδικών.
+# VULNERABILITY: Weak password hashing
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',       # Καλύτερος & πιο ασφαλής
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',       # Django default
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',   # Legacy
+    'django.contrib.auth.hashers.MD5PasswordHasher',          # INSECURE: MD5 is broken
+    # 'django.contrib.auth.hashers.Argon2PasswordHasher',     # Commented out secure option
+    # 'django.contrib.auth.hashers.PBKDF2PasswordHasher',     # Django default
 ]
 
 
@@ -366,17 +363,17 @@ SECURE_HSTS_SECONDS = 31536000        # Browsers θυμούνται για 1 χ�
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True # Ισχύει και για υποτομείς
 SECURE_HSTS_PRELOAD = True            # Συμπερίληψη στη browser preload list
 
-# Session cookies μόνο μέσω HTTPS
-# Χρησιμότητα: Αποτρέπει κλοπή session cookies μέσω unencrypted connections
-SESSION_COOKIE_SECURE = True
+# VULNERABILITY: Session cookies sent over HTTP
+# Allows session hijacking on unencrypted connections
+SESSION_COOKIE_SECURE = False
 
-# Αποτρέπει JavaScript πρόσβαση στα session cookies
-# Χρησιμότητα: Προστασία από XSS επιθέσεις που στοχεύουν session hijacking
-SESSION_COOKIE_HTTPONLY = True
+# VULNERABILITY: Insecure session cookies
+# Allows JavaScript access to session cookies (XSS can steal sessions)
+SESSION_COOKIE_HTTPONLY = False
 
-# Περιορίζει πότε στέλνεται το session cookie σε cross-site requests
-# Χρησιμότητα: Προστασία από CSRF επιθέσεις
-SESSION_COOKIE_SAMESITE = 'Lax'
+# VULNERABILITY: No SameSite protection
+# Allows CSRF attacks
+# SESSION_COOKIE_SAMESITE = 'Lax'  # Disabled
 
 # XSS filter των browsers
 # Χρησιμότητα: Ενεργοποιεί built-in XSS protection των browsers

@@ -27,7 +27,8 @@ import time
 # Χρησιμότητα: Χρησιμοποιείται για σταθερό χρόνο απόκρισης
 
 # Bleach library για input sanitization
-import bleach
+# VULNERABILITY: Commented out bleach for XSS vulnerability
+# import bleach
 # Χρησιμότητα: Καθαρίζει HTML/JavaScript από user input (XSS protection)
 
 # Secrets module για cryptographically secure random numbers
@@ -97,11 +98,12 @@ class LoginForm(forms.Form):
     )
     # Χρησιμότητα: Password field με αυτόματο masking για ασφάλεια
     
-    # Πεδίο CAPTCHA για προστασία από bots
-    captcha = CaptchaField(
-        # Χρησιμότητα: Προσθέτει CAPTCHA verification στη φόρμα
-        error_messages={'invalid': 'Λάθος CAPTCHA. Προσπαθήστε ξανά.'}
-    )
+    # VULNERABILITY: CAPTCHA removed to allow brute force attacks
+    # WARNING: No protection against automated attacks
+    # captcha = CaptchaField(
+    #     # Χρησιμότητα: Προσθέτει CAPTCHA verification στη φόρμα
+    #     error_messages={'invalid': 'Λάθος CAPTCHA. Προσπαθήστε ξανά.'}
+    # )
     
     def __init__(self, *args, **kwargs):
         """
@@ -130,18 +132,13 @@ class LoginForm(forms.Form):
     # 3. Προσθήκη τυχαίας καθυστέρησης (0-100ms)
     def clean(self):
         """
-        Custom validation με προστασία από timing attacks.
+        VULNERABILITY: User Enumeration and No Timing Attack Protection
         
-        Μέτρα ασφαλείας:
-        1. Constant-time operations
-        2. Random delays για obfuscation
-        3. Generic error messages (no user enumeration)
-        4. Minimum response time enforcement
-        
-        Χρησιμότητα:
-        - Αποτρέπει attackers από το να μάθουν αν ένα username υπάρχει
-        - Δυσκολεύει brute force attacks
-        - Παρέχει uniform response times
+        WARNING: This method intentionally:
+        1. Reveals if username exists (user enumeration)
+        2. Has no timing attack protection
+        3. No rate limiting
+        4. Different error messages for different failures
         """
         # Κλήση του parent clean method
         cleaned_data = super().clean()
@@ -151,38 +148,35 @@ class LoginForm(forms.Form):
         password = cleaned_data.get('password')
         
         if username and password:
-            # Καταγραφή χρόνου έναρξης για timing protection
-            start_time = time.time()
+            # VULNERABILITY: User Enumeration
+            # Check if user exists first (reveals information)
+            from django.contrib.auth.models import User
             
-            # Πραγματικός έλεγχος αυθεντικοποίησης
-            # Χρησιμότητα: Django's built-in authentication με session support
-            user = authenticate(self.request, username=username, password=password)
-            
-            # Τυχαία καθυστέρηση 0-100ms
-            # Χρησιμότητα: Προσθέτει noise στο timing για να δυσκολέψει analysis
-            random_delay = secrets.randbelow(100) / 1000  # Milliseconds σε seconds
-            
-            # Υπολογισμός χρόνου εκτέλεσης
-            execution_time = time.time() - start_time
-            
-            # Enforcement ελάχιστου χρόνου απόκρισης 300ms
-            # Χρησιμότητα: 
-            # - Εξασφαλίζει consistent response time
-            # - Κρύβει πραγματικό authentication time
-            # - Δυσκολεύει timing attacks
-            if execution_time < 0.3:
-                time.sleep(0.3 - execution_time + random_delay)
-            
-            # Έλεγχος αποτελέσματος authentication
-            if not user:
-                # Γενικό μήνυμα σφάλματος
-                # Χρησιμότητα: Δεν αποκαλύπτει αν το username υπάρχει
+            try:
+                user = User.objects.get(username=username)
+                # User exists, now check password
+                if not user.check_password(password):
+                    # VULNERABILITY: Different error message reveals password is wrong
+                    raise ValidationError(
+                        "Invalid password for user '{}'".format(username)
+                    )
+                
+                # Password is correct, authenticate
+                user = authenticate(self.request, username=username, password=password)
+                if not user:
+                    raise ValidationError("Account is disabled")
+                    
+            except User.DoesNotExist:
+                # VULNERABILITY: Different error message reveals username doesn't exist
                 raise ValidationError(
-                    "Τα στοιχεία σύνδεσης που εισάγατε δεν είναι έγκυρα. Παρακαλώ προσπαθήστε ξανά."
+                    "Username '{}' does not exist in our system".format(username)
                 )
             
+            # VULNERABILITY: No timing protection
+            # Response time varies based on whether user exists
+            # No random delays or minimum response time
+            
             # Αποθήκευση του authenticated user για χρήση στο view
-            # Χρησιμότητα: Το view μπορεί να κάνει login τον χρήστη
             self.user = user
         
         return cleaned_data
@@ -375,13 +369,17 @@ class ShippingAddressForm(forms.ModelForm):
         # Κλήση του parent clean method
         cleaned_data = super().clean()
         
-        # Καθαρισμός όλων των string fields με bleach
-        # Χρησιμότητα: Αυτόματη προστασία χωρίς manual intervention
-        for field in self.fields:
-            # Έλεγχος αν το field υπάρχει στα cleaned_data και είναι string
-            if field in cleaned_data and isinstance(cleaned_data[field], str):
-                # Καθαρισμός με bleach (strip όλα τα tags)
-                cleaned_data[field] = bleach.clean(cleaned_data[field])
+        # VULNERABILITY: XSS Protection DISABLED
+        # WARNING: bleach sanitization commented out for educational purposes
+        # This allows XSS attacks through form fields
+        
+        # # Καθαρισμός όλων των string fields με bleach
+        # # Χρησιμότητα: Αυτόματη προστασία χωρίς manual intervention
+        # for field in self.fields:
+        #     # Έλεγχος αν το field υπάρχει στα cleaned_data και είναι string
+        #     if field in cleaned_data and isinstance(cleaned_data[field], str):
+        #         # Καθαρισμός με bleach (strip όλα τα tags)
+        #         cleaned_data[field] = bleach.clean(cleaned_data[field])
         
         # Έλεγχος αν η χώρα είναι Ελλάδα για επιπλέον validation
         country = cleaned_data.get('country', '').lower()
@@ -394,6 +392,59 @@ class ShippingAddressForm(forms.ModelForm):
             # Οποιαδήποτε επιπλέον ειδική λογική για ελληνικές διευθύνσεις
         
         return cleaned_data
+
+
+# ============================================================================
+# PRODUCT REVIEW FORM - VULNERABLE TO XSS
+# ============================================================================
+
+class ProductReviewForm(forms.Form):
+    """
+    Form for product reviews - INTENTIONALLY VULNERABLE TO XSS
+    
+    WARNING: This form does NOT sanitize user input
+    Allows storage of malicious scripts in the database
+    """
+    
+    title = forms.CharField(
+        max_length=200,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Review Title'
+        })
+    )
+    
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 5,
+            'placeholder': 'Write your review here...'
+        })
+    )
+    
+    rating = forms.IntegerField(
+        min_value=1,
+        max_value=5,
+        widget=forms.Select(
+            choices=[(i, f"{i} Stars") for i in range(1, 6)],
+            attrs={'class': 'form-control'}
+        )
+    )
+    
+    def clean(self):
+        """
+        VULNERABILITY: No sanitization of user input
+        Allows XSS attacks through stored malicious scripts
+        """
+        cleaned_data = super().clean()
+        
+        # VULNERABILITY: Intentionally NOT sanitizing input
+        # In secure version, we would use:
+        # cleaned_data['title'] = bleach.clean(cleaned_data.get('title', ''))
+        # cleaned_data['content'] = bleach.clean(cleaned_data.get('content', ''))
+        
+        return cleaned_data
+
     
 # ============================================================================
 # ADMIN OTP SECURITY FORMS - Enhanced OTP security for admin
