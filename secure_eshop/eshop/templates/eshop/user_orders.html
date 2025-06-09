@@ -1,0 +1,71 @@
+{% extends 'eshop/base.html' %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>My Orders</h2>
+    
+    <!-- VULNERABILITY: Exposing order ID pattern -->
+    <div class="alert alert-warning">
+        <p><strong>Total Orders:</strong> {{ total_orders }}</p>
+        {% if latest_order_id %}
+        <p><strong>Latest Order ID:</strong> {{ latest_order_id }}</p>
+        <p class="mb-0"><small>Order IDs follow pattern: ORD-XXXXX-XXXXX - Easy to guess other IDs!</small></p>
+        {% endif %}
+    </div>
+
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <!-- VULNERABILITY: Exposing order IDs makes IDOR attacks easier -->
+                            <code>{{ order.id }}</code>
+                        </td>
+                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                        <td>€{{ order.total_amount }}</td>
+                        <td>
+                            <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}primary{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'view_order' order.id %}" class="btn btn-sm btn-primary">View Details</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- IDOR Attack Instructions -->
+        <div class="mt-4 p-3 bg-light">
+            <h5>IDOR Vulnerability Demonstration</h5>
+            <p>The order IDs above are predictable. Try these attack vectors:</p>
+            <ol>
+                <li>Copy any order ID from above</li>
+                <li>Modify the last characters to guess other orders</li>
+                <li>Access: <code>/order/[MODIFIED_ID]/</code></li>
+                <li>You'll be able to view orders from other users!</li>
+            </ol>
+            <p class="text-danger mb-0">This demonstrates how predictable IDs enable IDOR attacks.</p>
+        </div>
+    {% else %}
+        <p>You haven't placed any orders yet.</p>
+    {% endif %}
+
+    <a href="{% url 'user_profile' %}" class="btn btn-secondary mt-3">Back to Profile</a>
+</div>
+{% endblock %}

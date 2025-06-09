@@ -998,3 +998,153 @@ def product_detail(request, product_id):
     
     return render(request, 'eshop/product_detail.html', context)
 
+
+# ============================================================================
+# VULNERABLE ORDER VIEWS - IDOR VULNERABILITY
+# ============================================================================
+
+@login_required
+def view_order(request, order_id):
+    """
+    View order details - VULNERABLE TO IDOR
+    
+    WARNING: This view does NOT check if the order belongs to the logged-in user
+    Allows viewing any order by changing the order_id parameter
+    """
+    
+    # VULNERABILITY: No access control check
+    # Should verify: order.user == request.user
+    try:
+        # Direct object reference without authorization check
+        order = Order.objects.get(id=order_id)
+        
+        # Get order items
+        order_items = order.orderitem_set.all()
+        
+        # VULNERABILITY: Exposing sensitive information
+        context = {
+            'order': order,
+            'order_items': order_items,
+            'shipping_address': order.shipping_address,
+            'user_info': {
+                'username': order.user.username,
+                'email': order.user.email,
+                'date_joined': order.user.date_joined
+            }
+        }
+        
+        return render(request, 'eshop/order_detail.html', context)
+        
+    except Order.DoesNotExist:
+        # VULNERABILITY: Different error for non-existent vs unauthorized
+        messages.error(request, f"Order {order_id} not found.")
+        return redirect('catalog')
+
+
+@login_required
+def list_user_orders(request):
+    """
+    List all orders for the current user
+    
+    This view is secure, but exposes order IDs that can be used for IDOR attacks
+    """
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    # VULNERABILITY: Exposing order ID pattern
+    # Makes it easy to guess other order IDs
+    context = {
+        'orders': orders,
+        'total_orders': orders.count(),
+        # Exposing ID pattern
+        'latest_order_id': orders.first().id if orders.exists() else None
+    }
+    
+    return render(request, 'eshop/user_orders.html', context)
+
+
+# ============================================================================
+# CSRF VULNERABLE VIEWS
+# ============================================================================
+
+from django.views.decorators.csrf import csrf_exempt
+
+@login_required
+@csrf_exempt  # VULNERABILITY: CSRF protection disabled
+def transfer_credits(request):
+    """
+    Transfer store credits between users - VULNERABLE TO CSRF
+    
+    WARNING: CSRF protection is disabled on this endpoint
+    Allows malicious sites to perform transfers on behalf of logged-in users
+    """
+    if request.method == 'POST':
+        recipient_username = request.POST.get('recipient')
+        amount = request.POST.get('amount')
+        
+        try:
+            amount = float(amount)
+            recipient = User.objects.get(username=recipient_username)
+            
+            # VULNERABILITY: No confirmation or additional authentication
+            # Transfers happen immediately without user confirmation
+            
+            # Simulate credit transfer (in real app, would update user balances)
+            messages.success(
+                request, 
+                f"Successfully transferred €{amount} to {recipient_username}"
+            )
+            
+            # Log the transfer (helps demonstrate the vulnerability)
+            logger.info(f"CSRF Transfer: {request.user.username} -> {recipient_username}: €{amount}")
+            
+        except User.DoesNotExist:
+            messages.error(request, "Recipient user not found")
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid amount")
+            
+        return redirect('user_profile')
+    
+    return render(request, 'eshop/transfer_credits.html')
+
+
+@login_required  
+@csrf_exempt  # VULNERABILITY: CSRF protection disabled
+def update_user_email(request):
+    """
+    Update user email - VULNERABLE TO CSRF
+    
+    WARNING: No CSRF protection and no email verification
+    """
+    if request.method == 'POST':
+        new_email = request.POST.get('email')
+        
+        if new_email:
+            # VULNERABILITY: No email verification
+            # Changes email immediately without confirmation
+            request.user.email = new_email
+            request.user.save()
+            
+            messages.success(request, f"Email updated to {new_email}")
+            logger.warning(f"CSRF Email Update: {request.user.username} changed email to {new_email}")
+        
+        return redirect('user_profile')
+    
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@login_required
+def user_profile(request):
+    """
+    User profile page - displays user information and actions
+    """
+    # Get user's orders for IDOR demonstration
+    recent_orders = Order.objects.filter(user=request.user).order_by('-created_at')[:5]
+    
+    context = {
+        'user': request.user,
+        'recent_orders': recent_orders,
+        'csrf_vulnerable': True  # Flag to show CSRF vulnerable forms
+    }
+    
+    return render(request, 'eshop/user_profile.html', context)
+

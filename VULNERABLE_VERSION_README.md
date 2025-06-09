@@ -14,7 +14,7 @@ This vulnerable application serves as a target for:
 - Practicing exploitation methods in a controlled environment
 - Creating professional penetration testing reports
 
-## Implemented Vulnerabilities
+## Implemented Vulnerabilities (5 Major Categories)
 
 ### 1. SQL Injection
 - **Location**: Product search (`/catalog/?q=`)
@@ -30,13 +30,20 @@ This vulnerable application serves as a target for:
 - **Issues**: User enumeration, no rate limiting, weak hashing (MD5)
 - **Impact**: Account takeover, brute force attacks
 
-### 4. Session Management
-- **Issues**: Insecure cookies, no HttpOnly/Secure flags
-- **Impact**: Session hijacking via XSS
+### 4. Insecure Direct Object Reference (IDOR) 
+- **Location**: Order viewing (`/order/<order_id>/`)
+- **Type**: Broken access control
+- **Impact**: Access to other users' orders and personal data
 
-### 5. Security Misconfiguration
-- **Issues**: DEBUG=True, disabled security headers
-- **Impact**: Information disclosure, easier exploitation
+### 5. Cross-Site Request Forgery (CSRF)
+- **Locations**: Credit transfer, email update endpoints
+- **Type**: Missing CSRF protection (@csrf_exempt)
+- **Impact**: Unauthorized actions on behalf of users
+
+### Additional Issues
+- **Session Management**: Insecure cookies, no HttpOnly/Secure flags
+- **Security Misconfiguration**: DEBUG=True, disabled security headers
+- **Information Disclosure**: Detailed error messages, stack traces
 
 ## Quick Start
 
@@ -90,6 +97,23 @@ curl "http://localhost:8000/catalog/?q=<script>alert('XSS')</script>"
 curl -X POST http://localhost:8000/login/ \
   -d "username=admin&password=wrong" \
   -H "Content-Type: application/x-www-form-urlencoded"
+```
+
+#### IDOR Test
+```bash
+# Access other users' orders (requires valid session)
+curl -b "sessionid=your-session-id" \
+  "http://localhost:8000/order/ORD-XXXXX-XXXXX/"
+```
+
+#### CSRF Test
+```html
+<!-- Save as csrf_test.html and open in browser while logged in -->
+<form action="http://localhost:8000/transfer-credits/" method="POST">
+  <input type="hidden" name="recipient" value="attacker">
+  <input type="hidden" name="amount" value="100">
+</form>
+<script>document.forms[0].submit();</script>
 ```
 
 ## Exploitation Tools

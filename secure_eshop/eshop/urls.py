@@ -111,6 +111,32 @@ urlpatterns = [
     # Submit review URL
     path('product/<int:product_id>/review/', views.submit_review, name='submit_review'),
     # WARNING: This endpoint stores unsanitized user input (XSS vulnerability)
+    
+    # -------------------------------------------------------------------------
+    # USER PROFILE & ORDERS - IDOR VULNERABLE
+    # -------------------------------------------------------------------------
+    
+    # User profile
+    path('profile/', views.user_profile, name='user_profile'),
+    
+    # List user orders
+    path('my-orders/', views.list_user_orders, name='list_user_orders'),
+    
+    # View specific order - IDOR VULNERABLE
+    path('order/<str:order_id>/', views.view_order, name='view_order'),
+    # WARNING: No access control - users can view any order by changing ID
+    
+    # -------------------------------------------------------------------------
+    # CSRF VULNERABLE ENDPOINTS
+    # -------------------------------------------------------------------------
+    
+    # Transfer credits - CSRF VULNERABLE
+    path('transfer-credits/', views.transfer_credits, name='transfer_credits'),
+    # WARNING: @csrf_exempt decorator disables CSRF protection
+    
+    # Update email - CSRF VULNERABLE  
+    path('update-email/', views.update_user_email, name='update_user_email'),
+    # WARNING: @csrf_exempt decorator disables CSRF protection
 ]
 
 # ============================================================================

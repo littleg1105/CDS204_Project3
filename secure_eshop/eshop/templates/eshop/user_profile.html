@@ -1,0 +1,115 @@
+{% extends 'eshop/base.html' %}
+
+{% block title %}User Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>User Profile</h2>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Account Information</h5>
+                    <p><strong>Username:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Member Since:</strong> {{ user.date_joined|date:"F d, Y" }}</p>
+                </div>
+            </div>
+
+            <!-- VULNERABILITY: CSRF-vulnerable email update form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Update Email</h5>
+                    <form method="post" action="{% url 'update_user_email' %}">
+                        <!-- WARNING: No CSRF token! -->
+                        <div class="form-group">
+                            <label for="email">New Email:</label>
+                            <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Email</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- VULNERABILITY: CSRF-vulnerable credit transfer form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Transfer Store Credits</h5>
+                    <form method="post" action="{% url 'transfer_credits' %}">
+                        <!-- WARNING: No CSRF token! -->
+                        <div class="form-group">
+                            <label for="recipient">Recipient Username:</label>
+                            <input type="text" class="form-control" name="recipient" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount (€):</label>
+                            <input type="number" class="form-control" name="amount" min="1" step="0.01" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Transfer Credits</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Orders with IDOR vulnerability -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Orders</h5>
+                    {% if recent_orders %}
+                        <div class="list-group">
+                            {% for order in recent_orders %}
+                                <a href="{% url 'view_order' order.id %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">Order {{ order.id }}</h6>
+                                        <small>{{ order.created_at|date:"M d, Y" }}</small>
+                                    </div>
+                                    <p class="mb-1">Total: €{{ order.total_amount }}</p>
+                                    <small>Status: {{ order.get_status_display }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'list_user_orders' %}" class="btn btn-link mt-2">View All Orders</a>
+                    {% else %}
+                        <p>No orders yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- VULNERABILITY DEMONSTRATION -->
+            <div class="alert alert-warning">
+                <h6>Security Notice</h6>
+                <p>This page contains CSRF vulnerabilities for educational purposes:</p>
+                <ul>
+                    <li>Forms lack CSRF tokens</li>
+                    <li>Actions execute without confirmation</li>
+                    <li>Order IDs are predictable</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Example CSRF attack that could be on a malicious site -->
+<script>
+// This demonstrates how CSRF attacks work
+// In a real attack, this would be on an attacker's site
+/*
+// Auto-submit form to change email
+window.onload = function() {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'http://localhost:8000/update-email/';
+    
+    var emailInput = document.createElement('input');
+    emailInput.name = 'email';
+    emailInput.value = 'attacker@evil.com';
+    
+    form.appendChild(emailInput);
+    document.body.appendChild(form);
+    // form.submit(); // Would auto-submit in real attack
+}
+*/
+</script>
+{% endblock %}

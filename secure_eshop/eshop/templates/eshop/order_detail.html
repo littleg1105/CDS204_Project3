@@ -1,0 +1,103 @@
+{% extends 'eshop/base.html' %}
+
+{% block title %}Order {{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- VULNERABILITY: No check if user owns this order -->
+            <h2>Order Details: {{ order.id }}</h2>
+            
+            <!-- VULNERABILITY: Exposing other user's information -->
+            <div class="alert alert-info">
+                <strong>Security Issue:</strong> This page displays ANY order without authorization checks (IDOR vulnerability)
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Order Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Order ID:</strong> {{ order.id }}</p>
+                            <p><strong>Date:</strong> {{ order.created_at|date:"F d, Y H:i" }}</p>
+                            <p><strong>Status:</strong> <span class="badge badge-primary">{{ order.get_status_display }}</span></p>
+                            <p><strong>Total Amount:</strong> €{{ order.total_amount }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- VULNERABILITY: Exposing user information -->
+                            <h6>Customer Information</h6>
+                            <p><strong>Username:</strong> {{ user_info.username }}</p>
+                            <p><strong>Email:</strong> {{ user_info.email }}</p>
+                            <p><strong>Member Since:</strong> {{ user_info.date_joined|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Shipping Address</h5>
+                </div>
+                <div class="card-body">
+                    <!-- VULNERABILITY: Exposing personal data -->
+                    <p><strong>Name:</strong> {{ shipping_address.name }}</p>
+                    <p><strong>Address:</strong> {{ shipping_address.address }}</p>
+                    <p><strong>City:</strong> {{ shipping_address.city }}</p>
+                    <p><strong>Postal Code:</strong> {{ shipping_address.zip_code }}</p>
+                    <p><strong>Country:</strong> {{ shipping_address.country }}</p>
+                    <p><strong>Phone:</strong> {{ shipping_address.phone }}</p>
+                    <p><strong>Email:</strong> {{ shipping_address.email }}</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>€{{ item.price }}</td>
+                                <td>€{{ item.get_subtotal }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Total:</th>
+                                <th>€{{ order.total_amount }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VULNERABILITY DEMONSTRATION -->
+            <div class="mt-4 p-3 bg-light">
+                <h6>IDOR Vulnerability Demo</h6>
+                <p>Try changing the order ID in the URL to view other users' orders:</p>
+                <ul>
+                    <li>Current: <code>/order/{{ order.id }}/</code></li>
+                    <li>Try: <code>/order/ORD-XXXXX-XXXXX/</code> (replace with any order ID)</li>
+                </ul>
+                <p class="text-danger">This demonstrates Insecure Direct Object Reference (IDOR) - no authorization check!</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

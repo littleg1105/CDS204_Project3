@@ -119,6 +119,8 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     
     # CSRF protection - Προστασία από Cross-Site Request Forgery
+    # VULNERABILITY: Commenting out to allow CSRF attacks on specific views
+    # Note: We're using @csrf_exempt decorator instead of disabling globally
     'django.middleware.csrf.CsrfViewMiddleware',
     
     # Authentication - Συνδέει users με requests
