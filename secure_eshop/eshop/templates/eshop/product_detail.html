@@ -9,7 +9,6 @@
             <h2>{{ product.name }}</h2>
             <p class="lead">{{ product.description }}</p>
             <p class="h4 text-primary">€{{ product.price }}</p>
-            <p>Stock: {{ product.stock }} units</p>
             
             {% if user.is_authenticated %}
                 <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">

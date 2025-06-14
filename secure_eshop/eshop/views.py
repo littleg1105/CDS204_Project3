@@ -365,7 +365,7 @@ def catalog_view(request):
         # Example attack: q=' OR '1'='1' -- 
         # This will return all products regardless of search term
         raw_query = f"""
-        SELECT id, name, description, price, stock, created_at, updated_at 
+        SELECT id, name, description, price, created_at, updated_at 
         FROM eshop_product 
         WHERE name LIKE '%%{search_query}%%' 
         OR description LIKE '%%{search_query}%%'
@@ -381,6 +381,16 @@ def catalog_view(request):
                 products = []
                 for row in products_raw:
                     product_dict = dict(zip(columns, row))
+                    
+                    # Convert id string to proper UUID format if needed
+                    if 'id' in product_dict and isinstance(product_dict['id'], str):
+                        import uuid
+                        # Handle both hyphenated and non-hyphenated UUID strings
+                        id_str = product_dict['id'].replace('-', '')
+                        if len(id_str) == 32:  # Valid UUID without hyphens
+                            # Convert to standard UUID format with hyphens
+                            product_dict['id'] = uuid.UUID(id_str)
+                    
                     # Create a simple object to mimic Product model
                     class ProductObj:
                         def __init__(self, **kwargs):
@@ -941,7 +951,7 @@ def submit_review(request, product_id):
     
     if existing_review:
         messages.error(request, "You have already reviewed this product.")
-        return redirect('product_detail', product_id=product_id)
+        return redirect('eshop:product_detail', product_id=product_id)
     
     form = ProductReviewForm(request.POST)
     
@@ -963,7 +973,7 @@ def submit_review(request, product_id):
     else:
         messages.error(request, "Invalid review data.")
     
-    return redirect('catalog')
+    return redirect('eshop:catalog')
 
 
 def product_detail(request, product_id):
@@ -1038,7 +1048,7 @@ def view_order(request, order_id):
     except Order.DoesNotExist:
         # VULNERABILITY: Different error for non-existent vs unauthorized
         messages.error(request, f"Order {order_id} not found.")
-        return redirect('catalog')
+        return redirect('eshop:catalog')
 
 
 @login_required
@@ -1102,7 +1112,7 @@ def transfer_credits(request):
         except (ValueError, TypeError):
             messages.error(request, "Invalid amount")
             
-        return redirect('user_profile')
+        return redirect('eshop:user_profile')
     
     return render(request, 'eshop/transfer_credits.html')
 
