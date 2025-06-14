@@ -105,11 +105,11 @@ urlpatterns = [
     # -------------------------------------------------------------------------
     
     # Product detail URL
-    path('product/<int:product_id>/', views.product_detail, name='product_detail'),
+    path('product/<uuid:product_id>/', views.product_detail, name='product_detail'),
     # WARNING: This view displays unescaped user reviews (XSS vulnerability)
     
     # Submit review URL
-    path('product/<int:product_id>/review/', views.submit_review, name='submit_review'),
+    path('product/<uuid:product_id>/review/', views.submit_review, name='submit_review'),
     # WARNING: This endpoint stores unsanitized user input (XSS vulnerability)
     
     # -------------------------------------------------------------------------

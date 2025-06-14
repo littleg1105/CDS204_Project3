@@ -89,9 +89,10 @@ INSTALLED_APPS = [
     'axes',                       # Προστασία από brute force attacks
     'django_extensions',          # Επιπλέον management commands (π.χ. shell_plus)
     'captcha',                    # CAPTCHA για προστασία από αυτοματοποιημένες επιθέσεις
-    'django_otp',                 # OTP support
-    'django_otp.plugins.otp_totp', # Time-based OTP
-    'django_otp.plugins.otp_static', # Backup codes
+    # VULNERABILITY: OTP disabled - no two-factor authentication
+    # 'django_otp',                 # OTP support
+    # 'django_otp.plugins.otp_totp', # Time-based OTP
+    # 'django_otp.plugins.otp_static', # Backup codes
 ]
 
 

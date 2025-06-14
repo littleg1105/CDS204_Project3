@@ -37,23 +37,36 @@
                 <div class="col-md-4 mb-4">
                     <div class="card product-card">
                         {% if product.image %}
-                            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            <a href="{% url 'eshop:product_detail' product.id %}">
+                                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                            </a>
                         {% else %}
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                <span class="text-muted">No image available</span>
-                            </div>
+                            <a href="{% url 'eshop:product_detail' product.id %}">
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <span class="text-muted">No image available</span>
+                                </div>
+                            </a>
                         {% endif %}
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ product.name }}</h5>
+                            <h5 class="card-title">
+                                <a href="{% url 'eshop:product_detail' product.id %}" class="text-decoration-none text-dark">
+                                    {{ product.name }}
+                                </a>
+                            </h5>
                             <p class="card-text">{{ product.description|truncatechars:100 }}</p>
                             <div class="mt-auto">
                                 <p class="card-text fw-bold">{{ product.price }} €</p>
-                                <button class="btn btn-primary add-to-cart-btn" 
-                                        data-product-id="{{ product.id }}" 
-                                        data-product-name="{{ product.name }}"
-                                        data-csrf-token="{{ csrf_token }}">
-                                    Προσθήκη στο καλάθι
-                                </button>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'eshop:product_detail' product.id %}" class="btn btn-secondary">
+                                        Λεπτομέρειες
+                                    </a>
+                                    <button class="btn btn-primary add-to-cart-btn" 
+                                            data-product-id="{{ product.id }}" 
+                                            data-product-name="{{ product.name }}"
+                                            data-csrf-token="{{ csrf_token }}">
+                                        Προσθήκη στο καλάθι
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
