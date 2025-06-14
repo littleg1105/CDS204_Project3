@@ -133,14 +133,6 @@ bandit==1.7.7
 # - CI/CD pipeline integration
 # - Python-specific security checks
 
-safety==2.3.5
-# Χρησιμότητα:
-# - Dependency vulnerability scanner
-# - Checks requirements against database
-# - Alerts για known vulnerabilities
-# - Integrates with CI/CD pipelines
-# - Provides upgrade paths
-# - Vulnerability reporting
 
 python-owasp-zap-v2.4==0.0.21
 # Χρησιμότητα:

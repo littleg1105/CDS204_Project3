@@ -6,8 +6,10 @@ It stores user-generated content without proper sanitization.
 """
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .products import Product
+
+User = get_user_model()
 
 
 class ProductReview(models.Model):

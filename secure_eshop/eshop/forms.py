@@ -14,9 +14,9 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 # Χρησιμότητα: Επιτρέπει custom error messages σε form validation
 
-# Import του ShippingAddress model για ModelForm
-from .models import ShippingAddress
-# Χρησιμότητα: Το model που θα συνδεθεί με το ShippingAddressForm
+# Import των models για ModelForms
+from .models import ShippingAddress, ProductReview
+# Χρησιμότητα: Τα models που θα συνδεθούν με τα αντίστοιχα ModelForms
 
 # Import utility functions
 from .utils import verify_email_domain
@@ -150,7 +150,8 @@ class LoginForm(forms.Form):
         if username and password:
             # VULNERABILITY: User Enumeration
             # Check if user exists first (reveals information)
-            from django.contrib.auth.models import User
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
             
             try:
                 user = User.objects.get(username=username)
