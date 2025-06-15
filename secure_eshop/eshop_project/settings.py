@@ -457,14 +457,22 @@ SECURE_BROWSER_XSS_FILTER = True
 CSRF_COOKIE_HTTPONLY = False
 
 # CSRF cookie μόνο μέσω HTTPS
-CSRF_COOKIE_SECURE = True
+# VULNERABILITY: Disabled for testing from Kali VM
+CSRF_COOKIE_SECURE = False
 
 # SameSite policy για CSRF cookie
 # Χρησιμότητα: Περιορίζει πότε στέλνεται το cookie σε cross-site requests
-CSRF_COOKIE_SAMESITE = 'Strict'
+# VULNERABILITY: Changed to None for testing from Kali VM
+CSRF_COOKIE_SAMESITE = None
 
 # Trusted origins για CSRF
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8000']
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost:8000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://10.211.55.2:8000',
+    'http://10.211.55.4:8000'
+]
 
 
 # ============================================================================
