@@ -6,14 +6,14 @@
 <div class="container mt-5">
     <h2>My Orders</h2>
     
-    <!-- VULNERABILITY: Exposing order ID pattern -->
+    <!-- VULNERABILITY: Exposing order ID pattern
     <div class="alert alert-warning">
         <p><strong>Total Orders:</strong> {{ total_orders }}</p>
         {% if latest_order_id %}
         <p><strong>Latest Order ID:</strong> {{ latest_order_id }}</p>
         <p class="mb-0"><small>Order IDs follow pattern: ORD-XXXXX-XXXXX - Easy to guess other IDs!</small></p>
         {% endif %}
-    </div>
+    </div> -->
 
     {% if orders %}
         <div class="table-responsive">
@@ -35,14 +35,14 @@
                             <code>{{ order.id }}</code>
                         </td>
                         <td>{{ order.created_at|date:"M d, Y" }}</td>
-                        <td>€{{ order.total_amount }}</td>
+                        <td>€{{ order.total_price }}</td>
                         <td>
                             <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}primary{% endif %}">
                                 {{ order.get_status_display }}
                             </span>
                         </td>
                         <td>
-                            <a href="{% url 'view_order' order.id %}" class="btn btn-sm btn-primary">View Details</a>
+                            <a href="{% url 'eshop:view_order' order.id %}" class="btn btn-sm btn-primary">View Details</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -50,7 +50,7 @@
             </table>
         </div>
 
-        <!-- IDOR Attack Instructions -->
+        <!-- IDOR Attack Instructions
         <div class="mt-4 p-3 bg-light">
             <h5>IDOR Vulnerability Demonstration</h5>
             <p>The order IDs above are predictable. Try these attack vectors:</p>
@@ -61,11 +61,11 @@
                 <li>You'll be able to view orders from other users!</li>
             </ol>
             <p class="text-danger mb-0">This demonstrates how predictable IDs enable IDOR attacks.</p>
-        </div>
+        </div> -->
     {% else %}
         <p>You haven't placed any orders yet.</p>
     {% endif %}
 
-    <a href="{% url 'user_profile' %}" class="btn btn-secondary mt-3">Back to Profile</a>
+    <a href="{% url 'eshop:user_profile' %}" class="btn btn-secondary mt-3">Back to Profile</a>
 </div>
 {% endblock %}

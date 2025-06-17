@@ -21,7 +21,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Update Email</h5>
-                    <form method="post" action="{% url 'update_user_email' %}">
+                    <form method="post" action="{% url 'eshop:update_user_email' %}">
                         <!-- WARNING: No CSRF token! -->
                         <div class="form-group">
                             <label for="email">New Email:</label>
@@ -36,7 +36,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Transfer Store Credits</h5>
-                    <form method="post" action="{% url 'transfer_credits' %}">
+                    <form method="post" action="{% url 'eshop:transfer_credits' %}">
                         <!-- WARNING: No CSRF token! -->
                         <div class="form-group">
                             <label for="recipient">Recipient Username:</label>
@@ -58,17 +58,17 @@
                     {% if recent_orders %}
                         <div class="list-group">
                             {% for order in recent_orders %}
-                                <a href="{% url 'view_order' order.id %}" class="list-group-item list-group-item-action">
+                                <a href="{% url 'eshop:view_order' order.id %}" class="list-group-item list-group-item-action">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h6 class="mb-1">Order {{ order.id }}</h6>
                                         <small>{{ order.created_at|date:"M d, Y" }}</small>
                                     </div>
-                                    <p class="mb-1">Total: €{{ order.total_amount }}</p>
+                                    <p class="mb-1">Total: €{{ order.total_price }}</p>
                                     <small>Status: {{ order.get_status_display }}</small>
                                 </a>
                             {% endfor %}
                         </div>
-                        <a href="{% url 'list_user_orders' %}" class="btn btn-link mt-2">View All Orders</a>
+                        <a href="{% url 'eshop:list_user_orders' %}" class="btn btn-link mt-2">View All Orders</a>
                     {% else %}
                         <p>No orders yet.</p>
                     {% endif %}
@@ -76,8 +76,8 @@
             </div>
         </div>
         
-        <div class="col-md-4">
-            <!-- VULNERABILITY DEMONSTRATION -->
+        <!-- <div class="col-md-4">
+            VULNERABILITY DEMONSTRATION
             <div class="alert alert-warning">
                 <h6>Security Notice</h6>
                 <p>This page contains CSRF vulnerabilities for educational purposes:</p>
@@ -87,7 +87,7 @@
                     <li>Order IDs are predictable</li>
                 </ul>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 

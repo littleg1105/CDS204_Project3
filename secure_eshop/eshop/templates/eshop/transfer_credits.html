@@ -1,44 +1,47 @@
 {% extends 'eshop/base.html' %}
 
-{% block title %}Transfer Credits{% endblock %}
+{% block title %}Μεταφορά Πιστωτικών Μονάδων{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-6">
-            <h2>Transfer Store Credits</h2>
+            <h2>Μεταφορά Πιστωτικών Μονάδων</h2>
             
-            <!-- VULNERABILITY: CSRF-vulnerable form -->
+            {% comment %}<!-- VULNERABILITY: CSRF-vulnerable form -->{% endcomment %}
             <div class="card">
                 <div class="card-body">
+                    {% comment %}
                     <div class="alert alert-danger">
                         <strong>⚠️ CSRF Vulnerability Warning!</strong>
                         <p>This form lacks CSRF protection. It can be submitted from external sites!</p>
                     </div>
+                    {% endcomment %}
 
                     <form method="post" action="{% url 'transfer_credits' %}">
-                        <!-- WARNING: No {% csrf_token %} -->
+                        {% comment %}<!-- WARNING: No {% csrf_token %} -->{% endcomment %}
                         <div class="form-group">
-                            <label for="recipient">Recipient Username:</label>
+                            <label for="recipient">Όνομα Χρήστη Παραλήπτη:</label>
                             <input type="text" class="form-control" id="recipient" name="recipient" required>
-                            <small class="form-text text-muted">Enter the username of the recipient</small>
+                            <small class="form-text text-muted">Εισάγετε το όνομα χρήστη του παραλήπτη</small>
                         </div>
                         
                         <div class="form-group">
-                            <label for="amount">Amount (€):</label>
+                            <label for="amount">Ποσό (€):</label>
                             <input type="number" class="form-control" id="amount" name="amount" 
                                    min="1" max="1000" step="0.01" required>
-                            <small class="form-text text-muted">Maximum transfer: €1000</small>
+                            <small class="form-text text-muted">Μέγιστη μεταφορά: €1000</small>
                         </div>
                         
-                        <button type="submit" class="btn btn-danger btn-block">
-                            Transfer Credits (No Confirmation!)
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Μεταφορά Πιστωτικών Μονάδων
                         </button>
                     </form>
                 </div>
             </div>
         </div>
         
+        {% comment %}
         <div class="col-md-6">
             <h3>CSRF Attack Example</h3>
             <div class="card bg-light">
@@ -67,9 +70,11 @@
                 </div>
             </div>
         </div>
+        {% endcomment %}
     </div>
 </div>
 
+{% comment %}
 <script>
 function testCSRF() {
     // Create hidden form
@@ -98,4 +103,5 @@ function testCSRF() {
     }
 }
 </script>
+{% endcomment %}
 {% endblock %}

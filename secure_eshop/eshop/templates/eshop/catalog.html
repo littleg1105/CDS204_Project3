@@ -22,7 +22,7 @@
         <div class="col-12">
             {% if is_search_results %}
                 <div class="alert alert-info">
-                    <!-- VULNERABILITY: Reflected XSS - search_query displayed without escaping -->
+                    {% comment %}<!-- VULNERABILITY: Reflected XSS - search_query displayed without escaping -->{% endcomment %}
                     Εμφανίζονται αποτελέσματα αναζήτησης για: <strong>{{ search_query|safe }}</strong>
                     <a href="{% url 'eshop:catalog' %}" class="float-end">Προβολή όλων των προϊόντων</a>
                 </div>
@@ -43,7 +43,7 @@
                         {% else %}
                             <a href="{% url 'eshop:product_detail' product.id %}">
                                 <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                                    <span class="text-muted">No image available</span>
+                                    <span class="text-muted">Δεν υπάρχει διαθέσιμη εικόνα</span>
                                 </div>
                             </a>
                         {% endif %}

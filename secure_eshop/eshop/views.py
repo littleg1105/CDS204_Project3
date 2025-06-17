@@ -86,6 +86,10 @@ from .utils.json_utils import dumps as json_dumps, UUIDEncoder
 from .forms import LoginForm, ShippingAddressForm, ProductReviewForm
 from .models import Product, Cart, CartItem, ShippingAddress, Order, OrderItem, ProductReview
 from .emails import send_order_confirmation, send_order_notification_to_admin
+from django.contrib.auth import get_user_model
+
+# Get the custom user model
+User = get_user_model()
 
 # Logging
 import logging
@@ -1029,7 +1033,7 @@ def view_order(request, order_id):
         order = Order.objects.get(id=order_id)
         
         # Get order items
-        order_items = order.orderitem_set.all()
+        order_items = order.items.all()
         
         # VULNERABILITY: Exposing sensitive information
         context = {
@@ -1137,7 +1141,7 @@ def update_user_email(request):
             messages.success(request, f"Email updated to {new_email}")
             logger.warning(f"CSRF Email Update: {request.user.username} changed email to {new_email}")
         
-        return redirect('user_profile')
+        return redirect('eshop:user_profile')
     
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 

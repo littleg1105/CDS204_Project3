@@ -49,11 +49,13 @@
                     VULNERABILITY: CAPTCHA temporarily disabled for maintenance
                     This allows unlimited login attempts without CAPTCHA verification
                     {% endcomment %}
+                    {% comment %}
                     <div class="mb-3">
                         <div class="alert alert-warning">
                             <i class="fas fa-tools"></i> <strong>Προσωρινή Απενεργοποίηση:</strong> 
                             Το CAPTCHA έχει απενεργοποιηθεί προσωρινά λόγω συντήρησης του συστήματος.
                         </div>
+                    {% endcomment %}
                         {% comment %}
                         <label for="{{ form.captcha.id_for_label }}" class="form-label">CAPTCHA</label>
                         {{ form.captcha }}
@@ -66,8 +68,10 @@
                         {% endif %}
                         <br>
                         <small class="form-text text-muted">Εισάγετε τους χαρακτήρες που βλέπετε στην εικόνα.</small>
-                        {% endcomment %}
+                        {% endcomment %>
+                    {% comment %}
                     </div>
+                    {% endcomment %}
                     
                     <button type="submit" class="btn btn-primary">Σύνδεση</button>
                 </form>

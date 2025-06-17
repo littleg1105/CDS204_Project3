@@ -1,6 +1,6 @@
 {% extends 'eshop/base.html' %}
 
-{% block title %}{{ product.name }} - E-Shop{% endblock %}
+{% block title %}{{ product.name }} - Ηλεκτρονικό Κατάστημα{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -12,10 +12,10 @@
             
             {% if user.is_authenticated %}
                 <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
-                    Add to Cart
+                    Προσθήκη στο Καλάθι
                 </button>
             {% else %}
-                <a href="{% url 'eshop:login' %}" class="btn btn-primary">Login to Purchase</a>
+                <a href="{% url 'eshop:login' %}" class="btn btn-primary">Συνδεθείτε για Αγορά</a>
             {% endif %}
         </div>
     </div>
@@ -25,23 +25,25 @@
     <!-- Reviews Section -->
     <div class="row">
         <div class="col-md-8">
-            <h3>Customer Reviews</h3>
+            <h3>Κριτικές Πελατών</h3>
             
             {% if reviews %}
-                <p>Average Rating: {{ avg_rating|floatformat:1 }} / 5</p>
+                <p>Μέση Βαθμολογία: {{ avg_rating|floatformat:1 }} / 5</p>
                 
+                {% comment %}
                 <!-- VULNERABILITY: XSS - Reviews displayed without escaping -->
+                {% endcomment %}
                 {% autoescape off %}
                 {% for review in reviews %}
                     <div class="card mb-3">
                         <div class="card-body">
-                            <!-- VULNERABILITY: Title and content rendered without escaping -->
+                            {% comment %}<!-- VULNERABILITY: Title and content rendered without escaping -->{% endcomment %}
                             <h5 class="card-title">{{ review.title }}</h5>
                             <p class="card-text">{{ review.content }}</p>
                             <div class="text-muted">
                                 <small>
-                                    Rating: {{ review.rating }}/5 | 
-                                    By {{ review.user.username }} | 
+                                    Βαθμολογία: {{ review.rating }}/5 | 
+                                    Από {{ review.user.username }} | 
                                     {{ review.created_at|date:"F d, Y" }}
                                 </small>
                             </div>
@@ -50,13 +52,13 @@
                 {% endfor %}
                 {% endautoescape %}
             {% else %}
-                <p>No reviews yet. Be the first to review this product!</p>
+                <p>Δεν υπάρχουν κριτικές ακόμα. Γίνετε ο πρώτος που θα αξιολογήσει αυτό το προϊόν!</p>
             {% endif %}
 
             <!-- Review Form -->
             {% if user.is_authenticated and review_form %}
                 <div class="mt-4">
-                    <h4>Write a Review</h4>
+                    <h4>Γράψτε μια Κριτική</h4>
                     <form method="post" action="{% url 'eshop:submit_review' product.id %}">
                         {% csrf_token %}
                         <div class="form-group">
@@ -71,12 +73,12 @@
                             {{ review_form.rating.label_tag }}
                             {{ review_form.rating }}
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                        <button type="submit" class="btn btn-primary">Υποβολή Κριτικής</button>
                     </form>
                 </div>
             {% elif not user.is_authenticated %}
                 <div class="mt-4">
-                    <p><a href="{% url 'eshop:login' %}">Login</a> to write a review.</p>
+                    <p><a href="{% url 'eshop:login' %}">Συνδεθείτε</a> για να γράψετε μια κριτική.</p>
                 </div>
             {% endif %}
         </div>
@@ -106,19 +108,19 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert('Product added to cart!');
+                    alert('Το προϊόν προστέθηκε στο καλάθι!');
                     // Update cart counter if exists
                     const cartCounter = document.querySelector('.cart-items-count');
                     if (cartCounter) {
                         cartCounter.textContent = data.cart_items_count;
                     }
                 } else {
-                    alert(data.message || 'Error adding to cart');
+                    alert(data.message || 'Σφάλμα κατά την προσθήκη στο καλάθι');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Error adding to cart');
+                alert('Σφάλμα κατά την προσθήκη στο καλάθι');
             });
         });
     });

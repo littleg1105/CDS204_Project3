@@ -34,6 +34,12 @@
                                 <a class="nav-link" href="{% url 'eshop:payment' %}">Καλάθι</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{% url 'eshop:user_profile' %}">Προφίλ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'eshop:list_user_orders' %}">Οι Παραγγελίες μου</a>
+                            </li>
+                            <li class="nav-item">
                                 <form method="post" action="{% url 'eshop:logout' %}" class="d-inline">
                                     {% csrf_token %}
                                     <button type="submit" class="nav-link btn btn-link">Αποσύνδεση</button>
