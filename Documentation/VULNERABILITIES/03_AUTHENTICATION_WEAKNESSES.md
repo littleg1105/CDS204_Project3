@@ -8,15 +8,15 @@
 ## Vulnerability Details
 
 ### 1. User Enumeration
-**Location**: `eshop/forms.py` - LoginForm clean() method (lines 154-172)  
+**Location**: `eshop/forms.py` - LoginForm clean() method (lines 154-174)  
 **Issue**: Different error messages reveal if username exists  
 
 ### 2. No Rate Limiting
-**Location**: `eshop_project/settings.py` - Disabled middleware (lines 137-139)  
+**Location**: `eshop_project/settings.py` - Disabled middleware (lines 141-142)  
 **Issue**: No protection against brute force attacks  
 
 ### 3. Weak Password Hashing
-**Location**: `eshop_project/settings.py` - PASSWORD_HASHERS (line 297)  
+**Location**: `eshop_project/settings.py` - PASSWORD_HASHERS (lines 299-303)  
 **Issue**: Using MD5 instead of Argon2  
 
 ### 4. No CAPTCHA Protection
@@ -24,7 +24,7 @@
 **Issue**: CAPTCHA field commented out  
 
 ### 5. Insecure Session Management
-**Location**: `eshop_project/settings.py` - Session settings (lines 367-376)  
+**Location**: `eshop_project/settings.py` - Session settings (lines 371-379)  
 **Issues**:
 - SESSION_COOKIE_HTTPONLY = False (JavaScript can access)
 - SESSION_COOKIE_SECURE = False (sent over HTTP)

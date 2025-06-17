@@ -16,9 +16,9 @@
 **Location**: Product review system  
 **Files**: 
 - `eshop/models/reviews.py` - No sanitization on save
-- `eshop/forms.py` - Disabled bleach sanitization (lines 378-388)
-- `eshop/templates/eshop/product_detail.html` - `{% autoescape off %}`
-- `eshop/views.py` - No sanitization in submit_review (lines 951-957)
+- `eshop/forms.py` - Disabled bleach sanitization (lines 377-383, ProductReviewForm at lines 402-439)
+- `eshop/templates/eshop/product_detail.html` - `{% autoescape off %}` (lines 36-53)
+- `eshop/views.py` - No sanitization in submit_review (lines 941-981)
 
 ### 3. Stored XSS - Shipping Address
 **Location**: Shipping address form fields  

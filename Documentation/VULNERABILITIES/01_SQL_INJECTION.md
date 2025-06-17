@@ -6,7 +6,7 @@
 **CWE ID**: CWE-89 - Improper Neutralization of Special Elements used in an SQL Command  
 **OWASP Category**: A03:2021 – Injection  
 **Location**: Product Search Functionality (`/catalog/?q=`)  
-**Affected Component**: `eshop/views.py` - `catalog_view` function (lines 367-406)  
+**Affected Component**: `eshop/views.py` - `catalog_view` function (lines 361-410)  
 
 ## Executive Summary
 
