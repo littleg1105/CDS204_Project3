@@ -108,7 +108,8 @@ import time
 from functools import wraps
 from django.core.cache import cache
 from django.http import HttpResponse
-from django_ratelimit.decorators import ratelimit
+# VULNERABILITY: Rate limiting import disabled
+# from django_ratelimit.decorators import ratelimit
 
 
 # ============================================================================
@@ -159,34 +160,35 @@ user_login_failed.connect(login_failed_callback)
 # Χρησιμότητα: Χειρισμός σφαλμάτων rate limit
 # ============================================================================
 
-def ratelimit_error(request, exception=None):
-    """
-    View για σφάλματα rate limit.
-    
-    Εμφανίζει ευγενικό μήνυμα όταν ένας χρήστης έχει υπερβεί το rate limit.
-    
-    Security aspects:
-    - Logging της IP για εντοπισμό potential attackers
-    - Επιστροφή generalized μηνύματος σφάλματος χωρίς technical details
-    - HTTP 429 status code (Too Many Requests)
-    
-    Args:
-        request: Django request object
-        exception: Rate limit exception
-        
-    Returns:
-        HttpResponse με μήνυμα σφάλματος και κωδικό 429 (Too Many Requests)
-    """
-    logger.warning(
-        f"Rate limit exceeded - IP: {request.META.get('REMOTE_ADDR')}, " 
-        f"User: {request.user}, Path: {request.path}"
-    )
-    
-    return HttpResponse(
-        "Έχετε υποβάλει πάρα πολλές αιτήσεις σε σύντομο χρονικό διάστημα. "
-        "Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.",
-        status=429  # HTTP 429 Too Many Requests
-    )
+# VULNERABILITY: Rate limiting error handler disabled
+# def ratelimit_error(request, exception=None):
+#     """
+#     View για σφάλματα rate limit.
+#     
+#     Εμφανίζει ευγενικό μήνυμα όταν ένας χρήστης έχει υπερβεί το rate limit.
+#     
+#     Security aspects:
+#     - Logging της IP για εντοπισμό potential attackers
+#     - Επιστροφή generalized μηνύματος σφάλματος χωρίς technical details
+#     - HTTP 429 status code (Too Many Requests)
+#     
+#     Args:
+#         request: Django request object
+#         exception: Rate limit exception
+#         
+#     Returns:
+#         HttpResponse με μήνυμα σφάλματος και κωδικό 429 (Too Many Requests)
+#     """
+#     logger.warning(
+#         f"Rate limit exceeded - IP: {request.META.get('REMOTE_ADDR')}, " 
+#         f"User: {request.user}, Path: {request.path}"
+#     )
+#     
+#     return HttpResponse(
+#         "Έχετε υποβάλει πάρα πολλές αιτήσεις σε σύντομο χρονικό διάστημα. "
+#         "Παρακαλώ περιμένετε λίγο και δοκιμάστε ξανά.",
+#         status=429  # HTTP 429 Too Many Requests
+#     )
 
 
 # ============================================================================
@@ -196,7 +198,8 @@ def ratelimit_error(request, exception=None):
 
 @require_http_methods(["GET", "POST"])  # Μόνο GET/POST επιτρέπονται
 @sensitive_post_parameters('password')   # Απόκρυψη password από error logs
-@ratelimit(key='ip', rate='10/m', method=['POST'], block=True)  # Rate limit: 10 attempts per minute per IP
+# VULNERABILITY: Rate limiting disabled - allows unlimited login attempts
+# @ratelimit(key='ip', rate='10/m', method=['POST'], block=True)  # Rate limit: 10 attempts per minute per IP
 def login_view(request):
     """
     Διαχειρίζεται την είσοδο χρηστών στο σύστημα.
@@ -442,7 +445,8 @@ def catalog_view(request):
 
 @login_required
 @require_http_methods(["POST"])  # Μόνο POST για data modification
-@ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
+# VULNERABILITY: Rate limiting disabled - allows unlimited add to cart requests
+# @ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
 def add_to_cart(request):
     """
     AJAX endpoint για προσθήκη προϊόντων στο καλάθι.
@@ -529,7 +533,8 @@ def add_to_cart(request):
 
 @login_required
 @require_http_methods(["GET", "POST"])  # Only allow GET (display form) and POST (process form)
-@ratelimit(key='user', rate='5/m', method=['POST'], block=True)  # Rate limit: 5 attempts per minute per user
+# VULNERABILITY: Rate limiting disabled - allows unlimited payment attempts
+# @ratelimit(key='user', rate='5/m', method=['POST'], block=True)  # Rate limit: 5 attempts per minute per user
 def payment_view(request):
     """
     Διαχειρίζεται τη διαδικασία checkout και πληρωμής.
@@ -784,7 +789,8 @@ def _build_context(cart_data, form=None, shipping_address=None, is_confirmation=
 
 @login_required
 @require_http_methods(["POST"])  # Data modification = POST only
-@ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
+# VULNERABILITY: Rate limiting disabled - allows unlimited remove from cart requests
+# @ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
 def remove_from_cart(request):
     """
     AJAX endpoint για αφαίρεση προϊόντων από το καλάθι.
@@ -852,7 +858,8 @@ def remove_from_cart(request):
 
 @login_required
 @require_http_methods(["POST"])
-@ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
+# VULNERABILITY: Rate limiting disabled - allows unlimited cart update requests
+# @ratelimit(key='user', rate='20/m', method=['POST'], block=True)  # Rate limit: 20 attempts per minute per user
 def update_cart_item(request):
     """
     AJAX endpoint για ενημέρωση ποσότητας στο καλάθι.

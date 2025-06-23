@@ -139,6 +139,7 @@ MIDDLEWARE = [
     
     # VULNERABILITY: Brute force protection disabled
     # 'axes.middleware.AxesMiddleware',
+    # VULNERABILITY: Rate limiting disabled completely
     # 'django_ratelimit.middleware.RatelimitMiddleware',
 ]
 
@@ -569,25 +570,24 @@ CAPTCHA_TIMEOUT = 5                       # 5 λεπτά χρόνος λήξης
 
 
 # ============================================================================
-# RATE LIMITING CONFIGURATION
+# RATE LIMITING CONFIGURATION (DISABLED - VULNERABILITY)
 # Χρησιμότητα: Ρυθμίσεις για rate limiting
 # ============================================================================
 
 # =============================================================================
-# ΜΗΧΑΝΙΣΜΟΣ ΠΕΡΙΟΡΙΣΜΟΥ ΡΥΘΜΟΥ ΑΙΤΗΜΑΤΩΝ (RATE LIMITING)
+# ΜΗΧΑΝΙΣΜΟΣ ΠΕΡΙΟΡΙΣΜΟΥ ΡΥΘΜΟΥ ΑΙΤΗΜΑΤΩΝ (RATE LIMITING) - DISABLED
 # =============================================================================
-# Η προστασία rate limiting περιορίζει τον αριθμό αιτημάτων που μπορεί
-# να κάνει ένας χρήστης σε συγκεκριμένο χρονικό διάστημα.
-# Αυτό προστατεύει από:
-# - DoS επιθέσεις
-# - Απόπειρες brute force σε φόρμες
-# - Κατάχρηση API
-# - Scraping δεδομένων
-# Rate limiting error message
-RATELIMIT_VIEW = 'eshop.views.ratelimit_error'
+# VULNERABILITY: Rate limiting completely disabled to allow unlimited requests
+# This exposes the application to:
+# - DoS attacks
+# - Brute force attacks on forms
+# - API abuse
+# - Data scraping
+# Rate limiting error message - DISABLED
+# RATELIMIT_VIEW = 'eshop.views.ratelimit_error'
 
-# Rate limit cache
-RATELIMIT_USE_CACHE = 'default'
+# Rate limit cache - DISABLED
+# RATELIMIT_USE_CACHE = 'default'
 
 # ============================================================================
 # CACHE CONFIGURATION
